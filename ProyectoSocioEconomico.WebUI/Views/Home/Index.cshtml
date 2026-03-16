@@ -1,8 +1,52 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    Layout = "_LayoutMain";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<header class="header">
+    <h1 class="header__title">Conectamos apoyo solidario con quienes <span class="header__title--resaltado">mas lo necesitan</span></h1>
+    <p class="header__description">Unete a la comunidad y marca la diferencia cada pequeña accion salva vidas</p>
+    <form>
+        <div class="search search--absolute">
+            <input type="text" placeholder="Busca casos" class="search__search" id="search" autocomplete="on"/>
+            @await Html.PartialAsync("_Btn", new BtnViewModel
+            {
+                TextoBtn = "Encunetra un caso",
+                ColorClass = "btn--green"
+            })
+        </div>
+    </form>
+</header>
+<section class="main-content">
+    <section class="categories">
+        <div class="categories__top">
+            <h2 class="categories__title">Explorar categorias</h2>
+            <a href="" class="categories__all">Ver todas</a>
+        </div>
+        <div class="categories__down">
+            <div class="categories__categories">
+                @* TODO falta agragar las imagenes/icons de las categorias *@
+                @await Html.PartialAsync("_Categorie", new CategorieViewModel
+                {
+                    Title = "Salud",
+                    IconUrl = "/img/heart.png"
+                })")
+                @await Html.PartialAsync("_Categorie", new CategorieViewModel
+                {
+                    Title = "Salud",
+                    IconUrl = "/img/heart.png"
+                })")
+                @await Html.PartialAsync("_Categorie", new CategorieViewModel
+                {
+                    Title = "Salud",
+                    IconUrl = "/img/heart.png"
+                })")
+                @await Html.PartialAsync("_Categorie", new CategorieViewModel
+                {
+                    Title = "Salud",
+                    IconUrl = "/img/heart.png"
+                })")
+            </div>
+        </div>
+    </section>
+</section>

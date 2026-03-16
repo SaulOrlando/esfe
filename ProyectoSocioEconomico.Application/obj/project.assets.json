@@ -1709,23 +1709,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\jdavi\\.nuget\\packages\\": {},
+    "C:\\Users\\Level\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoWeb\\ProyectoSocioEconomico.Application\\ProyectoSocioEconomico.Application.csproj",
+      "projectUniqueName": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Application\\ProyectoSocioEconomico.Application.csproj",
       "projectName": "ProyectoSocioEconomico.Application",
-      "projectPath": "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoWeb\\ProyectoSocioEconomico.Application\\ProyectoSocioEconomico.Application.csproj",
-      "packagesPath": "C:\\Users\\jdavi\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoWeb\\ProyectoSocioEconomico.Application\\obj\\",
+      "projectPath": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Application\\ProyectoSocioEconomico.Application.csproj",
+      "packagesPath": "C:\\Users\\Level\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Application\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\jdavi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Level\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1741,11 +1741,11 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoWeb\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj": {
-              "projectPath": "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoWeb\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj"
+            "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj": {
+              "projectPath": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj"
             },
-            "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoWeb\\ProyectoSocioEconomico.Infraestructure\\ProyectoSocioEconomico.Infrastructure.csproj": {
-              "projectPath": "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoWeb\\ProyectoSocioEconomico.Infraestructure\\ProyectoSocioEconomico.Infrastructure.csproj"
+            "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Infraestructure\\ProyectoSocioEconomico.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Infraestructure\\ProyectoSocioEconomico.Infrastructure.csproj"
             }
           }
         }
@@ -1760,7 +1760,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net10.0": {
@@ -1781,7 +1781,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

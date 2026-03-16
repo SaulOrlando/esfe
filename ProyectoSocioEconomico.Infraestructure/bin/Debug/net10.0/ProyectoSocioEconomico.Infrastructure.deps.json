@@ -10,7 +10,6 @@
         "dependencies": {
           "Microsoft.EntityFrameworkCore.Design": "10.0.3",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.3",
-          "ProyectoSocioEconomico.Application": "1.0.0",
           "ProyectoSocioEconomico.Domain": "1.0.0"
         },
         "runtime": {
@@ -906,17 +905,6 @@
           }
         }
       },
-      "ProyectoSocioEconomico.Application/1.0.0": {
-        "dependencies": {
-          "ProyectoSocioEconomico.Domain": "1.0.0"
-        },
-        "runtime": {
-          "ProyectoSocioEconomico.Application.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
-      },
       "ProyectoSocioEconomico.Domain/1.0.0": {
         "runtime": {
           "ProyectoSocioEconomico.Domain.dll": {
@@ -1310,11 +1298,6 @@
       "sha512": "sha512-o94k2RKuAce3GeDMlUvIXlhVa1kWpJw95E6C9LwW0KlG0nj5+SgCiIxJ2Eroqb9sLtG1mEMbFttZIBZ13EJPvQ==",
       "path": "system.security.cryptography.protecteddata/9.0.4",
       "hashPath": "system.security.cryptography.protecteddata.9.0.4.nupkg.sha512"
-    },
-    "ProyectoSocioEconomico.Application/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     },
     "ProyectoSocioEconomico.Domain/1.0.0": {
       "type": "project",
