@@ -61,6 +61,9 @@
           "projectReferences": {
             "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj": {
               "projectPath": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj"
+            },
+            "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Infraestructure\\ProyectoSocioEconomico.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Infraestructure\\ProyectoSocioEconomico.Infrastructure.csproj"
             }
           }
         }
@@ -96,7 +99,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.200/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

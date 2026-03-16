@@ -1,0 +1,232 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.nav {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    background-color: #112111;
+    color: #FFFFFF;
+    padding: 1rem;
+
+    .nav__right {
+        display: flex;
+        flex-flow: row nowrap;
+        gap: 1.50rem;
+    }
+}
+
+.nav__left {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 0.75rem;
+}
+
+}
+
+.marca {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+}
+
+.links {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 0.75rem;
+    align-items: center;
+
+    .links__link {
+        display: flex;
+        color: inherit;
+        text-decoration: none;
+    }
+}
+
+.links--column{
+    flex-flow: column nowrap; 
+    align-items: flex-start;
+}
+
+.btn {
+    display: display;
+    padding: 8px 0.75rem;
+    border-radius: 1rem;
+    background-color: #FBBF24;
+    justify-content: center;
+    align-content: center;
+    transition: all .3s ease;
+    box-sizing: border-box;
+    color: #000;
+    border: 4px #FBBF24 solid;
+
+    &:hover {
+        background-color: #151124;
+        border: #D29 4px solid;
+        cursor: pointer;
+        color: #FFFFFF;
+    }
+}
+
+.btn--green {
+    background: #14B814;
+    border: 4px #14B814 solid;
+    transition: all .3s ease;
+}
+
+.header {
+    color: #FFF;
+    background: #112111;
+    position: relative;
+    height: 29.25rem;
+
+    .header__title {
+        position: absolute;
+        font-size: 3.75rem;
+        top: 45%;
+        left: 50%;
+        text-align: center;
+        transform: translate(-50%, -50%);
+
+        .header__title--resaltado {
+            color: #14B814;
+        }
+    }
+
+    .header__description {
+        position: absolute;
+        font-size: 1.75rem;
+        top: 70%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+}
+
+
+.search {
+    background: #FFF;
+    padding: 1.50rem;
+    border-radius: 1rem;
+
+    .search__search {
+        border: none;
+        outline: none;
+    }
+}
+
+.search--absolute {
+    position: absolute;
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+}
+
+.footer {
+    display: flex;
+    flex-flow: column nowrap;
+    background: #112111;
+    color: #FFF;
+    gap: 5.25rem;
+    padding: 5.25rem 5rem 2.50rem 5rem;
+    align-items: center;
+
+    .footer__separator {
+        height: 4px;
+        width: 88vw;
+        background-color: #808080;
+    }
+
+    .footer__up {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.50rem;
+    }
+
+    .footer__down {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .footer__column {
+        display: flex;
+        flex-flow: column nowrap;
+        gap: 1rem;
+    }
+
+    .footer__column-title {
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .footer-marca {
+        display: flex;
+        flex-flow: row nowrap;
+    }
+}
+
+.main-content {
+    display: flex;
+    flex-flow: column nowrap;
+    color: #000;
+    background: #FFF;
+}
+
+.categories {
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 4rem 0;
+
+    .categories__top {
+        display: flex;
+        padding: 0 5.25rem 0 5.25rem;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+
+
+        .categories__title {
+            font-weight: 400;
+            font-size: 1.50rem;
+        }
+
+        .categories__all {
+            color: #14B814;
+            font-weight: 400;
+            text-decoration: none;
+        }
+    }
+
+    .categories__down {
+        padding: 4.50rem 11.25rem 0 11.25rem;
+
+        .categories__categories {
+            display: flex;
+            justify-content: space-evenly;
+        }
+    }
+}
+
+.categoria {
+    display: flex;
+    flex-flow: column nowrap;
+
+    .categoria__circle {
+        padding: 8px 0 4px 0;
+        border-radius: 50%;
+    }
+
+    .categoria__title {
+        font-size: 1.25rem;
+        font-weight: 400;
+    }
+
+    .categoria__description {
+        font-size: 0.75rem;
+    }
+}
