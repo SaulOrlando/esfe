@@ -27,11 +27,13 @@
             <section class="nav__left">
             @await Html.PartialAsync("_Btn", new BtnViewModel
             {
-                TextoBtn = "Iniciar sesión"
+                TextoBtn = "Iniciar sesión",
+                Path = "/Account/IniciarSesion"
             })
             @await Html.PartialAsync("_Btn", new BtnViewModel
             {
-                TextoBtn = "Registrarse"
+                TextoBtn = "Registrarse",
+                Path = "/Account/Registrarse"
             })
             </section>
         </nav>

@@ -63,6 +63,7 @@
     box-sizing: border-box;
     color: #000;
     border: 4px #FBBF24 solid;
+    text-decoration: none;
 
     &:hover {
         background-color: #151124;

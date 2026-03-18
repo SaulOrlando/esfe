@@ -575,4 +575,4 @@ C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\bin\Debug\
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\bin\Debug\net10.0\tr\Microsoft.CodeAnalysis.Scripting.resources.dll
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\bin\Debug\net10.0\zh-Hans\Microsoft.CodeAnalysis.Scripting.resources.dll
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\bin\Debug\net10.0\zh-Hant\Microsoft.CodeAnalysis.Scripting.resources.dll
-C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\m81iudsgf8-{0}-7a68ey6f4v-7a68ey6f4v.gz
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\m81iudsgf8-{0}-n8nlkroaw8-n8nlkroaw8.gz
