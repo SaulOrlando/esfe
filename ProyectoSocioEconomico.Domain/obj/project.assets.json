@@ -8,23 +8,23 @@
     "net10.0": []
   },
   "packageFolders": {
-    "C:\\Users\\jdavi\\.nuget\\packages\\": {},
+    "C:\\Users\\Level\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoKRS\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj",
+      "projectUniqueName": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj",
       "projectName": "ProyectoSocioEconomico.Domain",
-      "projectPath": "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoKRS\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj",
-      "packagesPath": "C:\\Users\\jdavi\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\jdavi\\Desktop\\ProyectoKSGIJ\\ProyectoSocioEconomicoKRS\\ProyectoSocioEconomico.Domain\\obj\\",
+      "projectPath": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Domain\\ProyectoSocioEconomico.Domain.csproj",
+      "packagesPath": "C:\\Users\\Level\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Level\\source\\repos\\ProyectoESFE\\ProyectoSocioEconomico.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\jdavi\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Level\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
