@@ -9,3 +9,15 @@ C:\Users\jdavi\Desktop\ProyectoKSGIJ\ProyectoSocioEconomicoKRS\ProyectoSocioEcon
 C:\Users\jdavi\Desktop\ProyectoKSGIJ\ProyectoSocioEconomicoKRS\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\refint\ProyectoSocioEconomico.Domain.dll
 C:\Users\jdavi\Desktop\ProyectoKSGIJ\ProyectoSocioEconomicoKRS\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ProyectoSocioEconomico.Domain.pdb
 C:\Users\jdavi\Desktop\ProyectoKSGIJ\ProyectoSocioEconomicoKRS\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ref\ProyectoSocioEconomico.Domain.dll
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\bin\Debug\net10.0\ProyectoSocioEconomico.Domain.deps.json
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\bin\Debug\net10.0\ProyectoSocioEconomico.Domain.dll
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\bin\Debug\net10.0\ProyectoSocioEconomico.Domain.pdb
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ProyectoSocioEconomico.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ProyectoSocioEconomico.Domain.AssemblyInfoInputs.cache
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ProyectoSocioEconomico.Domain.AssemblyInfo.cs
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ProyectoSocioEconomico.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ProyectoSocioEconomico.Domain.sourcelink.json
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ProyectoSocioEconomico.Domain.dll
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\refint\ProyectoSocioEconomico.Domain.dll
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ProyectoSocioEconomico.Domain.pdb
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.Domain\obj\Debug\net10.0\ref\ProyectoSocioEconomico.Domain.dll
