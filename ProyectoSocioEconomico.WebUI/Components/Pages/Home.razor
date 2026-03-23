@@ -2,11 +2,55 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<header class="header">
+    <section class="header__container">
+        <h1 class="header__title">Conectamos apoyo solidario con quienes <span class="header__title--primary-color">mas
+            lo necesitan</span></h1>
+            <p class="header__subtitle">Unete a la comunidad y marca la diferencia cada pequeña accion
+                salva vidas</p>
+                <div class="search">
+                    <div class="bulma-control bulma-has-icons-left search__input-container">
+                        <input class="bulma-input bulma-input-rounded bulma-is-success bulma-is-medium search__input"
+                               type="text" name="search" placeholder="Busca causas o programas" />
+                        <span class="bulma-icon bulma-is-small bulma-is-left">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                    </div>
+                    <a class="bulma-button bulma-is-success">Encuentra un caso</a>
+                </div>
+            </section>
+        </header>
 
-Welcome to your new app.
-dotnet ef database update --project ProyectoSocioEconomico.Infrastructure --startup-project ProyectoSocioEconomico.WebUI
-dotnet ef database update --verbose --project Proyectosocioeconomico.Infrastructure --startup-project Proyectosocioeconomico.WebUI
-dotnet ef database drop --project ProyectoSocioEconomico.Infrastructure --startup-project ProyectoSocioEconomico.WebUI
-
-dotnet ef database update --verbose --project TuProyecto.Infrastructure --startup-project TuProyecto.API
+        <section class="bulma-container bulma-mt-5">
+            <section class="bulma-section">
+                <div class="bulma-is-flex bulma-is-justify-content-space-between">
+                    <div>Explorar categorias</div>
+                    <a class="color-primary">Ver mas</a>
+                </div>
+                <section class="bulma-section icons-container">
+                    <CategoryComponent Title="Medicina" Icon="fa-apple-whole" ColorClass="icon-category__icon--health" />
+                    <CategoryComponent Title="Educacion" Icon="fa-book-open" ColorClass="icon-category__icon--education" />
+                    <CategoryComponent Title="Desastres naturales" Icon="fa-person-walking-arrow-loop-left"
+                                       ColorClass="icon-category__icon--disaster-relief" />
+                    <CategoryComponent Title="Medio ambiente" Icon="fa-leaf" ColorClass="icon-category__icon--environment" />
+                </section>
+                <section class="bulma-section bulma-is-flex bulma-is-justify-content-space-between bg-cream-color">
+                    <div class="mx-3">
+                        <h2 class="bulma-has-text-black bulma-title">Buscando apoyo?</h2>
+                        <p class="bulma-has-text-black">Ya sean facturas médicas, proyectos comunitarios o necesidades
+                            educativas,
+                            Nuestra plataforma lo conecta directamente con quienes se preocupan. Comienza tu
+                            campaña en menos de 5 minutos.</p>
+                        </div>
+                        <div class="bulma-is-flex bulma-is-align-items-center">
+                            <a class="bulma-button bulma-is-success bulma-is-medium">Crea tu caso ahora</a>
+                        </div>
+                    </section>
+                </section>
+            </section>
+            <div class="bulma-container">
+                <section class="bulma-section bulma-is-flex bulma-is-align-items-center">
+                    <div class="raya-decoration"></div>
+                    <p class="bulma-has-text-black mx-3">Programas activos de Aid</p>
+                </section>
+            </div>

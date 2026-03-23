@@ -1,0 +1,53 @@
+@charset "utf-8";
+
+/*! bulma.io v1.0.4 | MIT License | github.com/jgthms/bulma */
+$prefix: "bulma-" !default;
+
+@forward "sass" with (
+  $prefix: $prefix
+);
+
+@use "utilities" with (
+  $prefix: $prefix
+);
+@forward "utilities";
+
+@use "base" with (
+  $prefix: $prefix
+);
+@forward "base";
+
+@use "elements" with (
+  $prefix: $prefix
+);
+@forward "elements";
+
+@use "form" with (
+  $prefix: $prefix
+);
+@forward "form";
+
+@use "components" with (
+  $prefix: $prefix
+);
+@forward "components";
+
+@use "grid" with (
+  $prefix: $prefix
+);
+@forward "grid";
+
+@use "helpers" with (
+  $prefix: $prefix
+);
+@forward "helpers";
+
+@use "layout" with (
+  $prefix: $prefix
+);
+@forward "layout";
+
+@use "themes" with (
+  $prefix: $prefix
+);
+@forward "themes";

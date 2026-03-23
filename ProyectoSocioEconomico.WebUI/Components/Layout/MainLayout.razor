@@ -1,20 +1,41 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+<nav class="bulma-navbar bulma-px-1">
+    <section class="bulma-navbar-brand">
+        <a class="bulma-navbar-item bulma-title">AidPortal</a>
+    </section>
+    <section class="bulma-navbar-menu">
+        <ul class="bulma-navbar-start">
+            <a class="bulma-navbar-item">
+                Programas
+            </a>
+            <a class="bulma-navbar-item">
+                Acerca de nosotros
+            </a>
+            <a class="bulma-navbar-item">
+                Reportes de impacto
+            </a>
+            <a class="bulma-navbar-item">
+                Ser volunatario
+            </a>
+        </ul>
+        <section class="bulma-navbar-end bulma-is-flex bulma-is-align-items-center">
+            <div class="bulma-navbar-item">
+                <a class="bulma-button bulma-is-info">Mi caso</a>
+            </div>
+            <a>
+                <figure class="bulma-image bulma-is-48x48">
+                    <img class="bulma-is-rounded" src="https://bulma.io/assets/images/placeholders/48x48.png" />
+                </figure>
+            </a>
+        </section>
+    </section>
+</nav>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+<main>
+    @Body
+</main>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
