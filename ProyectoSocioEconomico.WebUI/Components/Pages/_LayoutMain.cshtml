@@ -25,12 +25,12 @@
             </section>
             </section>
             <section class="nav__left">
-            @await Html.PartialAsync("_Btn", new BtnViewModel
+            @await Html.PartialAsync("_Btn", new ProyectoSocioEconomico.WebUI.ViewModels.BtnViewModel
             {
                 TextoBtn = "Iniciar sesión",
                 Path = "/Account/IniciarSesion"
             })
-            @await Html.PartialAsync("_Btn", new BtnViewModel
+            @await Html.PartialAsync("_Btn", new ProyectoSocioEconomico.WebUI.ViewModels.BtnViewModel
             {
                 TextoBtn = "Registrarse",
                 Path = "/Account/Registrarse"

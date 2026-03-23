@@ -2,8 +2,13 @@ using ProyectoSocioEconomico.Infrastructure;
 using ProyectoSocioEconomico.WebUI.Components;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddInfrastructure(
-    builder.Configuration.GetConnectionString("DefaultConnection"));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+}
+builder.Services.AddInfrastructure(connectionString);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
