@@ -1,0 +1,176 @@
+@page "/login"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.Infrastructure.Data
+@inject IUsuarioService UsuarioService
+@inject AppDbContext DbContext
+@inject NavigationManager NavigationManager
+
+<form @onsubmit="CrearCuenta">
+    <div class="login-step3">
+        <section class="bulma-container login-step3-container">
+            <section class="bulma-section login-step3-section bulma-has-text-black">
+                <div class="login-step3-text">
+                    <h1 class="bulma-title bulma-has-text-black">Seguridada y configuracion de la cuenta</h1>
+                    <p>Finalize your credentials and select your role within the community.</p>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(mensaje))
+                {
+                    <div class="bulma-notification @(esError ? "bulma-is-danger" : "bulma-is-success") bulma-mb-4">
+                        @mensaje
+                    </div>
+                }
+
+                <section class="login-step3-inputs">
+                    <label class="item">
+                        <span>Correo electronico</span>
+                        <div class="bulma-control bulma-has-icons-right">
+                            <input
+                                class="bulma-input bulma-input-rounded bulma-is-medium"
+                                type="email"
+                                name="email"
+                                placeholder="ejemplo@gmail.com"
+                                @bind="email" />
+                            <span class="bulma-icon bulma-is-small bulma-is-right">
+                                <i class="fa-solid fa-at"></i>
+                            </span>
+                        </div>
+                    </label>
+                    <section class="login-step3-inputs-passwords">
+                        <label>
+                            <span>Contraseña</span>
+                            <div class="bulma-control">
+                                <input
+                                    class="bulma-input bulma-input-rounded bulma-is-medium"
+                                    type="password"
+                                    name="password"
+                                    placeholder="Introduce tu contraseña"
+                                    @bind="password" />
+                            </div>
+                        </label>
+                        <label>
+                            <span>Repite la contraña</span>
+                            <div class="bulma-control">
+                                <input
+                                    class="bulma-input bulma-input-rounded bulma-is-medium"
+                                    type="password"
+                                    name="repeatPassword"
+                                    placeholder="Introduce tu constraseña de nuevo"
+                                    @bind="repeatPassword" />
+                            </div>
+                        </label>
+                    </section>
+                </section>
+                <div class="bulma-is-flex">
+                    <label class="checkbox">
+                        <input type="checkbox" class="mr-5" @bind="aceptaTerminos" />
+                        <span class="bulma-has-text-centred bulma-has-text-black">
+                            I agree to the Terms of Service and Privacy Policy. I understand that my data will be
+                            used for socioeconomic analysis.
+                        </span>
+                    </label>
+                </div>
+                <button type="submit" class="bulma-button bulma-is-warning bulma-is-fullwidth" disabled="@guardando">
+                    @(guardando ? "Guardando..." : "Crear Cuenta")
+                </button>
+            </section>
+        </section>
+    </div>
+</form>
+
+@code {
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string repeatPassword = string.Empty;
+    private bool aceptaTerminos;
+    private bool guardando;
+    private string mensaje = string.Empty;
+    private bool esError;
+
+    private async Task CrearCuenta()
+    {
+        mensaje = string.Empty;
+        esError = false;
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(repeatPassword))
+        {
+            esError = true;
+            mensaje = "Completa todos los campos.";
+            return;
+        }
+
+        if (password != repeatPassword)
+        {
+            esError = true;
+            mensaje = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        if (!aceptaTerminos)
+        {
+            esError = true;
+            mensaje = "Debes aceptar los términos y condiciones.";
+            return;
+        }
+
+        guardando = true;
+
+        try
+        {
+            var usuarios = await UsuarioService.ObtenerTodos();
+
+            if (usuarios.Any(u => u.Email.ToLower() == email.Trim().ToLower()))
+            {
+                esError = true;
+                mensaje = "Ese correo ya está registrado.";
+                return;
+            }
+
+            var rolPorDefecto = await DbContext.Roles
+                .OrderBy(r => r.Id)
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync();
+
+            if (rolPorDefecto == 0)
+            {
+                esError = true;
+                mensaje = "No existe ningún rol configurado en la base de datos.";
+                return;
+            }
+
+            var usuario = new Usuario
+            {
+                Nombre = "Nuevo",
+                Apellido = "Usuario",
+                Email = email.Trim(),
+                PasswordHash = password,
+                FechaNacimiento = DateTime.Today,
+                Dui = null,
+                Telefono = null,
+                Direccion = null,
+                IdRol = rolPorDefecto,
+                Estado = "Activo",
+                FechaRegistro = DateTime.Now
+            };
+
+            await UsuarioService.Crear(usuario);
+
+            mensaje = "Cuenta creada correctamente.";
+            esError = false;
+
+            NavigationManager.NavigateTo("/");
+        }
+        catch
+        {
+            esError = true;
+            mensaje = "Ocurrió un error al crear la cuenta.";
+        }
+        finally
+        {
+            guardando = false;
+        }
+    }
+}

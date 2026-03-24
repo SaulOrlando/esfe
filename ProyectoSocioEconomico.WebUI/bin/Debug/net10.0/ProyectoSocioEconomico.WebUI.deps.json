@@ -768,6 +768,7 @@
       },
       "ProyectoSocioEconomico.Infrastructure/1.0.0": {
         "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.5",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.5",
           "ProyectoSocioEconomico.Application": "1.0.0",
           "ProyectoSocioEconomico.Domain": "1.0.0"
