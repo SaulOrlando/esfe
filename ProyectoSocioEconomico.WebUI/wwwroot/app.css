@@ -137,6 +137,58 @@ section.bg-cream-color {
 
 div.raya-decoration {
   height: 2rem;
-  width: 0.50rem;
+  width: 0.5rem;
   background-color: var(--primary-color);
+}
+
+div.login-step3 {
+  display: flex;
+  justify-content: center;
+  background: var(--white-cream);
+  min-height: 100vh;
+  align-items: center;
+
+  .login-step3-section {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 2.75rem;
+    align-items: center;
+  }
+
+  .login-step3-container {
+    display: flex;
+    background: var(--white);
+    flex-flow: column nowrap;
+  }
+
+  .login-step3-text {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 1rem;
+    align-items: center;
+  }
+}
+
+section.login-step3-inputs {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 100%;
+  gap: 3.50rem;
+  align-items: center;
+
+  .login-step3-inputs-passwords {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 3rem;
+    width: 100%;
+    justify-content: space-between;
+
+    label {
+      width: calc(100% - 55%);
+    }
+  }
+
+  .item {
+    width: 100%;
+  }
 }
