@@ -10,6 +10,9 @@
     </a>
 </article>
 
+@using Microsoft.EntityFrameworkCore
+@using ProyectoSocioEconomico.Infrastructure.Data
+
 @code {
     [Parameter]
     public string? Icon { set; get; }
@@ -17,10 +20,18 @@
     public string? Title { set; get; }
     [Parameter]
     public string? ColorClass { set; get; }
+    [Parameter]
+    public int IdCategoria { get; set; }
 
     public string? Cases { set; get; }
 
-    async void callDatabaseToGetCases()
+    @inject AppDbContext DbContext
+
+    protected override async Task OnInitializedAsync()
     {
+        var count = await DbContext.Casos
+            .Where(c => c.IdCategoria == IdCategoria && c.Estado == "Activo")
+            .CountAsync();
+        Cases = count.ToString();
     }
 }
