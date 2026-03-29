@@ -13,7 +13,7 @@
     <div class="bulma-container">
         <div class="bulma-columns bulma-is-centered">
             <div class="bulma-column registrarse-column">
-                <form @onsubmit="CrearCuenta" class="bulma-box bulma-p-6 bulma-has-background-white form-registrarse">
+                <form @onsubmit="ManejarLogin" class="bulma-box bulma-p-6 bulma-has-background-white form-registrarse">
                 <div class="login-step3-content bulma-has-text-black">
                 <div class="login-step3-text">
                     <h1 class="bulma-title bulma-has-text-black bulma-mb-5">Bienvenido de vuelta</h1>
@@ -86,7 +86,7 @@
 
     private void TogglePassword() => verPassword = !verPassword;
 
-    private async Task CrearCuenta()
+    private async Task ManejarLogin()
     {
         mensaje = string.Empty;
         esError = false;
@@ -98,10 +98,17 @@
             return;
         }
 
+        if (password.Length < 8)
+        {
+            esError = true;
+            mensaje = "La contraseña debe tener al menos 8 caracteres.";
+            return;
+        }
+
         if (!aceptaTerminos)
         {
             esError = true;
-            mensaje = "Debes aceptar los términos y condiciones.";
+            mensaje = "Debes aceptar los términos y condiciones para continuar.";
             return;
         }
 
@@ -110,52 +117,26 @@
         try
         {
             var usuarios = await UsuarioService.ObtenerTodos();
+            var usuarioEncontrado = usuarios.FirstOrDefault(u => 
+                u.Email.Equals(email.Trim(), StringComparison.OrdinalIgnoreCase) && 
+                u.PasswordHash == password);
 
-            if (usuarios.Any(u => u.Email.ToLower() == email.Trim().ToLower()))
+            if (usuarioEncontrado != null)
+            {
+                mensaje = "Sesión iniciada correctamente.";
+                esError = false;
+                NavigationManager.NavigateTo("/");
+            }
+            else
             {
                 esError = true;
-                mensaje = "Ese correo ya está registrado.";
-                return;
+                mensaje = "Correo electrónico o contraseña incorrectos.";
             }
-
-            var rolPorDefecto = await DbContext.Roles
-                .OrderBy(r => r.Id)
-                .Select(r => r.Id)
-                .FirstOrDefaultAsync();
-
-            if (rolPorDefecto == 0)
-            {
-                esError = true;
-                mensaje = "No existe ningún rol configurado en la base de datos.";
-                return;
-            }
-
-            var usuario = new Usuario
-            {
-                Nombre = "Nuevo",
-                Apellido = "Usuario",
-                Email = email.Trim(),
-                PasswordHash = password,
-                FechaNacimiento = DateTime.Today,
-                Dui = null,
-                Telefono = null,
-                Direccion = null,
-                IdRol = rolPorDefecto,
-                Estado = "Activo",
-                FechaRegistro = DateTime.Now
-            };
-
-            await UsuarioService.Crear(usuario);
-
-            mensaje = "Cuenta creada correctamente.";
-            esError = false;
-
-            NavigationManager.NavigateTo("/");
         }
         catch
         {
             esError = true;
-            mensaje = "Ocurrió un error al crear la cuenta.";
+            mensaje = "Ocurrió un error al intentar iniciar sesión.";
         }
         finally
         {
