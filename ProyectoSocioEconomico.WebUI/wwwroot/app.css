@@ -7,13 +7,14 @@
 :root {
   color-scheme: light dark;
   --primary-color: #14b814;
-  --primary-color-dark: #112111;
+  --primary-color-dark: #112111; /* verde oscuro */
+  --header-glow: #1a3a1a;
   --secondary-color: #fbbd23;
   --white: #fff;
   --black: #000;
   --white-cream: #fef2f2;
-  --health-color: #ef4444;
-  --education-color: #3b82f6;
+  --health-color: #ef4444; /* Rojo */
+  --education-color: #3b82f6; /* Azul */
 }
 
 .color-primary {
@@ -21,7 +22,7 @@
 }
 
 header.header {
-  background: var(--primary-color-dark);
+  background: radial-gradient(circle at center, var(--header-glow) 0%, var(--primary-color-dark) 100%);
   height: calc(100vh - 64px);
   position: relative;
 
@@ -37,6 +38,7 @@ header.header {
   .header__title {
     font-size: 2.25rem;
     font-weight: 900;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
 
   .header__title--primary-color {
@@ -217,11 +219,6 @@ section.registrarse {
       border-radius: 6px !important;
       transition: border-color 0.2s, box-shadow 0.2s;
 
-      &:focus {
-          border-color: var(--education-color) !important;
-          box-shadow: 0 0 0 0.125em rgba(32, 156, 238, 0.25) !important;
-      }
-
       &::placeholder {
           color: #7a7a7a !important;
           opacity: 1;
@@ -230,17 +227,16 @@ section.registrarse {
 
     .bulma-control .bulma-icon {
       height: 100%;
-      color: var(--primary-color);
       transition: color 0.2s ease-in-out;
+    }
+
+    .bulma-control:focus-within .bulma-icon.bulma-is-left {
+      color: var(--education-color);
     }
 
     .bulma-icon.bulma-is-clickable {
         pointer-events: all;
         cursor: pointer;
-    }
-
-    .bulma-control:focus-within .bulma-icon {
-      color: var(--education-color);
     }
   }
 

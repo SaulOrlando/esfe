@@ -455,4 +455,4 @@ C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\6nsu9plqyv-{0}-qtffaftpm7-qtffaftpm7.gz
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\d4vtvxeprj-{0}-b9228eflpl-b9228eflpl.gz
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\d8te6a9v4m-{0}-2tj1sjhksk-2tj1sjhksk.gz
-C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\jf2eb0412t-{0}-2dvl12hre4-2dvl12hre4.gz
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\jf2eb0412t-{0}-9aoi51osqq-9aoi51osqq.gz
