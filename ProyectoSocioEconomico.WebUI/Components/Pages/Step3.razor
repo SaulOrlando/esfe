@@ -1,8 +1,14 @@
 @page "/registrarse/step3"
 @using System.Text.RegularExpressions
+@using Microsoft.EntityFrameworkCore
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.Infrastructure.Data
 @layout EmptyLayout
 @inject NavigationManager Navigation
 @inject ProyectoSocioEconomico.WebUI.Services.RegistrationState RegState
+@inject AppDbContext DbContext
+@inject IWebHostEnvironment Environment
+@inject ProyectoSocioEconomico.WebUI.Services.CustomAuthenticationStateProvider AuthStateProvider
 
 <div class="rp3-page">
     <!-- ── MAIN ── -->
@@ -45,14 +51,14 @@
                     <div class="bulma-field rp3-field">
                         <label class="bulma-label rp3-label" for="email">Email Address</label>
                         <div class="bulma-control bulma-has-icons-right rp3-control">
-                            <input id="email" class="bulma-input rp3-input @(mostrarErrores && !EsEmailValido(Email) ? "bulma-is-danger" : "")" 
+                            <input id="email" class="bulma-input rp3-input @(mostrarErrores && !EsEmailValido(RegState.Email) ? "bulma-is-danger" : "")" 
                                    type="email" placeholder="example@email.com"
-                                   @bind="Email" />
+                                   @bind="RegState.Email" />
                             <span class="bulma-icon bulma-is-right rp3-input-icon">
                                 <i class="far fa-envelope"></i>
                             </span>
                         </div>
-                        @if (mostrarErrores && !EsEmailValido(Email))
+                        @if (mostrarErrores && !EsEmailValido(RegState.Email))
                         {
                             <p class="bulma-help bulma-is-danger">Por favor, ingresa un correo electrónico válido.</p>
                         }
@@ -65,15 +71,15 @@
                         <div class="bulma-field rp3-field rp3-field--half">
                             <label class="bulma-label rp3-label" for="password">Create Password</label>
                             <div class="bulma-control bulma-has-icons-right rp3-control">
-                                <input id="password" class="bulma-input rp3-input @(mostrarErrores && !EsPasswordValido(Password) ? "bulma-is-danger" : "")"
-                                       type="@(ShowPassword ? "text" : "password")" placeholder="••••••••" @bind="Password"
+                                <input id="password" class="bulma-input rp3-input @(mostrarErrores && !EsPasswordValido(RegState.Password) ? "bulma-is-danger" : "")"
+                                       type="@(ShowPassword ? "text" : "password")" placeholder="••••••••" @bind="RegState.Password"
                                        @oninput="OnPasswordInput" />
                                 <span class="bulma-icon bulma-is-right rp3-input-icon rp3-input-icon--clickable"
                                       @onclick="TogglePassword">
                                     <i class="@(ShowPassword ? "far fa-eye" : "far fa-eye-slash")"></i>
                                 </span>
                             </div>
-                            @if (mostrarErrores && !EsPasswordValido(Password))
+                            @if (mostrarErrores && !EsPasswordValido(RegState.Password))
                             {
                                 <p class="bulma-help bulma-is-danger">Mínimo 8 caracteres.</p>
                             }
@@ -83,7 +89,7 @@
                         <div class="bulma-field rp3-field rp3-field--half">
                             <label class="bulma-label rp3-label" for="confirm-password">Confirm Password</label>
                             <div class="bulma-control bulma-has-icons-right rp3-control">
-                                <input id="confirm-password" class="bulma-input rp3-input @(mostrarErrores && Password != ConfirmPassword ? "bulma-is-danger" : "")"
+                                <input id="confirm-password" class="bulma-input rp3-input @(mostrarErrores && RegState.Password != ConfirmPassword ? "bulma-is-danger" : "")"
                                        type="@(ShowConfirm ? "text" : "password")" placeholder="••••••••"
                                        @bind="ConfirmPassword" />
                                 <span class="bulma-icon bulma-is-right rp3-input-icon rp3-input-icon--clickable"
@@ -91,7 +97,7 @@
                                     <i class="@(ShowConfirm ? "far fa-eye" : "far fa-eye-slash")"></i>
                                 </span>
                             </div>
-                            @if (mostrarErrores && Password != ConfirmPassword)
+                            @if (mostrarErrores && RegState.Password != ConfirmPassword)
                             {
                                 <p class="bulma-help bulma-is-danger">Las contraseñas no coinciden.</p>
                             }
@@ -132,12 +138,9 @@
         }
     }
 
-    private string Email { get; set; } = string.Empty;
-    private string Password { get; set; } = string.Empty;
     private string ConfirmPassword { get; set; } = string.Empty;
     private bool ShowPassword { get; set; } = false;
     private bool ShowConfirm { get; set; } = false;
-    private string SelectedRole { get; set; } = "donor";
     private bool AgreeTerms { get; set; } = false;
     private int StrengthScore { get; set; } = 0;
     private string mensajeError = string.Empty;
@@ -154,12 +157,11 @@
 
     private void TogglePassword() => ShowPassword = !ShowPassword;
     private void ToggleConfirm() => ShowConfirm = !ShowConfirm;
-    private void SelectRole(string role) => SelectedRole = role;
 
     private void OnPasswordInput(ChangeEventArgs e)
     {
-        Password = e.Value?.ToString() ?? string.Empty;
-        StrengthScore = ComputeStrength(Password);
+        RegState.Password = e.Value?.ToString() ?? string.Empty;
+        StrengthScore = ComputeStrength(RegState.Password);
     }
 
     private int ComputeStrength(string pwd)
@@ -190,24 +192,24 @@
         return bar <= StrengthScore ? "rp3-strength__bar--filled" : string.Empty;
     }
 
-    private void HandleSubmit()
+    private async Task HandleSubmit()
     {
         mensajeError = string.Empty;
         mostrarErrores = true;
 
-        if (!EsEmailValido(Email))
+        if (!EsEmailValido(RegState.Email))
         {
             mensajeError = "Por favor, ingresa un correo electrónico válido.";
             return;
         }
 
-        if (!EsPasswordValido(Password))
+        if (!EsPasswordValido(RegState.Password))
         {
             mensajeError = "La contraseña debe tener al menos 8 caracteres.";
             return;
         }
 
-        if (Password != ConfirmPassword)
+        if (RegState.Password != ConfirmPassword)
         {
             mensajeError = "Las contraseñas no coinciden.";
             return;
@@ -219,6 +221,89 @@
             return;
         }
 
-        // Si todo es válido, proceder con el registro (ej. navegación o guardado)
+        try
+        {
+            // 1. Verificar si el email ya existe
+            if (await DbContext.Usuarios.AnyAsync(u => u.Email == RegState.Email))
+            {
+                mensajeError = "El correo electrónico ya está registrado.";
+                return;
+            }
+
+            // 2. Obtener Rol "Donador"
+            var rolDonador = await DbContext.Roles.FirstOrDefaultAsync(r => r.Nombre.ToLower() == "donador");
+            if (rolDonador == null)
+            {
+                rolDonador = new Role 
+                { 
+                    Nombre = "Donador", 
+                    Descripcion = "Usuario que realiza donaciones", 
+                    Estado = "Activo" 
+                };
+                DbContext.Roles.Add(rolDonador);
+                await DbContext.SaveChangesAsync();
+            }
+
+            // 3. Guardar Archivos DUI
+            string frontPath = await SaveFileData(RegState.DuiFrontData, RegState.DuiFrontName, "front");
+            string backPath = await SaveFileData(RegState.DuiBackData, RegState.DuiBackName, "back");
+
+            // 4. Crear Usuario
+            var nuevoUsuario = new Usuario
+            {
+                Nombre = RegState.FullName,
+                Apellido = "", // Opcional
+                Email = RegState.Email,
+                PasswordHash = HashPassword(RegState.Password), 
+                FechaNacimiento = RegState.BirthDate ?? DateTime.Now,
+                Dui = RegState.DuiNumber,
+                Telefono = RegState.PhoneNumber,
+                IdRol = rolDonador.Id,
+                Estado = "Activo",
+                FechaRegistro = DateTime.Now,
+                ImagenPerfil = "uploads/profiles/DefaultProfile.png",
+                FrontDUI = frontPath,
+                ReverseDUI = backPath
+            };
+
+            DbContext.Usuarios.Add(nuevoUsuario);
+            await DbContext.SaveChangesAsync();
+
+            // 5. Iniciar sesión automáticamente
+            AuthStateProvider.NotifyUserLogin(nuevoUsuario);
+
+            // 6. Finalizar
+            RegState.Reset();
+            Navigation.NavigateTo("/"); 
+        }
+        catch (Exception ex)
+        {
+            mensajeError = "Error al registrar: " + ex.Message;
+        }
+    }
+
+    private string HashPassword(string password)
+    {
+        // Hash simple para prototipo (SHA256) ya que no hay BCrypt instalado
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        var bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+        return Convert.ToBase64String(bytes);
+    }
+
+    private async Task<string> SaveFileData(byte[]? data, string? originalName, string prefix)
+    {
+        if (data == null || string.IsNullOrEmpty(originalName)) return string.Empty;
+
+        var fileName = $"{prefix}_{Guid.NewGuid()}{Path.GetExtension(originalName)}";
+        var relativePath = Path.Combine("uploads", "documents", "dui", fileName);
+        var physicalPath = Path.Combine(Environment.WebRootPath, relativePath);
+
+        // Asegurar que el directorio existe
+        var directory = Path.GetDirectoryName(physicalPath);
+        if (!Directory.Exists(directory)) Directory.CreateDirectory(directory!);
+
+        await File.WriteAllBytesAsync(physicalPath, data);
+
+        return relativePath.Replace("\\", "/");
     }
 }

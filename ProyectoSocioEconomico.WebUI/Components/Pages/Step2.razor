@@ -42,11 +42,11 @@
                 <div class="register-page__field bulma-field">
                     <label class="register-page__label bulma-label">Número de DUI</label>
                     <div class="register-page__control bulma-control bulma-has-icons-left">
-                        <input class="register-page__input bulma-input @(mostrarErrores && !EsDuiValido(duiNumber) ? "bulma-is-danger" : "")" 
+                        <input class="register-page__input bulma-input @(mostrarErrores && !EsDuiValido(RegState.DuiNumber) ? "bulma-is-danger" : "")" 
                                type="text"
                                placeholder="00000000-0" 
                                maxlength="10" 
-                               @bind="duiNumber"
+                               @bind="RegState.DuiNumber"
                                @bind:event="oninput" />
                         <span class="register-page__icon bulma-icon bulma-is-left">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -59,7 +59,7 @@
                             </svg>
                         </span>
                     </div>
-                    @if (mostrarErrores && !EsDuiValido(duiNumber))
+                    @if (mostrarErrores && !EsDuiValido(RegState.DuiNumber))
                     {
                         <p class="bulma-help bulma-is-danger">El DUI debe tener el formato 00000000-0</p>
                     }
@@ -69,9 +69,9 @@
                 <div class="register-page__field bulma-field">
                     <label class="register-page__label bulma-label">Fecha de Nacimiento</label>
                     <div class="register-page__control bulma-control bulma-has-icons-left">
-                        <input class="register-page__input bulma-input @(mostrarErrores && !EsFechaValida(birthDate) ? "bulma-is-danger" : "")" 
+                        <input class="register-page__input bulma-input @(mostrarErrores && !EsFechaValida(RegState.BirthDate) ? "bulma-is-danger" : "")" 
                                type="date" 
-                               @bind="birthDate" />
+                               @bind="RegState.BirthDate" />
                         <span class="register-page__icon bulma-icon bulma-is-left">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -82,7 +82,7 @@
                             </svg>
                         </span>
                     </div>
-                    @if (mostrarErrores && !EsFechaValida(birthDate))
+                    @if (mostrarErrores && !EsFechaValida(RegState.BirthDate))
                     {
                         <p class="bulma-help bulma-is-danger">Debes ser mayor de 18 años.</p>
                     }
@@ -93,25 +93,25 @@
                     <label class="register-page__label bulma-label">Subir fotos de DUI (Frente y Reverso)</label>
                     <div class="columns is-mobile is-variable is-2">
                         <div class="column">
-                            <div class="dui-upload-box @(duiFront != null ? "has-file" : (mostrarErrores ? "has-error" : ""))">
+                            <div class="dui-upload-box @(RegState.DuiFrontData != null ? "has-file" : (mostrarErrores ? "has-error" : ""))">
                                 <label class="upload-label">
                                     <InputFile OnChange="HandleFrontChange" accept="image/png, image/jpeg, image/jpg, image/webp" />
-                                    <i class="fas @(duiFront != null ? "fa-check-circle" : "fa-camera")"></i>
-                                    <span>@(duiFront != null ? "Cargado" : "Frente")</span>
+                                    <i class="fas @(RegState.DuiFrontData != null ? "fa-check-circle" : "fa-camera")"></i>
+                                    <span>@(RegState.DuiFrontData != null ? "Cargado" : "Frente")</span>
                                 </label>
                             </div>
                         </div>
                         <div class="column">
-                            <div class="dui-upload-box @(duiBack != null ? "has-file" : (mostrarErrores ? "has-error" : ""))">
+                            <div class="dui-upload-box @(RegState.DuiBackData != null ? "has-file" : (mostrarErrores ? "has-error" : ""))">
                                 <label class="upload-label">
                                     <InputFile OnChange="HandleBackChange" accept="image/png, image/jpeg, image/jpg, image/webp" />
-                                    <i class="fas @(duiBack != null ? "fa-check-circle" : "fa-camera")"></i>
-                                    <span>@(duiBack != null ? "Cargado" : "Reverso")</span>
+                                    <i class="fas @(RegState.DuiBackData != null ? "fa-check-circle" : "fa-camera")"></i>
+                                    <span>@(RegState.DuiBackData != null ? "Cargado" : "Reverso")</span>
                                 </label>
                             </div>
                         </div>
                     </div>
-                    @if (mostrarErrores && (duiFront == null || duiBack == null))
+                    @if (mostrarErrores && (RegState.DuiFrontData == null || RegState.DuiBackData == null))
                     {
                         <p class="bulma-help bulma-is-danger">Es obligatorio subir ambas fotografías.</p>
                     }
@@ -148,10 +148,6 @@
         }
     }
 
-    private string duiNumber = string.Empty;
-    private DateTime? birthDate;
-    private IBrowserFile? duiFront;
-    private IBrowserFile? duiBack;
     private string mensajeError = string.Empty;
     private bool mostrarErrores = false;
 
@@ -169,15 +165,31 @@
         return date.Value <= DateTime.Today.AddYears(-18);
     }
 
-    private void HandleFrontChange(InputFileChangeEventArgs e)
+    private async Task HandleFrontChange(InputFileChangeEventArgs e)
     {
-        duiFront = e.File;
+        var file = e.File;
+        if (file != null)
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5);
+            using var ms = new System.IO.MemoryStream();
+            await stream.CopyToAsync(ms);
+            RegState.DuiFrontData = ms.ToArray();
+            RegState.DuiFrontName = file.Name;
+        }
         StateHasChanged();
     }
 
-    private void HandleBackChange(InputFileChangeEventArgs e)
+    private async Task HandleBackChange(InputFileChangeEventArgs e)
     {
-        duiBack = e.File;
+        var file = e.File;
+        if (file != null)
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5);
+            using var ms = new System.IO.MemoryStream();
+            await stream.CopyToAsync(ms);
+            RegState.DuiBackData = ms.ToArray();
+            RegState.DuiBackName = file.Name;
+        }
         StateHasChanged();
     }
 
@@ -191,19 +203,19 @@
         mensajeError = string.Empty;
         mostrarErrores = true;
 
-        if (!EsDuiValido(duiNumber))
+        if (!EsDuiValido(RegState.DuiNumber))
         {
             mensajeError = "Por favor, ingresa un número de DUI válido (00000000-0).";
             return;
         }
 
-        if (!EsFechaValida(birthDate))
+        if (!EsFechaValida(RegState.BirthDate))
         {
             mensajeError = "Por favor, ingresa una fecha de nacimiento válida (debes ser mayor de 18 años).";
             return;
         }
 
-        if (duiFront == null || duiBack == null)
+        if (RegState.DuiFrontData == null || RegState.DuiBackData == null)
         {
             mensajeError = "Por favor, sube ambas fotos de tu DUI (frente y reverso).";
             return;
