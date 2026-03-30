@@ -414,3 +414,354 @@ main[b-mv9mys3c78] {
     text-decoration: none;
     font-weight: 600;
 }
+/* /Components/Pages/Step3.razor.rz.scp.css */
+/* ═══════════════════════════════════════════════════════════════
+   RegisterStep3Security.razor.css
+   Scoped styles – always use div.rp3-page as root for specificity
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── TOKENS ──────────────────────────────────────────────────── */
+div.rp3-page[b-zui2vasfek] {
+    --rp3-bg:           #f9f7f0;
+    --rp3-yellow:       #f5bb00;
+    --rp3-yellow-dark:  #d9a600;
+    --rp3-green:        #22c55e;
+    --rp3-text-dark:    #1a1a1a;
+    --rp3-text-mid:     #555;
+    --rp3-text-muted:   #888;
+    --rp3-border:       #e2e0d8;
+    --rp3-input-bg:     #ffffff;
+    --rp3-shadow:       0 1px 3px rgba(0, 0, 0, 0.06);
+    --rp3-glow:         rgba(245, 187, 0, 0.18);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    background-color: var(--rp3-bg);
+    background-image: radial-gradient(
+        ellipse 420px 520px at 92% 48%,
+        var(--rp3-glow) 0%,
+        transparent 70%
+    );
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── MAIN ────────────────────────────────────────────────────── */
+div.rp3-page main.rp3-main[b-zui2vasfek] {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 3rem 1.5rem 4rem;
+}
+
+/* ── CARD ────────────────────────────────────────────────────── */
+div.rp3-page main.rp3-main .rp3-card[b-zui2vasfek] {
+    width: 100%;
+    max-width: 580px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--rp3-border);
+    padding: 2.5rem 2.75rem 2.75rem;
+}
+
+/* ── PROGRESS SECTION ────────────────────────────────────────── */
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section[b-zui2vasfek] {
+    margin-bottom: 2.5rem;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section .rp3-progress-section__header[b-zui2vasfek] {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.55rem;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section .rp3-progress-section__eyebrow[b-zui2vasfek] {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--rp3-text-muted);
+    text-transform: uppercase;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section .rp3-progress-section__step-count[b-zui2vasfek] {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--rp3-yellow-dark);
+}
+
+/* Progress bar */
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section progress.rp3-progress-bar.bulma-progress.bulma-is-warning[b-zui2vasfek] {
+    height: 6px;
+    border-radius: 99px;
+    background-color: #e5e3da;
+    margin-bottom: 0.55rem;
+    display: block;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section progress.rp3-progress-bar.bulma-progress.bulma-is-warning[b-zui2vasfek]::-webkit-progress-bar {
+    background-color: #e5e3da;
+    border-radius: 99px;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section progress.rp3-progress-bar.bulma-progress.bulma-is-warning[b-zui2vasfek]::-webkit-progress-value {
+    background-color: var(--rp3-yellow);
+    border-radius: 99px;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section progress.rp3-progress-bar.bulma-progress.bulma-is-warning[b-zui2vasfek]::-moz-progress-bar {
+    background-color: var(--rp3-yellow);
+    border-radius: 99px;
+}
+
+/* Step name labels */
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section .rp3-progress-section__steps[b-zui2vasfek] {
+    display: flex;
+    justify-content: space-between;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section .rp3-progress-section__steps .rp3-progress-section__step-name[b-zui2vasfek] {
+    font-size: 0.75rem;
+    color: var(--rp3-text-muted);
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-progress-section .rp3-progress-section__steps .rp3-progress-section__step-name--active[b-zui2vasfek] {
+    font-weight: 700;
+    color: var(--rp3-text-dark);
+}
+
+/* ── HEADING ─────────────────────────────────────────────────── */
+div.rp3-page main.rp3-main .rp3-card .rp3-heading[b-zui2vasfek] {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-heading .rp3-heading__title[b-zui2vasfek] {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--rp3-text-dark);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-heading .rp3-heading__subtitle[b-zui2vasfek] {
+    font-size: 0.9rem;
+    color: var(--rp3-text-mid);
+    line-height: 1.6;
+}
+
+/* ── FORM ────────────────────────────────────────────────────── */
+div.rp3-page main.rp3-main .rp3-card .rp3-form[b-zui2vasfek] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Field */
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field.bulma-field[b-zui2vasfek] {
+    margin-bottom: 0;
+}
+
+/* Label */
+div.rp3-page main.rp3-main .rp3-card .rp3-form .bulma-label[b-zui2vasfek] {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--rp3-text-dark);
+    margin-bottom: 0.45rem;
+}
+
+/* Input */
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input.bulma-input[b-zui2vasfek] {
+    background: var(--rp3-input-bg);
+    border: 1.5px solid var(--rp3-border);
+    border-radius: 10px;
+    height: 3rem;
+    font-size: 0.9rem;
+    color: var(--rp3-text-dark);
+    box-shadow: var(--rp3-shadow);
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input.bulma-input[b-zui2vasfek]::placeholder {
+    color: #b0ada5;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input.bulma-input:focus[b-zui2vasfek] {
+    border-color: var(--rp3-yellow);
+    box-shadow: 0 0 0 3px rgba(245, 187, 0, 0.18);
+    outline: none;
+}
+
+/* Right icon */
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input-icon.bulma-icon.bulma-is-right[b-zui2vasfek] {
+    color: #a0a09a;
+    height: 3rem;
+    width: 2.75rem;
+    pointer-events: none;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input-icon--clickable.bulma-icon.bulma-is-right[b-zui2vasfek] {
+    pointer-events: all;
+    cursor: pointer;
+    transition: color 0.18s;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input-icon--clickable.bulma-icon.bulma-is-right:hover[b-zui2vasfek] {
+    color: var(--rp3-text-dark);
+}
+
+/* ── PASSWORDS ROW ───────────────────────────────────────────── */
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-passwords-row[b-zui2vasfek] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-passwords-row .rp3-field--half.bulma-field[b-zui2vasfek] {
+    margin-bottom: 0;
+}
+
+
+/* Profile card button */
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-profile-section[b-zui2vasfek] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 1.5rem 1rem;
+    background: #ffffff;
+    border: 1.5px solid var(--rp3-border);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    box-shadow: var(--rp3-shadow);
+    outline: none;
+}
+
+
+/* ── TERMS CHECKBOX ──────────────────────────────────────────── */
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field[b-zui2vasfek] {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox[b-zui2vasfek] {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    cursor: pointer;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__input[b-zui2vasfek] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__box[b-zui2vasfek] {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--rp3-border);
+    border-radius: 4px;
+    background: var(--rp3-input-bg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: border-color 0.18s, background 0.18s;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__input:checked + .rp3-checkbox__box[b-zui2vasfek] {
+    background: var(--rp3-yellow);
+    border-color: var(--rp3-yellow);
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__input:checked + .rp3-checkbox__box[b-zui2vasfek]::after {
+    content: "";
+    display: block;
+    width: 5px;
+    height: 9px;
+    border: 2px solid #1a1a1a;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__text[b-zui2vasfek] {
+    font-size: 0.85rem;
+    color: var(--rp3-text-mid);
+    line-height: 1.55;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__text .rp3-link[b-zui2vasfek] {
+    color: var(--rp3-yellow-dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__text .rp3-link:hover[b-zui2vasfek] {
+    text-decoration: underline;
+}
+
+/* ── CREATE ACCOUNT BUTTON ───────────────────────────────────── */
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulma-is-warning.bulma-is-fullwidth[b-zui2vasfek] {
+    background-color: var(--rp3-yellow);
+    color: #1a1a1a;
+    border: none;
+    border-radius: 10px;
+    height: 3.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(245, 187, 0, 0.35);
+    cursor: pointer;
+    transition: background-color 0.18s, box-shadow 0.18s, transform 0.12s;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulma-is-warning.bulma-is-fullwidth:not([disabled]):hover[b-zui2vasfek] {
+    background-color: var(--rp3-yellow-dark);
+    box-shadow: 0 6px 20px rgba(245, 187, 0, 0.45);
+    transform: translateY(-1px);
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulma-is-warning.bulma-is-fullwidth:not([disabled]):active[b-zui2vasfek] {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(245, 187, 0, 0.3);
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulma-is-warning.bulma-is-fullwidth[disabled][b-zui2vasfek] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    div.rp3-page nav.rp3-navbar[b-zui2vasfek] {
+        padding: 0 1rem;
+    }
+
+    div.rp3-page main.rp3-main[b-zui2vasfek] {
+        padding: 1.5rem 1rem 3rem;
+    }
+
+    div.rp3-page main.rp3-main .rp3-card[b-zui2vasfek] {
+        padding: 1.75rem 1.25rem;
+    }
+
+    div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-passwords-row[b-zui2vasfek] {
+        grid-template-columns: 1fr;
+    }
+
+    div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-profile-section[b-zui2vasfek] {
+        grid-template-columns: 1fr;
+    }
+
+    div.rp3-page main.rp3-main .rp3-card .rp3-heading .rp3-heading__title[b-zui2vasfek] {
+        font-size: 1.4rem;
+    }
+}

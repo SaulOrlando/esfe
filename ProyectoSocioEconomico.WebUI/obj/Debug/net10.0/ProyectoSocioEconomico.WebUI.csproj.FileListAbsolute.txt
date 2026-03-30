@@ -226,8 +226,6 @@ C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\ProyectoSocioEconomico.WebUI.AssemblyInfo.cs
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\ProyectoSocioEconomico.WebUI.csproj.CoreCompileInputs.cache
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\ProyectoSocioEconomico.WebUI.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\ProyectoSocioEconomico.WebUI.RazorAssemblyInfo.cache
-C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\ProyectoSocioEconomico.WebUI.RazorAssemblyInfo.cs
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\ProyectoSocioEconomico.WebUI.sourcelink.json
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\ProyectoSocioEconomico.WebUI.dll
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\refint\ProyectoSocioEconomico.WebUI.dll
@@ -455,5 +453,6 @@ C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\d8te6a9v4m-{0}-2tj1sjhksk-2tj1sjhksk.gz
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\jf2eb0412t-{0}-cvckc53dr1-cvckc53dr1.gz
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\scopedcss\Components\Pages\Step2.razor.rz.scp.css
-C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\y6q2qnb4cw-{0}-sg14ef6yrp-sg14ef6yrp.gz
-C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\6z06w0avkv-{0}-sg14ef6yrp-sg14ef6yrp.gz
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\scopedcss\Components\Pages\Step3.razor.rz.scp.css
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\y6q2qnb4cw-{0}-6qv26nun9w-6qv26nun9w.gz
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\6z06w0avkv-{0}-6qv26nun9w-6qv26nun9w.gz

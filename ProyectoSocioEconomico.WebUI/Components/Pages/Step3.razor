@@ -1,0 +1,168 @@
+@page "/registrarse/step3"
+@using System.Text.RegularExpressions
+@layout EmptyLayout
+
+<div class="rp3-page">
+
+    <!-- ── NAVBAR ── -->
+    @* <nav class="bulma-navbar rp3-navbar" role="navigation" aria-label="main navigation">
+        <div class="bulma-navbar-brand rp3-navbar__brand">
+            <a class="rp3-navbar__logo-link bulma-navbar-item" href="/">
+                <span class="rp3-navbar__logo-icon">
+                    <i class="fas fa-shield-halved"></i>
+                </span>
+                <span class="rp3-navbar__brand-text">Social Aid Platform</span>
+            </a>
+        </div>
+    </nav> *@
+
+    <!-- ── MAIN ── -->
+    <main class="rp3-main">
+        <div class="rp3-card">
+
+            <!-- ── PROGRESS ── -->
+            <div class="rp3-progress-section">
+                <div class="rp3-progress-section__header">
+                    <span class="rp3-progress-section__eyebrow">REGISTRATION PROCESS</span>
+                    <span class="rp3-progress-section__step-count">Step 3 of 3</span>
+                </div>
+                <progress class="bulma-progress bulma-is-success rp3-progress-bar" value="100" max="100">100%</progress>
+                <div class="rp3-progress-section__steps">
+                    <span class="rp3-progress-section__step-name">Personal Info</span>
+                    <span class="rp3-progress-section__step-name">Verification</span>
+                    <span class="rp3-progress-section__step-name rp3-progress-section__step-name--active">Security &amp;
+                        Role</span>
+                    </div>
+                </div>
+
+                <!-- ── HEADING ── -->
+                <div class="rp3-heading">
+                    <h1 class="rp3-heading__title">Security &amp; Account Setup</h1>
+                    <p class="rp3-heading__subtitle">Finalize your credentials and select your role within the community.
+                    </p>
+                </div>
+
+                <!-- ── FORM ── -->
+                <div class="rp3-form">
+
+                    <!-- Email -->
+                    <div class="bulma-field rp3-field">
+                        <label class="bulma-label rp3-label" for="email">Email Address</label>
+                        <div class="bulma-control bulma-has-icons-right rp3-control">
+                            <input id="email" class="bulma-input rp3-input" type="email" placeholder="example@email.com"
+                                   @bind="Email" />
+                            <span class="bulma-icon bulma-is-right rp3-input-icon">
+                                <i class="far fa-envelope"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Passwords row -->
+                    <div class="rp3-passwords-row">
+
+                        <!-- Create Password -->
+                        <div class="bulma-field rp3-field rp3-field--half">
+                            <label class="bulma-label rp3-label" for="password">Create Password</label>
+                            <div class="bulma-control bulma-has-icons-right rp3-control">
+                                <input id="password" class="bulma-input rp3-input"
+                                       type="@(ShowPassword ? "text" : "password")" placeholder="••••••••" @bind="Password"
+                                       @oninput="OnPasswordInput" />
+                                <span class="bulma-icon bulma-is-right rp3-input-icon rp3-input-icon--clickable"
+                                      @onclick="TogglePassword">
+                                    <i class="@(ShowPassword ? "far fa-eye-slash" : "far fa-eye")"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="bulma-field rp3-field rp3-field--half">
+                            <label class="bulma-label rp3-label" for="confirm-password">Confirm Password</label>
+                            <div class="bulma-control bulma-has-icons-right rp3-control">
+                                <input id="confirm-password" class="bulma-input rp3-input"
+                                       type="@(ShowConfirm ? "text" : "password")" placeholder="••••••••"
+                                       @bind="ConfirmPassword" />
+                                <span class="bulma-icon bulma-is-right rp3-input-icon rp3-input-icon--clickable"
+                                      @onclick="ToggleConfirm">
+                                    <i class="@(ShowConfirm ? "far fa-eye-slash" : "far fa-eye")"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Terms -->
+                    <div class="bulma-field rp3-field rp3-field--terms">
+                        <label class="bulma-checkbox rp3-checkbox">
+                            <input type="checkbox" class="rp3-checkbox__input" @bind="AgreeTerms" />
+                            <span class="rp3-checkbox__box"></span>
+                            <span class="rp3-checkbox__text">
+                                I agree to the
+                                <span class="rp3-link">Terms of Service</span>
+                                and
+                                <span href="/privacy" class="rp3-link">Privacy Policy</span>.
+                                I understand that my data will be used for socioeconomic analysis.
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="button" class="bulma-button bulma-is-warning bulma-is-fullwidth rp3-btn-create"
+                            disabled="@(!AgreeTerms)" @onclick="HandleSubmit">
+                        <strong>Create Account</strong>
+                    </button>
+
+                </div><!-- /rp3-form -->
+            </div><!-- /rp3-card -->
+        </main>
+    </div>
+
+@code {
+    private string Email { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+    private string ConfirmPassword { get; set; } = string.Empty;
+    private bool ShowPassword { get; set; } = false;
+    private bool ShowConfirm { get; set; } = false;
+    private string SelectedRole { get; set; } = "donor";
+    private bool AgreeTerms { get; set; } = false;
+    private int StrengthScore { get; set; } = 0;
+
+    private string StrengthLabel => StrengthScore switch
+    {
+        1 => "WEAK",
+        2 => "FAIR",
+        3 => "GOOD",
+        4 => "STRONG",
+        _ => ""
+    };
+
+    private void TogglePassword() => ShowPassword = !ShowPassword;
+    private void ToggleConfirm() => ShowConfirm = !ShowConfirm;
+    private void SelectRole(string role) => SelectedRole = role;
+
+    private void OnPasswordInput(ChangeEventArgs e)
+    {
+        Password = e.Value?.ToString() ?? string.Empty;
+        StrengthScore = ComputeStrength(Password);
+    }
+
+    private int ComputeStrength(string pwd)
+    {
+        if (string.IsNullOrEmpty(pwd)) return 0;
+        int score = 0;
+        if (pwd.Length >= 8) score++;
+        if (Regex.IsMatch(pwd, @"[A-Z]")) score++;
+        if (Regex.IsMatch(pwd, @"[0-9]")) score++;
+        if (Regex.IsMatch(pwd, @"[^a-zA-Z0-9]")) score++;
+        return score;
+    }
+
+    private string GetBarClass(int bar)
+    {
+        if (StrengthScore == 0) return string.Empty;
+        return bar <= StrengthScore ? "rp3-strength__bar--filled" : string.Empty;
+    }
+
+    private void HandleSubmit()
+    {
+        if (!AgreeTerms) return;
+        // Navigation or further logic here
+    }
+}
