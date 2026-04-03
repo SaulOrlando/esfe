@@ -112,12 +112,7 @@ div.dp-page .dp-body main.dp-main .dp-main__header .dp-main__header-text .dp-mai
     margin-bottom: 0.3rem;
 }
 
-div.dp-page .dp-body main.dp-main .dp-main__header .dp-main__header-text .dp-main__subtitle {
-    font-size: 0.9rem;
-    color: var(--dp-text-mid);
-}
-
-div.dp-page .dp-body main.dp-main .dp-main__header .dp-year-btn.bulma-button {
+div.dp-page .dp-body main.dp-main .dp-main__header .bulma-button {
     background: var(--dp-white);
     border: 1.5px solid var(--dp-border);
     border-radius: 8px;
@@ -133,7 +128,7 @@ div.dp-page .dp-body main.dp-main .dp-main__header .dp-year-btn.bulma-button {
     transition: border-color 0.18s;
 }
 
-div.dp-page .dp-body main.dp-main .dp-main__header .dp-year-btn.bulma-button:hover {
+div.dp-page .dp-body main.dp-main .dp-main__header .bulma-button:hover {
     border-color: var(--dp-yellow);
 }
 

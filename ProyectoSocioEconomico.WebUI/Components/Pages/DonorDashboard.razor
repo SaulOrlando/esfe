@@ -12,27 +12,15 @@
         <!-- ── SIDEBAR ── -->
         <aside class="dp-sidebar">
 
-            <!-- Status card -->
-            @* <div class="dp-sidebar__status-card">
-                <p class="dp-sidebar__status-label">
-                    <span class="bulma-icon bulma-is-small dp-sidebar__status-icon">
-                        <i class="fas fa-shield-check"></i>
-                    </span>
-                    STATUS
-                </p>
-                <p class="dp-sidebar__status-title">Identity Verified</p>
-                <p class="dp-sidebar__status-sub">Socioeconomic profile validated on Jan 12, 2024</p>
-            </div> *@
-
             <!-- Nav links -->
             <nav class="dp-sidebar__nav">
-                <a href="/donor/dashboard" class="dp-sidebar__nav-item dp-sidebar__nav-item--active">
-                    <span class="bulma-icon bulma-is-small"><i class="fas fa-table-cells-large"></i></span>
-                    My Case Overview
-                </a>
                 <a href="/donor/settings" class="dp-sidebar__nav-item">
                     <span class="bulma-icon bulma-is-small"><i class="far fa-user"></i></span>
                     Account Settings
+                </a>
+                <a href="/donor/dashboard" class="dp-sidebar__nav-item dp-sidebar__nav-item--active">
+                    <span class="bulma-icon bulma-is-small"><i class="fas fa-table-cells-large"></i></span>
+                    Mis donaciones
                 </a>
                 <a class="dp-sidebar__nav-item" @onclick="HandleLogout" style="cursor: pointer;">
                     <span class="bulma-icon bulma-is-small"><i class="fas fa-right-from-bracket"></i></span>
@@ -47,13 +35,9 @@
             <!-- Page header -->
             <div class="dp-main__header">
                 <div class="dp-main__header-text">
-                    <h1 class="dp-main__title">Donor Impact Dashboard</h1>
-                    <p class="dp-main__subtitle">Thank you for your continued support in 2024.</p>
+                    <h1 class="dp-main__title">Mis donaciones</h1>
+                    @* <p class="dp-main__subtitle">Thank you for your continued support in 2024.</p> *@
                 </div>
-                <button class="bulma-button dp-year-btn">
-                    <span class="bulma-icon bulma-is-small"><i class="far fa-calendar"></i></span>
-                    <span>Year 2024</span>
-                </button>
             </div>
 
             <!-- Stat cards -->
