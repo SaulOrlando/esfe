@@ -1,0 +1,251 @@
+@page "/donor/dashboard"
+@using ProyectoSocioEconomico.WebUI.Services
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<div class="dp-page">
+
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="dp-navbar">
+        <a href="/" class="dp-navbar__brand">
+            <span class="dp-navbar__logo-icon">
+                <i class="fas fa-shield-halved"></i>
+            </span>
+            <span class="dp-navbar__brand-text">AidFlow</span>
+        </a>
+
+        <div class="dp-navbar__search bulma-control bulma-has-icons-left">
+            <input class="bulma-input dp-navbar__search-input" type="text" placeholder="Search cases..." />
+            <span class="bulma-icon bulma-is-left dp-navbar__search-icon">
+                <i class="fas fa-magnifying-glass"></i>
+            </span>
+        </div>
+
+        <div class="dp-navbar__end">
+            <button class="dp-navbar__bell" aria-label="Notifications">
+                <i class="far fa-bell"></i>
+                <span class="dp-navbar__bell-dot"></span>
+            </button>
+            <div class="dp-navbar__user">
+                <img class="dp-navbar__avatar"
+                     src="@userImage"
+                     alt="@userName" />
+                <div class="dp-navbar__user-info">
+                    <span class="dp-navbar__user-name">@userName</span>
+                    <span class="dp-navbar__user-role">Gold Donor</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════ BODY ═══════════════ -->
+    <div class="dp-body">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="dp-sidebar">
+
+            <!-- Status card -->
+            <div class="dp-sidebar__status-card">
+                <p class="dp-sidebar__status-label">
+                    <span class="bulma-icon bulma-is-small dp-sidebar__status-icon">
+                        <i class="fas fa-shield-check"></i>
+                    </span>
+                    STATUS
+                </p>
+                <p class="dp-sidebar__status-title">Identity Verified</p>
+                <p class="dp-sidebar__status-sub">Socioeconomic profile validated on Jan 12, 2024</p>
+            </div>
+
+            <!-- Nav links -->
+            <nav class="dp-sidebar__nav">
+                <a href="/donor/dashboard" class="dp-sidebar__nav-item dp-sidebar__nav-item--active">
+                    <span class="bulma-icon bulma-is-small"><i class="fas fa-table-cells-large"></i></span>
+                    My Case Overview
+                </a>
+                <a href="/donor/settings" class="dp-sidebar__nav-item">
+                    <span class="bulma-icon bulma-is-small"><i class="far fa-user"></i></span>
+                    Account Settings
+                </a>
+                <a href="/donor/payout" class="dp-sidebar__nav-item">
+                    <span class="bulma-icon bulma-is-small"><i class="fas fa-wallet"></i></span>
+                    Payout Methods
+                </a>
+                <a class="dp-sidebar__nav-item" @onclick="HandleLogout" style="cursor: pointer;">
+                    <span class="bulma-icon bulma-is-small"><i class="fas fa-right-from-bracket"></i></span>
+                    Cerrar Sesión
+                </a>
+            </nav>
+        </aside>
+
+        <!-- ── MAIN CONTENT ── -->
+        <main class="dp-main">
+
+            <!-- Page header -->
+            <div class="dp-main__header">
+                <div class="dp-main__header-text">
+                    <h1 class="dp-main__title">Donor Impact Dashboard</h1>
+                    <p class="dp-main__subtitle">Thank you for your continued support in 2024.</p>
+                </div>
+                <button class="bulma-button dp-year-btn">
+                    <span class="bulma-icon bulma-is-small"><i class="far fa-calendar"></i></span>
+                    <span>Year 2024</span>
+                </button>
+            </div>
+
+            <!-- Stat cards -->
+            <div class="dp-stats-grid">
+
+                <div class="dp-stat-card">
+                    <span class="dp-stat-card__icon-wrap dp-stat-card__icon-wrap--yellow">
+                        <i class="fas fa-hand-holding-dollar"></i>
+                    </span>
+                    <div class="dp-stat-card__body">
+                        <p class="dp-stat-card__label">TOTAL CONTRIBUTED</p>
+                        <p class="dp-stat-card__value">$12,450.00</p>
+                        <p class="dp-stat-card__trend dp-stat-card__trend--up">
+                            <span class="bulma-icon bulma-is-small"><i class="fas fa-arrow-trend-up"></i></span>
+                            +12% from last year
+                        </p>
+                    </div>
+                </div>
+
+                <div class="dp-stat-card">
+                    <span class="dp-stat-card__icon-wrap dp-stat-card__icon-wrap--green">
+                        <i class="fas fa-people-group"></i>
+                    </span>
+                    <div class="dp-stat-card__body">
+                        <p class="dp-stat-card__label">LIVES IMPACTED</p>
+                        <p class="dp-stat-card__value">142</p>
+                        <p class="dp-stat-card__sub">Direct beneficiaries reached</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Donation History -->
+            <div class="dp-history-card">
+                <div class="dp-history-card__header">
+                    <h2 class="dp-history-card__title">
+                        <span class="bulma-icon bulma-is-small"><i class="fas fa-clock-rotate-left"></i></span>
+                        Donation History
+                    </h2>
+                    <a href="/donor/transactions" class="dp-history-card__view-all">View All Transactions</a>
+                </div>
+
+                <table class="bulma-table dp-history-table bulma-is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th class="dp-history-table__th">RECIPIENT (CASE/PROGRAM)</th>
+                            <th class="dp-history-table__th dp-history-table__th--right">AMOUNT</th>
+                            <th class="dp-history-table__th"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var donation in Donations)
+                        {
+                            <tr class="dp-history-table__row">
+                                <td class="dp-history-table__td">
+                                    <p class="dp-history-table__recipient">@donation.Name</p>
+                                    <p class="dp-history-table__type">@donation.Type</p>
+                                </td>
+                                <td class="dp-history-table__td dp-history-table__td--amount">
+                                    @donation.Amount.ToString("C")
+                                </td>
+                                <td class="dp-history-table__td dp-history-table__td--badge">
+                                    <span class="dp-badge dp-badge--yellow"></span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- ── RIGHT PANEL ── -->
+        <aside class="dp-panel">
+
+            <div class="dp-panel__stats-block">
+                <h3 class="dp-panel__stats-title">
+                    <span class="dp-panel__stats-icon bulma-icon bulma-is-small">
+                        <i class="fas fa-chart-column"></i>
+                    </span>
+                    Impact Statistics
+                </h3>
+                <p class="dp-panel__stats-subtitle">AID DISTRIBUTION</p>
+
+                <!-- Bar chart -->
+                <div class="dp-chart">
+                    <div class="dp-chart__bars">
+                        <div class="dp-chart__col">
+                            <div class="dp-chart__bar dp-chart__bar--sm dp-chart__bar--light"></div>
+                            <span class="dp-chart__label">Education</span>
+                        </div>
+                        <div class="dp-chart__col">
+                            <div class="dp-chart__bar dp-chart__bar--md dp-chart__bar--light"></div>
+                            <span class="dp-chart__label"></span>
+                        </div>
+                        <div class="dp-chart__col">
+                            <div class="dp-chart__bar dp-chart__bar--lg dp-chart__bar--dark"></div>
+                            <span class="dp-chart__label">Health</span>
+                        </div>
+                        <div class="dp-chart__col">
+                            <div class="dp-chart__bar dp-chart__bar--md dp-chart__bar--dark"></div>
+                            <span class="dp-chart__label"></span>
+                        </div>
+                        <div class="dp-chart__col">
+                            <div class="dp-chart__bar dp-chart__bar--sm dp-chart__bar--light"></div>
+                            <span class="dp-chart__label">Rural</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exclusive Insight -->
+            <div class="dp-panel__insight">
+                <p class="dp-panel__insight-label">Exclusive Insight</p>
+                <p class="dp-panel__insight-quote">
+                    "Your donations this year have funded 4 full scholarships in the Northern District,
+                    changing the trajectory for 4 families permanently."
+                </p>
+            </div>
+
+            <!-- Make New Donation -->
+            <button class="bulma-button bulma-is-fullwidth dp-panel__donate-btn">
+                <span class="bulma-icon bulma-is-small"><i class="fas fa-hand-holding-dollar"></i></span>
+                <strong>Make New Donation</strong>
+            </button>
+
+        </aside>
+    </div>
+</div>
+
+@code {
+    private string userName = "Cargando...";
+    private string userImage = "https://i.pravatar.cc/40?img=12";
+    private record DonationRecord(string Name, string Type, decimal Amount);
+
+    private List<DonationRecord> Donations = new()
+    {
+        new("Education Fund: Northern District", "Institutional Program", 1200m),
+        new("Medical Relief: Case #8821",        "Direct Case Aid",       450m),
+        new("Rural Development Initiative",       "Institutional Program", 2500m),
+        new("Emergency Relief: San Salvador",     "Disaster Recovery",     800m),
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            userName = user.Identity.Name ?? "Usuario";
+            userImage = user.FindFirst("ImagenPerfil")?.Value ?? "https://i.pravatar.cc/40?img=12";
+        }
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthProvider.NotifyUserLogout();
+        Navigation.NavigateTo("/");
+    }
+}

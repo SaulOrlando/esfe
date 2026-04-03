@@ -13,5 +13,6 @@ public partial class Role
 
     public string Estado { get; set; } = null!;
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
 }

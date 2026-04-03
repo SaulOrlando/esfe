@@ -454,5 +454,6 @@ C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\jf2eb0412t-{0}-cvckc53dr1-cvckc53dr1.gz
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\scopedcss\Components\Pages\Step2.razor.rz.scp.css
 C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\scopedcss\Components\Pages\Step3.razor.rz.scp.css
-C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\y6q2qnb4cw-{0}-gizimqf1wl-gizimqf1wl.gz
-C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\6z06w0avkv-{0}-gizimqf1wl-gizimqf1wl.gz
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\scopedcss\Components\Pages\DonorDashboard.razor.rz.scp.css
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\y6q2qnb4cw-{0}-c3tbk51gtr-c3tbk51gtr.gz
+C:\Users\Level\source\repos\ProyectoESFE\ProyectoSocioEconomico.WebUI\obj\Debug\net10.0\compressed\6z06w0avkv-{0}-c3tbk51gtr-c3tbk51gtr.gz

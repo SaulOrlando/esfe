@@ -32,17 +32,24 @@ public partial class Usuario
 
     public DateTime FechaRegistro { get; set; }
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual ICollection<Caso> Casos { get; set; } = new List<Caso>();
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual ICollection<Donacione> Donaciones { get; set; } = new List<Donacione>();
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual Role IdRolNavigation { get; set; } = null!;
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual ICollection<InscripcionesVoluntario> InscripcionesVoluntarios { get; set; } = new List<InscripcionesVoluntario>();
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual ICollection<Notificacione> Notificaciones { get; set; } = new List<Notificacione>();
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual ICollection<Programa> Programas { get; set; } = new List<Programa>();
 
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual ICollection<Retiro> Retiros { get; set; } = new List<Retiro>();
 }
