@@ -36,7 +36,6 @@
             <div class="dp-main__header">
                 <div class="dp-main__header-text">
                     <h1 class="dp-main__title">Mis donaciones</h1>
-                    @* <p class="dp-main__subtitle">Thank you for your continued support in 2024.</p> *@
                 </div>
             </div>
 
@@ -48,12 +47,8 @@
                         <i class="fas fa-hand-holding-dollar"></i>
                     </span>
                     <div class="dp-stat-card__body">
-                        <p class="dp-stat-card__label">TOTAL CONTRIBUTED</p>
+                        <p class="dp-stat-card__label">TOTAL DONADO</p>
                         <p class="dp-stat-card__value">$12,450.00</p>
-                        <p class="dp-stat-card__trend dp-stat-card__trend--up">
-                            <span class="bulma-icon bulma-is-small"><i class="fas fa-arrow-trend-up"></i></span>
-                            +12% from last year
-                        </p>
                     </div>
                 </div>
 
@@ -62,9 +57,9 @@
                         <i class="fas fa-people-group"></i>
                     </span>
                     <div class="dp-stat-card__body">
-                        <p class="dp-stat-card__label">LIVES IMPACTED</p>
+                        <p class="dp-stat-card__label">CASOS APOYADOS</p>
                         <p class="dp-stat-card__value">142</p>
-                        <p class="dp-stat-card__sub">Direct beneficiaries reached</p>
+                        <p class="dp-stat-card__sub">Casos en los que has ayudado</p>
                     </div>
                 </div>
 
@@ -75,16 +70,16 @@
                 <div class="dp-history-card__header">
                     <h2 class="dp-history-card__title">
                         <span class="bulma-icon bulma-is-small"><i class="fas fa-clock-rotate-left"></i></span>
-                        Donation History
+                        Historial de Donaciones
                     </h2>
-                    <a href="/donor/transactions" class="dp-history-card__view-all">View All Transactions</a>
+                    <a href="/donor/transactions" class="dp-history-card__view-all">Ver todas las transacciones</a>
                 </div>
 
                 <table class="bulma-table dp-history-table bulma-is-fullwidth">
                     <thead>
                         <tr>
-                            <th class="dp-history-table__th">RECIPIENT (CASE/PROGRAM)</th>
-                            <th class="dp-history-table__th dp-history-table__th--right">AMOUNT</th>
+                            <th class="dp-history-table__th">RECEPTOR (CASO/PROGRAMA)</th>
+                            <th class="dp-history-table__th dp-history-table__th--right">CANTIDAD</th>
                             <th class="dp-history-table__th"></th>
                         </tr>
                     </thead>
@@ -108,62 +103,6 @@
                 </table>
             </div>
         </main>
-
-        <!-- ── RIGHT PANEL ── -->
-        <aside class="dp-panel">
-
-            <div class="dp-panel__stats-block">
-                <h3 class="dp-panel__stats-title">
-                    <span class="dp-panel__stats-icon bulma-icon bulma-is-small">
-                        <i class="fas fa-chart-column"></i>
-                    </span>
-                    Impact Statistics
-                </h3>
-                <p class="dp-panel__stats-subtitle">AID DISTRIBUTION</p>
-
-                <!-- Bar chart -->
-                <div class="dp-chart">
-                    <div class="dp-chart__bars">
-                        <div class="dp-chart__col">
-                            <div class="dp-chart__bar dp-chart__bar--sm dp-chart__bar--light"></div>
-                            <span class="dp-chart__label">Education</span>
-                        </div>
-                        <div class="dp-chart__col">
-                            <div class="dp-chart__bar dp-chart__bar--md dp-chart__bar--light"></div>
-                            <span class="dp-chart__label"></span>
-                        </div>
-                        <div class="dp-chart__col">
-                            <div class="dp-chart__bar dp-chart__bar--lg dp-chart__bar--dark"></div>
-                            <span class="dp-chart__label">Health</span>
-                        </div>
-                        <div class="dp-chart__col">
-                            <div class="dp-chart__bar dp-chart__bar--md dp-chart__bar--dark"></div>
-                            <span class="dp-chart__label"></span>
-                        </div>
-                        <div class="dp-chart__col">
-                            <div class="dp-chart__bar dp-chart__bar--sm dp-chart__bar--light"></div>
-                            <span class="dp-chart__label">Rural</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Exclusive Insight -->
-            <div class="dp-panel__insight">
-                <p class="dp-panel__insight-label">Exclusive Insight</p>
-                <p class="dp-panel__insight-quote">
-                    "Your donations this year have funded 4 full scholarships in the Northern District,
-                    changing the trajectory for 4 families permanently."
-                </p>
-            </div>
-
-            <!-- Make New Donation -->
-            <button class="bulma-button bulma-is-fullwidth dp-panel__donate-btn">
-                <span class="bulma-icon bulma-is-small"><i class="fas fa-hand-holding-dollar"></i></span>
-                <strong>Make New Donation</strong>
-            </button>
-
-        </aside>
     </div>
 </div>
 
