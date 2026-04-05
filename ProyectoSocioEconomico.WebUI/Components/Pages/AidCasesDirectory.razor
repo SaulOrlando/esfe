@@ -20,7 +20,7 @@
         <div class="bulma-control bulma-has-icons-left cap-toolbar__search-wrap">
             <input class="bulma-input cap-toolbar__search"
                    type="text"
-                   placeholder="Search for cases (e.g., 'Emergency Medical')"
+                   placeholder="Search for cases (e.g., 'Medical emergency')"
                    @bind="SearchQuery"
                    @oninput="OnSearch" />
             <span class="bulma-icon bulma-is-left cap-toolbar__search-icon">
@@ -51,13 +51,38 @@
                 decimal totalRecaudado = caso.Donaciones?.Sum(d => d.Monto) ?? 0m;
                 int progreso = CalcularPorcentaje(caso.Meta, totalRecaudado);
 
-                <CaseCardComponent Id="@caso.Id"
-                                   Title="@caso.Titulo"
-                                   Description="@caso.Descripcion"
-                                   Category="@caso.IdCategoriaNavigation?.Nombre"
-                                   MoneyRaised="@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))"
-                                   Progress="@progreso"
-                                   ImageUrl="@caso.ImagenUrl" />
+                <article class="cap-card">
+                    <div class="cap-card__image-wrap">
+                        @if (!string.IsNullOrEmpty(caso.ImagenUrl))
+                        {
+                            <img class="cap-card__image" src="@caso.ImagenUrl" alt="@caso.Titulo" />
+                        }
+                        else
+                        {
+                            <img class="cap-card__image" src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=80" alt="Default Image" />
+                        }
+                        <span class="cap-card__tag @GetCategoryClass(caso.IdCategoriaNavigation?.Nombre)">
+                            @caso.IdCategoriaNavigation?.Nombre.ToUpper()
+                        </span>
+                    </div>
+
+                    <div class="cap-card__body">
+                        <h2 class="cap-card__title">@caso.Titulo</h2>
+                        <p class="cap-card__desc">@caso.Descripcion</p>
+                        
+                        <div class="cap-card__progress-block">
+                            <div class="cap-card__progress-header">
+                                <span class="cap-card__progress-label">Recaudado: @totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                                <span class="cap-card__progress-pct">@progreso%</span>
+                            </div>
+                            <progress class="bulma-progress bulma-is-success cap-card__progress-bar" value="@progreso" max="100">@progreso%</progress>
+                        </div>
+
+                        <a href="/cases/@caso.Id" class="bulma-button bulma-is-warning bulma-is-fullwidth cap-card__btn">
+                            <strong>Ver Detalles</strong>
+                        </a>
+                    </div>
+                </article>
             }
         }
     </div>
@@ -99,11 +124,11 @@
     private List<FilterOption> Filters = new()
     {
         new("all",            "All",            "fas fa-table-cells-large"),
-        new("salud",          "Salud",          "fas fa-heart-pulse"),
-        new("educación",      "Educación",      "fas fa-graduation-cap"),
-        new("vivienda",       "Vivienda",       "fas fa-house-user"),
-        new("emergencia",     "Emergencia",     "fas fa-kit-medical"),
-        new("otros",          "Otros",          "fas fa-ellipsis-h"),
+        new("health",         "Health",         "fas fa-heart-pulse"),
+        new("education",      "Education",      "fas fa-graduation-cap"),
+        new("infrastructure", "Infrastructure", "fas fa-wrench"),
+        new("disaster relief", "Disaster Relief", "fas fa-house-chimney-crack"),
+        new("environment",    "Environment",    "fas fa-leaf"),
     };
 
     private List<Caso> AllCases = new();
@@ -115,10 +140,24 @@
 
     private IEnumerable<Caso> FilteredCases =>
         AllCases
-            .Where(c => ActiveFilter == "all" || c.IdCategoriaNavigation?.Nombre.ToLower() == ActiveFilter)
+            .Where(c => ActiveFilter == "all" || IsMatch(c.IdCategoriaNavigation?.Nombre, ActiveFilter))
             .Where(c => string.IsNullOrWhiteSpace(SearchQuery) ||
                         c.Titulo.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
                         c.Descripcion.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+
+    private bool IsMatch(string? categoryName, string filterKey)
+    {
+        if (string.IsNullOrEmpty(categoryName)) return false;
+        var name = categoryName.ToLower();
+        
+        // Mapping Spanish DB names to English filter keys
+        if (filterKey == "health" && name.Contains("salud")) return true;
+        if (filterKey == "education" && name.Contains("educación")) return true;
+        if (filterKey == "infrastructure" && name.Contains("vivienda")) return true;
+        if (filterKey == "disaster relief" && name.Contains("emergencia")) return true;
+        
+        return name == filterKey;
+    }
 
     private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)FilteredCases.Count() / PageSize));
 
@@ -147,5 +186,15 @@
     {
         if (meta <= 0) return 0;
         return Math.Clamp((int)Math.Round((actual / meta) * 100), 0, 100);
+    }
+
+    private string GetCategoryClass(string? categoryName)
+    {
+        if (string.IsNullOrEmpty(categoryName)) return "";
+        var name = categoryName.ToLower();
+        if (name.Contains("salud")) return "cap-card__tag--health";
+        if (name.Contains("educación")) return "cap-card__tag--education";
+        if (name.Contains("vivienda") || name.Contains("infrastructure")) return "cap-card__tag--infrastructure";
+        return "";
     }
 }

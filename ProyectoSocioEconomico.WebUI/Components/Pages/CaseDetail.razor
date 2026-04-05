@@ -12,136 +12,170 @@
 }
 else
 {
-    <div class="pd-page">
-        <!-- ═══════════════ HERO ═══════════════ -->
-        <div class="pd-hero">
-            @if (!string.IsNullOrEmpty(Caso.ImagenUrl))
-            {
-                <img class="pd-hero__image" src="@Caso.ImagenUrl" alt="@Caso.Titulo" />
-            }
-            else
-            {
-                <img class="pd-hero__image" src="https://images.unsplash.com/photo-1548438294-1ad5d5f4f063?w=1200&q=80" alt="Placeholder" />
-            }
-            <div class="pd-hero__overlay"></div>
-            <div class="pd-hero__content">
-                <span class="pd-hero__status-badge">CASO @Caso.Estado.ToUpper()</span>
-                <h1 class="pd-hero__title">@Caso.Titulo</h1>
-            </div>
-        </div>
-
-        <!-- ═══════════════ BODY ═══════════════ -->
-        <div class="pd-body">
-
-            <!-- ── LEFT / MAIN COLUMN ── -->
-            <div class="pd-body__main">
-
-                <!-- Descripción del Caso -->
-                <section class="pd-section">
-                    <h2 class="pd-section__heading">
-                        <span class="pd-section__heading-icon">
-                            <i class="fas fa-info-circle"></i>
-                        </span>
-                        Descripción del Caso
-                    </h2>
-                    <p class="pd-section__text">@Caso.Descripcion</p>
-                </section>
-
-                <!-- Detalles del Beneficiario -->
-                <section class="pd-section">
-                    <h3 class="pd-section__subheading">Información del Beneficiario</h3>
-                    <div class="pd-goal-card" style="max-width: 400px;">
-                        <span class="pd-goal-card__icon">
-                            <i class="fas fa-user"></i>
-                        </span>
-                        <p class="pd-goal-card__value">@Caso.IdBeneficiadoNavigation?.Nombre @Caso.IdBeneficiadoNavigation?.Apellido</p>
-                        <p class="pd-goal-card__desc">Beneficiario principal del caso.</p>
-                    </div>
-                </section>
-
-                <!-- Impacto y Progreso -->
-                <section class="pd-impact-card">
-                    <div class="pd-impact-card__header">
-                        <div>
-                            <h3 class="pd-impact-card__title">Progreso de Recaudación</h3>
-                            <p class="pd-impact-card__subtitle">Seguimiento en tiempo real de la meta financiera</p>
-                        </div>
-                    </div>
-
-                    <div class="pd-impact-card__metrics">
-                        @{
-                            decimal totalRecaudado = Caso.Donaciones?.Sum(d => d.Monto) ?? 0m;
-                            int progreso = CalcularPorcentaje(Caso.Meta, totalRecaudado);
+    <div class="cd-page">
+        <div class="cd-layout">
+            
+            <!-- ── COLUMNA PRINCIPAL ── -->
+            <main class="cd-main">
+                
+                <!-- Hero Card (Imagen e Identidad) -->
+                <article class="cd-hero-card">
+                    <div class="cd-hero-card__image-wrap">
+                        @if (!string.IsNullOrEmpty(Caso.ImagenUrl))
+                        {
+                            <img class="cd-hero-card__image" src="@Caso.ImagenUrl" alt="@Caso.Titulo" />
                         }
-                        <div class="pd-metric">
-                            <div class="pd-metric__header">
-                                <span class="pd-metric__label">Recaudado vs Meta</span>
-                                <span class="pd-metric__achievement">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV")) de @Caso.Meta.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
-                            </div>
-                            <div class="pd-metric__track">
-                                <div class="pd-metric__bar-bg">
-                                    <div class="pd-metric__bar-fill" style="width: @(progreso)%">
-                                        <span class="pd-metric__bar-text">@(progreso)% COMPLETADO</span>
-                                    </div>
-                                </div>
+                        else
+                        {
+                            <img class="cd-hero-card__image" src="https://images.unsplash.com/photo-1548438294-1ad5d5f4f063?w=1200&q=80" alt="Placeholder" />
+                        }
+                        <div class="cd-hero-card__overlay"></div>
+                        <div class="cd-hero-card__identity">
+                            <img class="cd-hero-card__avatar" src="@(Caso.IdBeneficiadoNavigation?.ImagenPerfil ?? "wwwroot/uploads/profiles/DefaultProfile.png")" alt="Avatar" />
+                            <div class="cd-hero-card__id-text">
+                                <h1 class="cd-hero-card__name">@Caso.Titulo</h1>
+                                <span class="cd-hero-card__location">
+                                    <i class="fas fa-location-dot"></i> @(Caso.IdBeneficiadoNavigation?.Nombre) @(Caso.IdBeneficiadoNavigation?.Apellido)
+                                </span>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="pd-metric">
-                            <div class="pd-metric__header">
-                                <span class="pd-metric__label">Donaciones Recibidas</span>
-                                <span class="pd-metric__achievement">@Caso.Donaciones?.Count() donantes activos</span>
+                    <div class="cd-hero-card__body">
+                        <div class="cd-tags">
+                            <span class="cd-tag cd-tag--verified">
+                                <i class="fas fa-check-circle"></i> CASO VERIFICADO
+                            </span>
+                            <span class="cd-tag">@Caso.IdCategoriaNavigation?.Nombre.ToUpper()</span>
+                            <span class="cd-tag">@Caso.Estado.ToUpper()</span>
+                        </div>
+                        <div class="cd-impact">
+                            <h2 class="cd-impact__title">Resumen del Impacto</h2>
+                            <p class="cd-impact__quote">
+                                Este caso busca proporcionar apoyo directo para cubrir necesidades de @Caso.IdCategoriaNavigation?.Nombre.
+                            </p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Story Card (Descripción) -->
+                <section class="cd-story-card">
+                    <h3 class="cd-story-card__title">
+                        <i class="fas fa-book-open cd-story-card__title-icon"></i>
+                        Historia del Caso
+                    </h3>
+                    <div class="cd-story-card__body">
+                        <p>@Caso.Descripcion</p>
+                    </div>
+                </section>
+
+                <!-- Metrics Card (Progreso) -->
+                @{
+                    decimal totalRecaudado = Caso.Donaciones?.Sum(d => d.Monto) ?? 0m;
+                    int progreso = CalcularPorcentaje(Caso.Meta, totalRecaudado);
+                }
+                <section class="cd-metrics-card">
+                    <div class="cd-vuln">
+                        <span class="cd-vuln__label">ESTADO ACTUAL</span>
+                        <div class="cd-vuln__ring-wrap">
+                            <svg class="cd-vuln__svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e6e4dc" stroke-width="8" />
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#22c55e" stroke-width="8" 
+                                        stroke-dasharray="@(progreso * 2.82) 282" stroke-linecap="round" transform="rotate(-90 50 50)" />
+                            </svg>
+                            <div class="cd-vuln__center">
+                                <span class="cd-vuln__score">@progreso<span class="cd-vuln__denom">%</span></span>
+                                <span class="cd-vuln__badge">RECAUDADO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cd-metric-analysis">
+                        <span class="cd-metric-analysis__label">Análisis de Meta</span>
+                        <div class="cd-metric-row">
+                            <div class="cd-metric-row__header">
+                                <span class="cd-metric-row__name">Monto Recaudado</span>
+                                <span class="cd-metric-row__pct">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                            </div>
+                            <div class="cd-metric-row__track">
+                                <div class="cd-metric-row__fill" style="width: @progreso%"></div>
+                            </div>
+                        </div>
+                        <div class="cd-metric-row">
+                            <div class="cd-metric-row__header">
+                                <span class="cd-metric-row__name">Meta Financiera</span>
+                                <span class="cd-metric-row__pct">@Caso.Meta.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Lista de Donantes (Opcional, similar a Metrics) -->
-                @if (Caso.Donaciones != null && Caso.Donaciones.Any())
-                {
-                    <section class="pd-section">
-                        <h3 class="pd-section__subheading">Donaciones Recientes</h3>
-                        <div class="bulma-table-container">
-                            <table class="bulma-table bulma-is-fullwidth bulma-is-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Donante</th>
-                                        <th>Monto</th>
-                                        <th>Fecha</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var donacion in Caso.Donaciones.OrderByDescending(d => d.FechaDonacion).Take(5))
-                                    {
-                                        <tr>
-                                            <td>@(donacion.IdDonadorNavigation?.Nombre ?? "Anónimo")</td>
-                                            <td>@donacion.Monto.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</td>
-                                            <td>@donacion.FechaDonacion.ToString("d")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                }
+            </main>
 
-            </div><!-- /pd-body__main -->
-
-            <!-- ── RIGHT SIDEBAR ── -->
-            <aside class="pd-body__sidebar">
-                <div class="pd-support-card">
-                    <h3 class="pd-support-card__title">Apoya este Caso</h3>
-                    <p class="pd-support-card__desc">
-                        Tu donación llega directamente al beneficiario para cubrir las necesidades descritas en este caso.
-                    </p>
-                    <a href="/donate/case/@Caso.Id"
-                       class="bulma-button bulma-is-warning bulma-is-fullwidth pd-support-card__btn">
-                        <strong>Dona a este Caso</strong>
+            <!-- ── SIDEBAR ── -->
+            <aside class="cd-sidebar">
+                
+                <div class="cd-sidebar__funding">
+                    <div class="cd-sidebar__funding-top">
+                        <span class="cd-sidebar__amount">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                        <span class="cd-sidebar__goal">de @Caso.Meta.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                    </div>
+                    <div class="cd-sidebar__progress-track">
+                        <div class="cd-sidebar__progress-fill" style="width: @progreso%"></div>
+                    </div>
+                    <div class="cd-sidebar__funding-meta">
+                        <span class="cd-sidebar__funded-pct">@progreso% COMPLETADO</span>
+                        <span class="cd-sidebar__days-left">@Caso.Donaciones?.Count() DONANTES</span>
+                    </div>
+                    
+                    <a href="/donate/case/@Caso.Id" class="bulma-button bulma-is-warning bulma-is-fullwidth cd-sidebar__btn-support">
+                        <i class="fas fa-heart"></i>
+                        <strong>Donar Ahora</strong>
                     </a>
+                    
+                    <button class="bulma-button bulma-is-fullwidth cd-sidebar__btn-share">
+                        <i class="fas fa-share-nodes"></i> Compartir caso
+                    </button>
                 </div>
+
+                <div class="cd-sidebar__trust">
+                    <div class="cd-sidebar__trust-item">
+                        <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--green">
+                            <i class="fas fa-shield-heart"></i>
+                        </div>
+                        <div>
+                            <h4 class="cd-sidebar__trust-title">Donación Segura</h4>
+                            <p class="cd-sidebar__trust-desc">Tu aporte llega íntegramente al beneficiario verificado.</p>
+                        </div>
+                    </div>
+                    <div class="cd-sidebar__trust-item">
+                        <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--yellow">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div>
+                            <h4 class="cd-sidebar__trust-title">Transparencia Total</h4>
+                            <p class="cd-sidebar__trust-desc">Recibe reportes sobre el uso de los fondos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cd-sidebar__verification">
+                    <span class="cd-sidebar__verification-label">
+                        <i class="fas fa-user-shield"></i> VERIFICACIÓN AGENTES
+                    </span>
+                    <p class="cd-sidebar__verification-desc">Este caso ha sido auditado por nuestro equipo de campo.</p>
+                    <div class="cd-sidebar__agents">
+                        <div class="cd-sidebar__agents-avatars">
+                            <img class="cd-sidebar__agent-avatar" src="https://i.pravatar.cc/150?u=1" alt="A1" />
+                            <img class="cd-sidebar__agent-avatar cd-sidebar__agent-avatar--offset" src="https://i.pravatar.cc/150?u=2" alt="A2" />
+                        </div>
+                        <span class="cd-sidebar__agents-label">2 Agentes Asignados</span>
+                    </div>
+                </div>
+
             </aside>
 
-        </div><!-- /pd-body -->
+        </div>
     </div>
 }
 
