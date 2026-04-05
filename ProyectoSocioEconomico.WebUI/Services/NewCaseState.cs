@@ -33,8 +33,11 @@ public class NewCaseState
 
     public string SelectedMethod { get; set; } = "bank";
     public string AccountHolder { get; set; } = string.Empty;
+
     public string AccountNumber { get; set; } = string.Empty;
+
     public string BankName { get; set; } = string.Empty;
+
     public bool IsCertified { get; set; } = false;
 
     public void Reset()

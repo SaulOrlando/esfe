@@ -1,11 +1,14 @@
 @page "/cases/new/step1"
+@rendermode InteractiveServer
 @using ProyectoSocioEconomico.WebUI.Services
 @using ProyectoSocioEconomico.Application.Interfaces
 @using ProyectoSocioEconomico.Domain.Entities
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NewCaseState CaseState
 @inject ICasoService CasoService
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="nc1-page">
 
@@ -136,6 +139,15 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity == null || !user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/registrarse");
+            return;
+        }
+
         categories = await CasoService.ObtenerCategorias();
     }
 

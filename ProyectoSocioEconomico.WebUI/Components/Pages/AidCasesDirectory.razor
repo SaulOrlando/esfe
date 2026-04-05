@@ -123,12 +123,12 @@
 
     private List<FilterOption> Filters = new()
     {
-        new("all",            "All",            "fas fa-table-cells-large"),
-        new("health",         "Health",         "fas fa-heart-pulse"),
-        new("education",      "Education",      "fas fa-graduation-cap"),
-        new("infrastructure", "Infrastructure", "fas fa-wrench"),
-        new("disaster relief", "Disaster Relief", "fas fa-house-chimney-crack"),
-        new("environment",    "Environment",    "fas fa-leaf"),
+        new("all",            "Todos",          "fas fa-table-cells-large"),
+        new("salud",          "Salud",          "fas fa-heart-pulse"),
+        new("educacion",      "Educación",      "fas fa-graduation-cap"),
+        new("infraestructura","Infraestructura","fas fa-wrench"),
+        new("desastres naturales", "Desastres Naturales", "fas fa-house-chimney-crack"),
+        new("naturaleza",     "Naturaleza",     "fas fa-leaf"),
     };
 
     private List<Caso> AllCases = new();
@@ -150,11 +150,12 @@
         if (string.IsNullOrEmpty(categoryName)) return false;
         var name = categoryName.ToLower();
         
-        // Mapping Spanish DB names to English filter keys
-        if (filterKey == "health" && name.Contains("salud")) return true;
-        if (filterKey == "education" && name.Contains("educación")) return true;
-        if (filterKey == "infrastructure" && name.Contains("vivienda")) return true;
-        if (filterKey == "disaster relief" && name.Contains("emergencia")) return true;
+        // Normalización para búsqueda flexible
+        if (filterKey == "salud" && name.Contains("salud")) return true;
+        if (filterKey == "educacion" && (name.Contains("educacion") || name.Contains("educación"))) return true;
+        if (filterKey == "infraestructura" && (name.Contains("infraestructura") || name.Contains("vivienda"))) return true;
+        if (filterKey == "desastres naturales" && (name.Contains("desastres") || name.Contains("emergencia"))) return true;
+        if (filterKey == "naturaleza" && name.Contains("naturaleza")) return true;
         
         return name == filterKey;
     }
@@ -193,8 +194,9 @@
         if (string.IsNullOrEmpty(categoryName)) return "";
         var name = categoryName.ToLower();
         if (name.Contains("salud")) return "cap-card__tag--health";
-        if (name.Contains("educación")) return "cap-card__tag--education";
-        if (name.Contains("vivienda") || name.Contains("infrastructure")) return "cap-card__tag--infrastructure";
+        if (name.Contains("educacion") || name.Contains("educación")) return "cap-card__tag--education";
+        if (name.Contains("infraestructura") || name.Contains("vivienda")) return "cap-card__tag--infrastructure";
+        if (name.Contains("naturaleza")) return "cap-card__tag--environment";
         return "";
     }
 }

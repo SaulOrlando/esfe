@@ -1,204 +1,284 @@
 @* NewCaseStep2.razor *@
 @page "/cases/new/step2"
+@rendermode InteractiveServer
 @using ProyectoSocioEconomico.WebUI.Services
 @using ProyectoSocioEconomico.Application.Interfaces
 @using ProyectoSocioEconomico.Domain.Entities
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
 @inject NewCaseState CaseState
 @inject ICasoService CasoService
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IWebHostEnvironment Environment
+@inject IJSRuntime JSRuntime
+@using System.IO
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 
 <div class="newcasestep2-page">
-    <div class="newcasestep2__container">
-        
-        @* PROGRESS BAR – idéntico al estilo de tu register-page pero con amarillo *@
-        <div class="newcasestep2__progress-section">
-            <div class="newcasestep2__progress-header">
-                <span class="newcasestep2__step">Step 2 of 2</span>
-                <span class="newcasestep2__step-label">100% COMPLETED</span>
-            </div>
-            <progress class="bulma-progress newcasestep2__progress-bar" value="100" max="100"></progress>
-        </div>
-
-        @* HEADING *@
-        <div class="newcasestep2__heading-block">
-            <h1 class="newcasestep2__title">Finalize Campaign</h1>
-            <p class="newcasestep2__subtitle">Verification and disbursement details</p>
-        </div>
-
-        <div class="newcasestep2__content">
-
-            @* SUPPORTING EVIDENCE *@
-            <div class="newcasestep2__section">
-                <div class="newcasestep2__section-header">
-                    <span class="newcasestep2__section-icon">🛡️</span>
-                    <h2 class="newcasestep2__section-title">Supporting Evidence</h2>
+    <EditForm Model="CaseState" OnValidSubmit="OnSubmitClicked" OnInvalidSubmit="OnInvalidSubmit" FormName="NewCaseStep2Form">
+        <DataAnnotationsValidator />
+        <div class="newcasestep2__container">
+            @if (!string.IsNullOrWhiteSpace(submissionError))
+            {
+                <div class="bulma-notification bulma-is-danger bulma-is-light newcasestep2__feedback">
+                    @submissionError
                 </div>
-                <p class="newcasestep2__section-description">
-                    To ensure transparency and build trust with donors, please upload official documents such as medical bills, 
-                    prescriptions, or utility statements. Accepted formats: PDF, JPG, PNG. Max 5MB per file.
-                </p>
+            }
 
-                @* Drag & Drop / Select Files *@
-                <label class="newcasestep2__upload-area">
-                    <InputFile OnChange="HandleEvidenceFiles" class="newcasestep2__file-input" multiple />
-                    <div class="newcasestep2__dropzone">
-                        <div class="newcasestep2__cloud-icon">☁️</div>
-                        <p class="newcasestep2__drop-text">Drag and drop files here</p>
-                        <p class="newcasestep2__drop-text">or click to browse from your computer</p>
-                        <button type="button" class="bulma-button bulma-is-dark newcasestep2__select-btn">
-                            Select Files
-                        </button>
-                    </div>
-                </label>
-                
-                @if (CaseState.EvidenceFileNames.Any())
-                {
-                    <div class="mt-3">
-                        <p class="is-size-7 has-text-weight-bold">Uploaded files:</p>
-                        <ul class="is-size-7">
-                            @foreach (var name in CaseState.EvidenceFileNames)
-                            {
-                                <li>@name</li>
-                            }
-                        </ul>
-                    </div>
-                }
+            @if (validationMessages.Any())
+            {
+                <div class="bulma-notification bulma-is-danger bulma-is-light newcasestep2__feedback">
+                    <p class="has-text-weight-semibold">Revisa estos campos antes de continuar:</p>
+                    <ul class="newcasestep2__feedback-list">
+                        @foreach (var message in validationMessages)
+                        {
+                            <li>@message</li>
+                        }
+                    </ul>
+                </div>
+            }
+            
+            @* BARRA DE PROGRESO *@
+            <div class="newcasestep2__progress-section">
+                <div class="newcasestep2__progress-header">
+                    <span class="newcasestep2__step-label">100% COMPLETADO</span>
+                </div>
+                <progress class="bulma-progress newcasestep2__progress-bar" value="100" max="100"></progress>
             </div>
 
-            @* CAMPAIGN THUMBNAIL *@
-            <div class="newcasestep2__section">
-                <div class="newcasestep2__section-header">
-                    <span class="newcasestep2__section-icon">📸</span>
-                    <h2 class="newcasestep2__section-title">Campaign Thumbnail</h2>
-                </div>
-                <div class="newcasestep2__thumbnail-wrapper">
-                    <label class="newcasestep2__thumbnail-box">
-                        <InputFile OnChange="HandleThumbnailFile" class="newcasestep2__file-input" accept="image/*" />
-                        <div class="newcasestep2__upload-placeholder">
-                            @if (CaseState.ThumbnailData != null)
-                            {
-                                <p class="is-size-7">@CaseState.ThumbnailName</p>
-                            }
-                            else
-                            {
-                                <div class="newcasestep2__camera-icon">📷<span class="newcasestep2__plus">+</span></div>
-                                <p class="newcasestep2__upload-text">Upload Cover Image</p>
-                            }
+            @* ENCABEZADO *@
+            <div class="newcasestep2__heading-block">
+                <h1 class="newcasestep2__title">Finalizar Campaña</h1>
+                <p class="newcasestep2__subtitle">Detalles de verificación y desembolso</p>
+            </div>
+
+            <div class="newcasestep2__content">
+
+                @* EVIDENCIA DE RESPALDO *@
+                <div class="newcasestep2__section">
+                    <div class="newcasestep2__section-header">
+                        <span class="newcasestep2__section-icon"><i class="fas fa-shield-halved"></i></span>
+                        <h2 class="newcasestep2__section-title">Evidencia de Respaldo</h2>
+                    </div>
+                    <p class="newcasestep2__section-description">
+                        Para garantizar la transparencia y generar confianza con los donantes, cargue documentos oficiales como facturas médicas, 
+                        recetas o estados de cuenta de servicios públicos. Formatos aceptados: PDF, JPG, PNG.
+                    </p>
+
+                    @* Arrastrar y Soltar / Seleccionar Archivos *@
+                    <label class="newcasestep2__upload-area">
+                        <div class="newcasestep2__dropzone">
+                            <div class="newcasestep2__cloud-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+                            <p class="newcasestep2__drop-text">Arrastra y suelta archivos aquí</p>
+                            <p class="newcasestep2__drop-text">o haz clic para buscar en tu computadora</p>
+                            <span class="bulma-button bulma-is-dark newcasestep2__select-btn">
+                                Seleccionar Archivos
+                            </span>
                         </div>
+                        <InputFile OnChange="HandleEvidenceFiles" class="newcasestep2__file-input" multiple style="display:none;" />
                     </label>
                     
-                    <div class="newcasestep2__thumbnail-info">
-                        <p>The thumbnail is the first thing donors see. Choose a compelling image that represents your case clearly.</p>
-                        <ul class="newcasestep2__thumbnail-list">
-                            <li>✔ High resolution (min 720p)</li>
-                            <li>✔ Respects privacy and dignity</li>
-                            <li>✔ No violent or graphic content</li>
-                        </ul>
-                        <p class="newcasestep2__recommended">Recommended size: 1280×720px (16:9)</p>
+                    @if (CaseState.EvidenceFileNames.Any())
+                    {
+                        <div class="mt-3">
+                            <p class="is-size-7 has-text-weight-bold">Archivos cargados:</p>
+                            <ul class="is-size-7">
+                                @foreach (var name in CaseState.EvidenceFileNames)
+                                {
+                                    <li class="has-text-success"><i class="fas fa-file-check mr-2"></i> @name</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+
+                @* MINIATURA DE LA CAMPAÑA *@
+                <div class="newcasestep2__section">
+                    <div class="newcasestep2__section-header">
+                        <span class="newcasestep2__section-icon"><i class="fas fa-camera-retro"></i></span>
+                        <h2 class="newcasestep2__section-title">Miniatura de la Campaña</h2>
                     </div>
+                    <div class="newcasestep2__thumbnail-wrapper">
+                        <label class="newcasestep2__thumbnail-box">
+                            <div class="newcasestep2__upload-placeholder">
+                                @if (CaseState.ThumbnailData != null)
+                                {
+                                    <div class="has-text-success mb-2">
+                                        <i class="fas fa-image fa-3x"></i>
+                                    </div>
+                                    <p class="is-size-7">@CaseState.ThumbnailName</p>
+                                }
+                                else
+                                {
+                                    <div class="newcasestep2__camera-icon">
+                                        <i class="fas fa-camera"></i>
+                                        <span class="newcasestep2__plus"><i class="fas fa-plus-circle"></i></span>
+                                    </div>
+                                    <p class="newcasestep2__upload-text">Cargar Imagen de Portada</p>
+                                }
+                            </div>
+                            @* Added style inline to avoid blocking other elements *@
+                            <InputFile OnChange="HandleThumbnailFile" class="newcasestep2__thumbnail-input" accept="image/*" style="position: absolute; opacity: 0; width: 0.1px; height: 0.1px; z-index: -1;" />
+                        </label>
+                        
+                        <div class="newcasestep2__thumbnail-info">
+                            <p>La miniatura es lo primero que ven los donantes. Elige una imagen atractiva que represente tu caso con claridad.</p>
+                            <ul class="newcasestep2__thumbnail-list">
+                                <li><i class="fas fa-check-circle has-text-success mr-2"></i> Alta resolución (mín. 720p)</li>
+                                <li><i class="fas fa-check-circle has-text-success mr-2"></i> Respeta la privacidad y la dignidad</li>
+                                <li><i class="fas fa-check-circle has-text-success mr-2"></i> Sin contenido violento o gráfico</li>
+                            </ul>
+                            <p class="newcasestep2__recommended">Tamaño recomendado: 1280×720px (16:9)</p>
+                            @if (CaseState.ThumbnailData == null || !string.IsNullOrEmpty(thumbnailError))
+                            {
+                                <p class="bulma-help bulma-is-danger">@(thumbnailError ?? "Una imagen de portada es requerida.")</p>
+                            }
+                            @if (!string.IsNullOrEmpty(thumbnailUploadError))
+                            {
+                                <p class="bulma-help bulma-is-danger">@thumbnailUploadError</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @* MÉTODO DE DESEMBOLSO *@
+                <div class="newcasestep2__section">
+                    <div class="newcasestep2__section-header">
+                        <span class="newcasestep2__section-icon"><i class="fas fa-hand-holding-dollar"></i></span>
+                        <h2 class="newcasestep2__section-title">Método de Desembolso</h2>
+                    </div>
+                    <p class="newcasestep2__section-description">
+                        Selecciona cómo te gustaría recibir los fondos una vez que la campaña alcance su objetivo.
+                    </p>
+
+                    <div class="newcasestep2__methods-grid">
+                        @* Transferencia Bancaria *@
+                        <button type="button"
+                                class="newcasestep2__method-card @(CaseState.SelectedMethod == "bank" ? "newcasestep2__method-card--selected" : "")"
+                                @onclick='() => SelectMethod("bank")'>
+                            <div class="newcasestep2__method-icon"><i class="fas fa-building-columns"></i></div>
+                            <div class="newcasestep2__method-content">
+                                <h3 class="newcasestep2__method-title">Transferencia Bancaria</h3>
+                                <span class="newcasestep2__method-badge">RECOMENDADO</span>
+                            </div>
+                            @if (CaseState.SelectedMethod == "bank")
+                            {
+                                <span class="newcasestep2__check-icon"><i class="fas fa-circle-check"></i></span>
+                            }
+                        </button>
+
+                        @* Billetera Digital *@
+                        <button type="button"
+                                class="newcasestep2__method-card @(CaseState.SelectedMethod == "wallet" ? "newcasestep2__method-card--selected" : "")"
+                                @onclick='() => SelectMethod("wallet")'>
+                            <div class="newcasestep2__method-icon"><i class="fas fa-credit-card"></i></div>
+                            <div class="newcasestep2__method-content">
+                                <h3 class="newcasestep2__method-title">Billetera Digital</h3>
+                                <span class="newcasestep2__method-badge">PAGO RÁPIDO</span>
+                            </div>
+                            @if (CaseState.SelectedMethod == "wallet")
+                            {
+                                <span class="newcasestep2__check-icon"><i class="fas fa-circle-check"></i></span>
+                            }
+                        </button>
+
+                    </div>
+
+                    @* Formulario de Transferencia Bancaria *@
+                    @if (CaseState.SelectedMethod == "bank")
+                    {
+                        <div class="newcasestep2__bank-form">
+                            <div class="bulma-field">
+                                <label class="bulma-label">NOMBRE DEL TITULAR DE LA CUENTA</label>
+                                <div class="bulma-control">
+                                    <InputText class="bulma-input newcasestep2__input" @bind-Value="CaseState.AccountHolder" placeholder="Ingrese el nombre del titular" />
+                                </div>
+                                <ValidationMessage For="@(() => CaseState.AccountHolder)" class="bulma-help bulma-is-danger" />
+                            </div>
+                            <div class="bulma-field">
+                                <label class="bulma-label">NÚMERO DE CUENTA / IBAN</label>
+                                <div class="bulma-control">
+                                    <InputText class="bulma-input newcasestep2__input" @bind-Value="CaseState.AccountNumber" placeholder="Ingrese el número de cuenta" />
+                                </div>
+                                <ValidationMessage For="@(() => CaseState.AccountNumber)" class="bulma-help bulma-is-danger" />
+                            </div>
+                            <div class="bulma-field">
+                                <label class="bulma-label">NOMBRE DEL BANCO</label>
+                                <div class="bulma-control">
+                                    <InputText class="bulma-input newcasestep2__input" @bind-Value="CaseState.BankName" placeholder="Ingrese el nombre del banco" />
+                                </div>
+                                <ValidationMessage For="@(() => CaseState.BankName)" class="bulma-help bulma-is-danger" />
+                            </div>
+                            @if (!string.IsNullOrEmpty(bankValidationError))
+                            {
+                                <p class="bulma-help bulma-is-danger">@bankValidationError</p>
+                            }
+                        </div>
+                    }
+
+                    @* Formulario de Billetera Digital *@
+                    @if (CaseState.SelectedMethod == "wallet")
+                    {
+                        <div class="newcasestep2__bank-form">
+                             <div class="bulma-field">
+                                <label class="bulma-label">NÚMERO DE TELÉFONO O CORREO ASOCIADO</label>
+                                <div class="bulma-control">
+                                    <InputText class="bulma-input newcasestep2__input" @bind-Value="CaseState.AccountNumber" placeholder="Ingrese el número o correo" />
+                                </div>
+                                <ValidationMessage For="@(() => CaseState.AccountNumber)" class="bulma-help bulma-is-danger" />
+                            </div>
+                            <div class="bulma-field">
+                                <label class="bulma-label">TIPO DE BILLETERA (Chivo, MoMo, etc.)</label>
+                                <div class="bulma-control">
+                                    <InputText class="bulma-input newcasestep2__input" @bind-Value="CaseState.BankName" placeholder="Ingrese el tipo de billetera" />
+                                </div>
+                                <ValidationMessage For="@(() => CaseState.BankName)" class="bulma-help bulma-is-danger" />
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* CASILLA DE CERTIFICACIÓN *@
+                <div class="newcasestep2__certification">
+                    <label class="newcasestep2__checkbox-container">
+                        <InputCheckbox class="newcasestep2__checkbox" @bind-Value="CaseState.IsCertified" />
+                        <span class="newcasestep2__checkbox-text">
+                            Certifico que la información proporcionada es exacta y veraz. Entiendo que la falsificación de los hechos puede dar lugar 
+                            a la cancelación de la campaña y a acciones legales. Acepto los 
+                            <a class="newcasestep2__link">Términos de Servicio</a> y la 
+                            <a class="newcasestep2__link">Política de Privacidad</a>.
+                        </span>
+                    </label>
+                    <ValidationMessage For="@(() => CaseState.IsCertified)" class="bulma-help bulma-is-danger" />
+                    @if (!string.IsNullOrEmpty(certificationError))
+                    {
+                        <p class="bulma-help bulma-is-danger">@certificationError</p>
+                    }
                 </div>
             </div>
 
-            @* DISBURSEMENT METHOD *@
-            <div class="newcasestep2__section">
-                <div class="newcasestep2__section-header">
-                    <span class="newcasestep2__section-icon">💰</span>
-                    <h2 class="newcasestep2__section-title">Disbursement Method</h2>
-                </div>
-                <p class="newcasestep2__section-description">
-                    Select how you would like to receive the funds once the campaign reaches its goal.
-                </p>
-
-                <div class="newcasestep2__methods-grid">
-                    @* Bank Transfer (seleccionado por defecto) *@
-                    <div class="newcasestep2__method-card @(CaseState.SelectedMethod == "bank" ? "newcasestep2__method-card--selected" : "")"
-                         @onclick='() => SelectMethod("bank")'>
-                        <div class="newcasestep2__method-icon">🏦</div>
-                        <div class="newcasestep2__method-content">
-                            <h3 class="newcasestep2__method-title">Bank Transfer</h3>
-                            <span class="newcasestep2__method-badge">RECOMMENDED</span>
-                        </div>
-                        @if (CaseState.SelectedMethod == "bank")
-                        {
-                            <span class="newcasestep2__check-icon">✔</span>
-                        }
-                    </div>
-
-                    @* Digital Wallet *@
-                    <div class="newcasestep2__method-card @(CaseState.SelectedMethod == "wallet" ? "newcasestep2__method-card--selected" : "")"
-                         @onclick='() => SelectMethod("wallet")'>
-                        <div class="newcasestep2__method-icon">💳</div>
-                        <div class="newcasestep2__method-content">
-                            <h3 class="newcasestep2__method-title">Digital Wallet</h3>
-                            <span class="newcasestep2__method-badge">FAST PAYOUT</span>
-                        </div>
-                    </div>
-
-                    @* Direct Utility Pay *@
-                    <div class="newcasestep2__method-card @(CaseState.SelectedMethod == "utility" ? "newcasestep2__method-card--selected" : "")"
-                         @onclick='() => SelectMethod("utility")'>
-                        <div class="newcasestep2__method-icon">📧</div>
-                        <div class="newcasestep2__method-content">
-                            <h3 class="newcasestep2__method-title">Direct Utility Pay</h3>
-                            <span class="newcasestep2__method-badge">PAY BILLS DIRECTLY</span>
-                        </div>
-                    </div>
-                </div>
-
-                @* Formulario solo visible cuando se elige Bank Transfer (como en la imagen) *@
-                @if (CaseState.SelectedMethod == "bank")
-                {
-                    <div class="newcasestep2__bank-form">
-                        <div class="bulma-field">
-                            <label class="bulma-label">ACCOUNT HOLDER NAME</label>
-                            <div class="bulma-control">
-                                <input type="text" class="bulma-input newcasestep2__input" @bind="CaseState.AccountHolder" />
-                            </div>
-                        </div>
-                        <div class="bulma-field">
-                            <label class="bulma-label">ACCOUNT NUMBER / IBAN</label>
-                            <div class="bulma-control">
-                                <input type="text" class="bulma-input newcasestep2__input" @bind="CaseState.AccountNumber" />
-                            </div>
-                        </div>
-                        <div class="bulma-field">
-                            <label class="bulma-label">BANK NAME</label>
-                            <div class="bulma-control">
-                                <input type="text" class="bulma-input newcasestep2__input" @bind="CaseState.BankName" />
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-
-            @* CERTIFICATION CHECKBOX *@
-            <div class="newcasestep2__certification">
-                <label class="newcasestep2__checkbox-container">
-                    <input type="checkbox" class="newcasestep2__checkbox" @bind="CaseState.IsCertified" />
-                    <span class="newcasestep2__checkbox-text">
-                        I certify that the information provided is accurate and truthful. I understand that misrepresentation of facts may lead 
-                        to campaign cancellation and legal action. I agree to the 
-                        <a href="#" class="newcasestep2__link">Terms of Service</a> and 
-                        <a href="#" class="newcasestep2__link">Privacy Policy</a>.
-                    </span>
-                </label>
+            @* BOTONES DEL PIE DE PÁGINA *@
+            <div class="newcasestep2__footer">
+                <button type="button" class="bulma-button bulma-is-light newcasestep2__back-btn" @onclick="OnBackClicked">
+                    <i class="fas fa-arrow-left mr-2"></i> Volver a Detalles de la Campaña
+                </button>
+                <button type="submit" class="bulma-button bulma-is-warning newcasestep2__submit-btn" disabled="@isSubmitting">
+                    Enviar para Revisión <i class="fas fa-paper-plane ml-2"></i>
+                </button>
             </div>
         </div>
-
-        @* FOOTER BUTTONS *@
-        <div class="newcasestep2__footer">
-            <button type="button" class="bulma-button bulma-is-light newcasestep2__back-btn" @onclick="OnBackClicked">
-                ← Back to Campaign Details
-            </button>
-            <button type="button" class="bulma-button bulma-is-warning newcasestep2__submit-btn" @onclick="OnSubmitClicked">
-                Submit for Review →
-            </button>
-        </div>
-    </div>
+    </EditForm>
 </div>
 
 @code {
+    private string? thumbnailUploadError;
+    private long maxFileSize = 15 * 1024 * 1024; // 15MB
+    private bool isSubmitting;
+    private string? submissionError;
+    private readonly List<string> validationMessages = new();
+
     protected override void OnInitialized()
     {
         if (!CaseState.Step1Completed)
@@ -209,27 +289,54 @@
 
     private void SelectMethod(string method)
     {
+        bankValidationError = null;
+        submissionError = null;
         CaseState.SelectedMethod = method;
+        StateHasChanged();
     }
 
     private async Task HandleEvidenceFiles(InputFileChangeEventArgs e)
     {
-        foreach (var file in e.GetMultipleFiles())
+        submissionError = null;
+        validationMessages.Clear();
+        try 
         {
-            var buffer = new byte[file.Size];
-            await file.OpenReadStream(5 * 1024 * 1024).ReadAsync(buffer);
-            CaseState.EvidenceFiles.Add(buffer);
-            CaseState.EvidenceFileNames.Add(file.Name);
+            foreach (var file in e.GetMultipleFiles())
+            {
+                var buffer = await ReadFileAsync(file);
+                CaseState.EvidenceFiles.Add(buffer);
+                CaseState.EvidenceFileNames.Add(file.Name);
+            }
+        }
+        catch (Exception ex)
+        {
+            submissionError = $"No se pudo cargar la evidencia: {GetDisplayError(ex)}";
+            await JSRuntime.InvokeVoidAsync("console.error", "Error uploading evidence files:", ex.Message);
         }
     }
 
     private async Task HandleThumbnailFile(InputFileChangeEventArgs e)
     {
-        var file = e.File;
-        var buffer = new byte[file.Size];
-        await file.OpenReadStream(5 * 1024 * 1024).ReadAsync(buffer);
-        CaseState.ThumbnailData = buffer;
-        CaseState.ThumbnailName = file.Name;
+        thumbnailUploadError = null;
+        thumbnailError = null;
+        submissionError = null;
+        validationMessages.Clear();
+        try 
+        {
+            var file = e.File;
+            await JSRuntime.InvokeVoidAsync("console.log", $"Handling thumbnail: {file.Name}, Size: {file.Size}");
+            
+            var buffer = await ReadFileAsync(file);
+            CaseState.ThumbnailData = buffer;
+            CaseState.ThumbnailName = file.Name;
+            
+            await JSRuntime.InvokeVoidAsync("console.log", "Thumbnail loaded successfully");
+        }
+        catch (Exception ex)
+        {
+            thumbnailUploadError = $"Error al cargar la imagen: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("console.error", "Error uploading thumbnail:", ex.Message);
+        }
     }
 
     private void OnBackClicked()
@@ -237,18 +344,184 @@
         Navigation.NavigateTo("/cases/new/step1");
     }
 
+    private string? bankValidationError;
+    private string? certificationError;
+    private string? thumbnailError;
+
+    private async Task OnInvalidSubmit(EditContext editContext)
+    {
+        validationMessages.Clear();
+        validationMessages.AddRange(editContext.GetValidationMessages().Distinct());
+        submissionError = "El formulario tiene campos incompletos o inválidos.";
+        await JSRuntime.InvokeVoidAsync("console.error", "Form validation failed");
+        Console.WriteLine("Form validation failed");
+        foreach (var message in editContext.GetValidationMessages())
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Validation error: " + message);
+            Console.WriteLine("Validation error: " + message);
+        }
+    }
+
     private async Task OnSubmitClicked()
     {
-        if (!CaseState.IsCertified)
+        if (isSubmitting)
         {
-            // Podrías usar un JS alert o un componente de notificación
             return;
         }
 
-        // Aquí iría la lógica de guardado final
-        // await CasoService.Crear(nuevoCaso);
-        
-        CaseState.Reset();
-        Navigation.NavigateTo("/cases"); // O a una página de éxito
+        isSubmitting = true;
+        await JSRuntime.InvokeVoidAsync("console.log", "OnSubmitClicked started");
+        Console.WriteLine("OnSubmitClicked started");
+
+        bankValidationError = null;
+        certificationError = null;
+        thumbnailError = null;
+        thumbnailUploadError = null;
+        submissionError = null;
+        validationMessages.Clear();
+
+        try
+        {
+            if (CaseState.SelectedMethod == "bank")
+            {
+                if (string.IsNullOrWhiteSpace(CaseState.AccountHolder) ||
+                    string.IsNullOrWhiteSpace(CaseState.AccountNumber) ||
+                    string.IsNullOrWhiteSpace(CaseState.BankName))
+                {
+                    bankValidationError = "Por favor, complete todos los datos bancarios.";
+                    await JSRuntime.InvokeVoidAsync("console.error", "Bank validation error");
+                    return;
+                }
+            }
+            else if (CaseState.SelectedMethod == "wallet")
+            {
+                if (string.IsNullOrWhiteSpace(CaseState.AccountNumber) ||
+                    string.IsNullOrWhiteSpace(CaseState.BankName))
+                {
+                    bankValidationError = "Por favor, complete los datos de su billetera digital.";
+                    await JSRuntime.InvokeVoidAsync("console.error", "Wallet validation error");
+                    return;
+                }
+            }
+
+            if (!CaseState.IsCertified)
+            {
+                certificationError = "Debes certificar que la información es exacta y veraz.";
+                await JSRuntime.InvokeVoidAsync("console.error", "Certification error");
+                return;
+            }
+
+            if (CaseState.ThumbnailData == null)
+            {
+                thumbnailError = "Una imagen de portada es requerida.";
+                await JSRuntime.InvokeVoidAsync("console.error", "Thumbnail error");
+                return;
+            }
+
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity == null || !user.Identity.IsAuthenticated)
+            {
+                submissionError = "Tu sesión no está activa. Inicia sesión nuevamente para enviar el caso.";
+                await JSRuntime.InvokeVoidAsync("console.error", "User not authenticated");
+                Console.WriteLine("User not authenticated");
+                return;
+            }
+
+            var userIdString = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                submissionError = "No se pudo identificar al usuario autenticado.";
+                await JSRuntime.InvokeVoidAsync("console.error", "Could not retrieve user ID", userIdString);
+                Console.WriteLine($"Could not retrieve user ID: {userIdString}");
+                return;
+            }
+
+            await JSRuntime.InvokeVoidAsync("console.log", $"User ID: {userId}");
+
+            var thumbnailPath = string.Empty;
+            if (CaseState.ThumbnailData != null)
+            {
+                var fileName = $"case_{Guid.NewGuid()}_{Path.GetFileName(CaseState.ThumbnailName)}";
+                var uploadPath = Path.Combine(Environment.WebRootPath, "uploads", "casos");
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var fullPath = Path.Combine(uploadPath, fileName);
+                await File.WriteAllBytesAsync(fullPath, CaseState.ThumbnailData);
+                thumbnailPath = $"uploads/casos/{fileName}";
+                await JSRuntime.InvokeVoidAsync("console.log", $"Thumbnail saved to {thumbnailPath}");
+            }
+
+            if (CaseState.EvidenceFiles.Any())
+            {
+                var evidencePath = Path.Combine(Environment.WebRootPath, "uploads", "casos", "evidencias");
+                if (!Directory.Exists(evidencePath))
+                {
+                    Directory.CreateDirectory(evidencePath);
+                }
+
+                for (int i = 0; i < CaseState.EvidenceFiles.Count; i++)
+                {
+                    var originalFileName = CaseState.EvidenceFileNames.Count > i
+                        ? CaseState.EvidenceFileNames[i]
+                        : $"evidencia_{i + 1}";
+                    var fileName = $"case_evidence_{Guid.NewGuid()}_{Path.GetFileName(originalFileName)}";
+                    var fullPath = Path.Combine(evidencePath, fileName);
+                    await File.WriteAllBytesAsync(fullPath, CaseState.EvidenceFiles[i]);
+                }
+
+                await JSRuntime.InvokeVoidAsync("console.log", $"{CaseState.EvidenceFiles.Count} evidence files saved.");
+            }
+
+            var nuevoCaso = new Caso
+            {
+                IdBeneficiado = userId,
+                Titulo = CaseState.CaseTitle,
+                Descripcion = CaseState.Description,
+                Meta = CaseState.FinancialGoal,
+                IdCategoria = CaseState.CategoryId ?? 0,
+                ImagenUrl = thumbnailPath,
+                Estado = "Pendiente",
+                FechaCreacion = DateTime.Now
+            };
+
+            await JSRuntime.InvokeVoidAsync("console.log", "Saving case to database...", nuevoCaso);
+            await CasoService.Crear(nuevoCaso);
+            await JSRuntime.InvokeVoidAsync("console.log", "Case saved successfully");
+
+            CaseState.Reset();
+            await JSRuntime.InvokeVoidAsync("console.log", "State reset, redirecting to home");
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            submissionError = $"No se pudo enviar el caso para revisión: {GetDisplayError(ex)}";
+            await JSRuntime.InvokeVoidAsync("console.error", "Error during case submission:", ex.Message);
+            Console.WriteLine($"Error during case submission: {ex}");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task<byte[]> ReadFileAsync(IBrowserFile file)
+    {
+        await using var stream = file.OpenReadStream(maxFileSize);
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        return memoryStream.ToArray();
+    }
+
+    private static string GetDisplayError(Exception ex)
+    {
+        var baseException = ex.GetBaseException();
+        return string.IsNullOrWhiteSpace(baseException.Message)
+            ? "Ocurrió un error inesperado."
+            : baseException.Message;
     }
 }

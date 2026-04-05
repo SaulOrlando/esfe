@@ -1,5 +1,4 @@
 /* NewCaseStep2.razor.css */
-/* Alta especificidad como en tu CSS global (register-page) + uso intensivo de Bulma con prefijo bulma- */
 
 .newcasestep2-page {
     min-height: 100vh;
@@ -21,21 +20,23 @@
     padding: 2.5rem 2rem;
 }
 
+.newcasestep2-page .newcasestep2__feedback {
+    margin-bottom: 1.5rem;
+}
+
+.newcasestep2-page .newcasestep2__feedback-list {
+    margin: 0.75rem 0 0 1rem;
+}
+
 /* ───────── PROGRESS ───────── */
 .newcasestep2-page .newcasestep2__progress-section {
     margin-bottom: 2.4rem;
 }
 .newcasestep2-page .newcasestep2__progress-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: baseline;
     margin-bottom: 0.5rem;
-}
-.newcasestep2-page .newcasestep2__step {
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--rp-text-muted);
 }
 .newcasestep2-page .newcasestep2__step-label {
     font-size: 0.82rem;
@@ -94,10 +95,10 @@
     justify-content: center;
     width: 2.25rem;
     height: 2.25rem;
-    background: #fef2f2;
+    background: #fff8e1;
     color: #f5bb00;
-    border-radius: 6px;
-    font-size: 1.35rem;
+    border-radius: 8px;
+    font-size: 1.2rem;
 }
 .newcasestep2-page .newcasestep2__section-title {
     font-size: 1.35rem;
@@ -116,6 +117,7 @@
 .newcasestep2__upload-area {
     display: block;
     cursor: pointer;
+    position: relative;
 }
 .newcasestep2__dropzone {
     border: 2px dashed #e2e0d8;
@@ -130,7 +132,7 @@
     background: #fffdf5;
 }
 .newcasestep2__cloud-icon {
-    font-size: 3.5rem;
+    font-size: 3rem;
     margin-bottom: 1rem;
     color: #d1c9b8;
 }
@@ -142,11 +144,20 @@
 .newcasestep2__select-btn {
     margin-top: 1rem;
     font-weight: 600;
+    display: inline-block;
 }
 
-/* Ocultar input file real */
+/* Ocultar input file real de forma robusta sin romper la funcionalidad del label */
 .newcasestep2__file-input {
-    display: none;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    opacity: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    cursor: pointer !important;
+    z-index: -1 !important; /* Lo mandamos al fondo para que no tape nada */
+    pointer-events: none !important; /* Evita que reciba clics directamente, el label se encarga */
 }
 
 /* ───────── THUMBNAIL ───────── */
@@ -157,7 +168,6 @@
     align-items: start;
 }
 .newcasestep2__thumbnail-box {
-    display: block;
     cursor: pointer;
     border: 2px dashed #e2e0d8;
     border-radius: 12px;
@@ -167,23 +177,42 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden; /* Evita que el input se salga */
 }
 .newcasestep2__thumbnail-box:hover {
     border-color: var(--rp-yellow);
 }
+.newcasestep2__thumbnail-input {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
 .newcasestep2__upload-placeholder {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    z-index: 1; /* Asegura que el contenido esté sobre el input oculto */
 }
 .newcasestep2__camera-icon {
-    font-size: 3.5rem;
+    font-size: 3rem;
     color: #d1c9b8;
     position: relative;
 }
 .newcasestep2__plus {
     position: absolute;
-    font-size: 1.5rem;
-    bottom: -4px;
-    right: -8px;
+    font-size: 1.2rem;
+    bottom: -2px;
+    right: -6px;
     color: var(--rp-yellow);
 }
 .newcasestep2__upload-text {
@@ -202,9 +231,11 @@
     margin: 0 0 1rem 0;
 }
 .newcasestep2__thumbnail-list li {
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.5rem;
     font-size: 0.9rem;
     color: var(--rp-text-mid);
+    display: flex;
+    align-items: center;
 }
 .newcasestep2__recommended {
     font-size: 0.85rem;
@@ -220,6 +251,7 @@
     margin-bottom: 1.5rem;
 }
 .newcasestep2__method-card {
+    appearance: none;
     border: 2px solid #e2e0d8;
     border-radius: 12px;
     padding: 1.25rem;
@@ -230,18 +262,28 @@
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    width: 100%;
+    text-align: left;
 }
 .newcasestep2__method-card:hover {
     border-color: #f5bb00;
+}
+.newcasestep2__method-card:focus-visible {
+    outline: 3px solid rgba(245, 187, 0, 0.22);
+    outline-offset: 2px;
 }
 .newcasestep2__method-card--selected {
     border-color: var(--rp-yellow);
     box-shadow: 0 0 0 4px rgba(245, 187, 0, 0.15);
 }
 .newcasestep2__method-icon {
-    font-size: 2.25rem;
-    width: 52px;
+    font-size: 2rem;
+    width: 48px;
     flex-shrink: 0;
+    color: #d1c9b8;
+}
+.newcasestep2__method-card--selected .newcasestep2__method-icon {
+    color: var(--rp-yellow);
 }
 .newcasestep2__method-title {
     font-weight: 700;
@@ -250,7 +292,7 @@
 }
 .newcasestep2__method-badge {
     display: inline-block;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     color: var(--rp-yellow);
@@ -258,35 +300,45 @@
     padding: 2px 8px;
     border-radius: 4px;
     margin-top: 4px;
+    border: 1px solid #fff2cc;
 }
 .newcasestep2__check-icon {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    font-size: 1.35rem;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2rem;
     color: var(--rp-yellow);
 }
 
 /* ───────── BANK FORM ───────── */
 .newcasestep2__bank-form {
-    background: #f9f7f0;
+    background: #faf9f5;
     border-radius: 12px;
     padding: 1.75rem;
     margin-top: 1rem;
+    border: 1px solid #eee;
+}
+.newcasestep2-page .newcasestep2__bank-form .bulma-label {
+    color: var(--rp-text-dark);
+    font-size: 0.85rem;
+    font-weight: 700;
 }
 .newcasestep2-page .newcasestep2__bank-form .bulma-input {
-    background: #fff;
-    border: 1.5px solid var(--rp-border);
-    border-radius: 10px;
-    height: 3rem;
-    font-size: 0.95rem;
-    color: var(--rp-text-dark);
-    box-shadow: var(--rp-shadow);
-    padding-left: 1rem;
+    background: #fff !important;
+    border: 1.5px solid var(--rp-border) !important;
+    border-radius: 10px !important;
+    height: 3.2rem !important;
+    font-size: 0.95rem !important;
+    color: #1a1a1a !important; /* Texto oscuro explícito */
+    box-shadow: none !important;
+    padding-left: 1rem !important;
+}
+.newcasestep2-page .newcasestep2__bank-form .bulma-input::placeholder {
+    color: #bbb !important;
 }
 .newcasestep2-page .newcasestep2__bank-form .bulma-input:focus {
-    border-color: var(--rp-yellow);
-    box-shadow: 0 0 0 3px rgba(245, 187, 0, 0.15);
+    border-color: var(--rp-yellow) !important;
+    box-shadow: 0 0 0 3px rgba(245, 187, 0, 0.12) !important;
 }
 
 /* ───────── CERTIFICATION ───────── */
@@ -300,17 +352,20 @@
     cursor: pointer;
 }
 .newcasestep2__checkbox {
-    margin-top: 3px;
+    margin-top: 4px;
     accent-color: var(--rp-yellow);
+    width: 18px;
+    height: 18px;
 }
 .newcasestep2__checkbox-text {
     font-size: 0.9rem;
-    line-height: 1.45;
+    line-height: 1.5;
     color: var(--rp-text-mid);
 }
 .newcasestep2__link {
     color: var(--rp-yellow-dark) !important;
-    font-weight: 600;
+    font-weight: 700;
+    text-decoration: underline;
 }
 
 /* ───────── FOOTER ───────── */
@@ -319,14 +374,19 @@
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    margin-top: 2rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
 }
 .newcasestep2__back-btn {
-    font-weight: 600;
+    font-weight: 700;
+    border-radius: 10px;
 }
 .newcasestep2__submit-btn {
     font-weight: 700;
-    padding: 0 2rem;
+    padding: 0 2.5rem;
+    border-radius: 10px;
+    height: 3.2rem;
 }
 
 /* ───────── RESPONSIVE ───────── */
@@ -339,5 +399,11 @@
     }
     .newcasestep2__container {
         padding: 1.75rem 1.25rem;
+    }
+    .newcasestep2__footer {
+        flex-direction: column-reverse;
+    }
+    .newcasestep2__footer button {
+        width: 100%;
     }
 }

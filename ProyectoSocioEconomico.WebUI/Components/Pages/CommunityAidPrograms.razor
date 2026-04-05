@@ -94,12 +94,12 @@
 
     private List<FilterOption> Filters = new()
     {
-        new("all",            "All",            "fas fa-table-cells-large"),
-        new("health",         "Health",         "fas fa-heart-pulse"),
-        new("education",      "Education",      "fas fa-graduation-cap"),
-        new("infrastructure", "Infrastructure", "fas fa-wrench"),
-        new("disaster relief", "Disaster Relief", "fas fa-house-chimney-crack"),
-        new("environment",    "Environment",    "fas fa-leaf"),
+        new("all",            "Todos",          "fas fa-table-cells-large"),
+        new("salud",          "Salud",          "fas fa-heart-pulse"),
+        new("educacion",      "Educación",      "fas fa-graduation-cap"),
+        new("infraestructura","Infraestructura","fas fa-wrench"),
+        new("desastres naturales", "Desastres Naturales", "fas fa-house-chimney-crack"),
+        new("naturaleza",     "Naturaleza",     "fas fa-leaf"),
     };
 
     private List<Programa> AllPrograms = new();
@@ -111,10 +111,18 @@
 
     private IEnumerable<Programa> FilteredPrograms =>
         AllPrograms
-            .Where(p => ActiveFilter == "all" || GetCategoryName(p).ToLower() == ActiveFilter)
+            .Where(p => ActiveFilter == "all" || IsMatch(GetCategoryName(p), ActiveFilter))
             .Where(p => string.IsNullOrWhiteSpace(SearchQuery) ||
                         p.Nombre.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
                         p.Descripcion.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+
+    private bool IsMatch(string categoryName, string filterKey)
+    {
+        var name = categoryName.ToLower();
+        if (filterKey == "educacion" && (name.Contains("educacion") || name.Contains("educación"))) return true;
+        if (filterKey == "desastres naturales" && (name.Contains("desastres") || name.Contains("emergencia"))) return true;
+        return name == filterKey;
+    }
 
     private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)FilteredPrograms.Count() / PageSize));
 
@@ -142,8 +150,7 @@
     private string GetCategoryName(Programa p)
     {
         // El programa no tiene categoría directa, se toma la del primer caso si existe
-        // En una implementación real se podría añadir CategoriaId a Programa
-        return p.IdCasos?.FirstOrDefault()?.IdCategoriaNavigation?.Nombre ?? "Other";
+        return p.IdCasos?.FirstOrDefault()?.IdCategoriaNavigation?.Nombre ?? "Otro";
     }
 
     private int CalculateOverallProgress(Programa p)
