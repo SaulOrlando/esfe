@@ -4,4 +4,4 @@ dotnet ef migrations add InitialCreate --project ProyectoSocioEconomico.Infrastr
 
 dotnet build ProyectoSocioEconomico.Infrastructure 
 
-dotnet ef database update --project ProyectoSocioEconomico.Infrastructure --startup-project ProyectoSocioEconomico.WebUI
+dotnet ef database update --project ProyectoSocioEconomicgo.Infrastructure --startup-project ProyectoSocioEconomico.WebUI
