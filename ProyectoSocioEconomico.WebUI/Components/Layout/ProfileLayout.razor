@@ -59,7 +59,7 @@
                 <nav class="pl-sidebar__nav">
                     <a href="/account/settings" class="@GetNavItemClass("/account/settings")">
                         <span class="bulma-icon bulma-is-small"><i class="far fa-user"></i></span>
-                        Account Settings
+                        Ajustes de cuenta
                     </a>
 
                     <a href="/donor/dashboard" class="@GetNavItemClass("/donor/dashboard")">
@@ -79,19 +79,21 @@
                             Mis retiros
                         </a>
                     }
-                    @* TODO Agrega esto solo si es admin *@
-                        @* <a href="" class="@GetNavItemClass("/beneficiary/withdrawals")">
-                            <span class="bulma-icon bulma-is-small"><i class="fas fa-clock-rotate-left"></i></span>
+
+                    @if (IsAdmin)
+                    {
+                        <a href="" class="@GetNavItemClass("/account/settings")">
                             Perfiles
-                        </a> *@
-                        @* <a href="" class="@GetNavItemClass("/beneficiary/withdrawals")">
-                            <span class="bulma-icon bulma-is-small"><i class="fas fa-clock-rotate-left"></i></span>
+                        </a>
+
+                        <a href="" class="@GetNavItemClass("/programs")">
                             Programas
-                        </a> *@
-                        @* <a href="" class="@GetNavItemClass("/beneficiary/withdrawals")">
-                            <span class="bulma-icon bulma-is-small"><i class="fas fa-clock-rotate-left"></i></span>
+                        </a>
+
+                        <a href="" class="@GetNavItemClass("/beneficiary/withdrawals")">
                             Retiros pendientes
-                        </a> *@
+                        </a>
+                    }
                 </nav>
             </aside>
 
@@ -178,6 +180,7 @@
 @code {
     private Usuario? CurrentUser { get; set; }
     private bool IsBeneficiario { get; set; }
+    private bool IsAdmin { get; set; }
     private string MyCaseUrl { get; set; } = "/cases/new/step1";
 
     protected override async Task OnParametersSetAsync()
@@ -187,6 +190,7 @@
 
         CurrentUser = null;
         IsBeneficiario = false;
+        IsAdmin = false;
         MyCaseUrl = "/cases/new/step1";
 
         if (user.Identity is null || !user.Identity.IsAuthenticated)
@@ -202,6 +206,7 @@
 
         CurrentUser = await UsuarioService.ObtenerPorId(userId);
         IsBeneficiario = HasBeneficiaryRole(CurrentUser);
+        IsAdmin = HasAdminRole(CurrentUser);
 
         if (!IsBeneficiario)
         {
@@ -218,6 +223,13 @@
         return !string.IsNullOrWhiteSpace(roleName) &&
                (roleName.Equals("Beneficiario", StringComparison.OrdinalIgnoreCase) ||
                 roleName.Equals("Beneficiado", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool HasAdminRole(Usuario? usuario)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
     }
 
     private string GetProfileImage(ClaimsPrincipal user)
