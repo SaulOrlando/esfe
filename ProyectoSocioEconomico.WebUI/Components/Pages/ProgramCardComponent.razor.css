@@ -1,0 +1,207 @@
+article.cap-card {
+    --cap-yellow: #f5bb00;
+    --cap-yellow-dark: #d9a600;
+    --cap-green: #22c55e;
+    --cap-green-dark: #16a34a;
+    --cap-blue: #3b82f6;
+    --cap-orange: #f97316;
+    --cap-text-dark: #1a1a1a;
+    --cap-text-mid: #4a4a4a;
+    --cap-text-muted: #888;
+    --cap-white: #ffffff;
+    --cap-shadow-card: 0 2px 16px rgba(0, 0, 0, 0.08);
+    --cap-radius-card: 14px;
+    background: var(--cap-white);
+    border-radius: var(--cap-radius-card);
+    box-shadow: var(--cap-shadow-card);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.18s, box-shadow 0.18s;
+}
+
+article.cap-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+
+article.cap-card .cap-card__image-wrap {
+    position: relative;
+    overflow: hidden;
+    height: 175px;
+    flex-shrink: 0;
+}
+
+article.cap-card.cap-card--compact .cap-card__image-wrap {
+    height: 120px;
+}
+
+article.cap-card .cap-card__image-wrap .cap-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    display: block;
+    transition: transform 0.35s;
+}
+
+article.cap-card:hover .cap-card__image-wrap .cap-card__image {
+    transform: scale(1.04);
+}
+
+article.cap-card .cap-card__image-wrap .cap-card__tag {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #fff;
+}
+
+article.cap-card .cap-card__image-wrap .cap-card__tag--health {
+    background: var(--cap-green);
+}
+
+article.cap-card .cap-card__image-wrap .cap-card__tag--infrastructure {
+    background: var(--cap-blue);
+}
+
+article.cap-card .cap-card__image-wrap .cap-card__tag--education {
+    background: var(--cap-orange);
+}
+
+article.cap-card .cap-card__image-wrap .cap-card__tag--environment {
+    background: var(--cap-green-dark);
+}
+
+article.cap-card .cap-card__image-wrap .cap-card__tag--disaster {
+    background: #475569;
+}
+
+article.cap-card .cap-card__body {
+    padding: 1.1rem 1.2rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    flex: 1;
+}
+
+article.cap-card.cap-card--compact .cap-card__body {
+    padding: 0.9rem 0.95rem 1rem;
+    gap: 0.55rem;
+}
+
+article.cap-card .cap-card__body .cap-card__title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--cap-text-dark);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+
+article.cap-card.cap-card--compact .cap-card__body .cap-card__title {
+    font-size: 0.92rem;
+}
+
+article.cap-card .cap-card__body .cap-card__desc {
+    font-size: 0.82rem;
+    color: var(--cap-text-mid);
+    line-height: 1.55;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+article.cap-card.cap-card--compact .cap-card__body .cap-card__desc {
+    font-size: 0.75rem;
+    -webkit-line-clamp: 2;
+}
+
+article.cap-card .cap-card__body .cap-card__progress-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+article.cap-card .cap-card__body .cap-card__progress-block .cap-card__progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+article.cap-card .cap-card__body .cap-card__progress-block .cap-card__progress-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--cap-text-muted);
+}
+
+article.cap-card.cap-card--compact .cap-card__body .cap-card__progress-block .cap-card__progress-label {
+    font-size: 0.68rem;
+}
+
+article.cap-card .cap-card__body .cap-card__progress-block .cap-card__progress-pct {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--cap-green-dark);
+}
+
+article.cap-card .cap-card__body progress.cap-card__progress-bar.bulma-progress.bulma-is-success {
+    height: 6px;
+    border-radius: 99px;
+    background-color: #e5e3da;
+    margin-bottom: 0;
+    display: block;
+}
+
+article.cap-card .cap-card__body progress.cap-card__progress-bar.bulma-progress.bulma-is-success::-webkit-progress-bar {
+    background-color: #e5e3da;
+    border-radius: 99px;
+}
+
+article.cap-card .cap-card__body progress.cap-card__progress-bar.bulma-progress.bulma-is-success::-webkit-progress-value {
+    background-color: var(--cap-green);
+    border-radius: 99px;
+}
+
+article.cap-card .cap-card__body progress.cap-card__progress-bar.bulma-progress.bulma-is-success::-moz-progress-bar {
+    background-color: var(--cap-green);
+    border-radius: 99px;
+}
+
+article.cap-card .cap-card__body .cap-card__btn.bulma-button.bulma-is-warning.bulma-is-fullwidth {
+    background-color: var(--cap-yellow);
+    color: #1a1a1a;
+    border: none;
+    border-radius: 8px;
+    height: 2.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(245, 187, 0, 0.25);
+    transition: background-color 0.15s, box-shadow 0.15s, transform 0.12s;
+}
+
+article.cap-card.cap-card--compact .cap-card__body .cap-card__btn.bulma-button.bulma-is-warning.bulma-is-fullwidth {
+    height: 2.35rem;
+    font-size: 0.78rem;
+}
+
+article.cap-card .cap-card__body .cap-card__btn.bulma-button.bulma-is-warning.bulma-is-fullwidth:hover {
+    background-color: var(--cap-yellow-dark);
+    box-shadow: 0 4px 14px rgba(245, 187, 0, 0.4);
+    transform: translateY(-1px);
+}
+
+article.cap-card .cap-card__body .cap-card__btn.bulma-button.bulma-is-warning.bulma-is-fullwidth:active {
+    transform: translateY(0);
+}

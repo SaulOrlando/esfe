@@ -12,7 +12,7 @@
         }
         else
         {
-            <div class="cap-grid">
+            <div class="programs-home-grid">
                 @foreach (var program in Programs)
                 {
                     <ProgramCardComponent Id="@program.Id"
@@ -21,7 +21,8 @@
                                           Category="@GetCategoryName(program)"
                                           ProgressLabel="Progreso"
                                           Progress="@CalculateOverallProgress(program)"
-                                          ImageUrl="@program.ImagenUrl" />
+                                          ImageUrl="@program.ImagenUrl"
+                                          Compact="true" />
                 }
             </div>
         }

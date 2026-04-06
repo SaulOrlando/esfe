@@ -1,6 +1,6 @@
 @using ProyectoSocioEconomico.Domain.Entities
 
-<article class="cap-card">
+<article class="cap-card @(Compact ? "cap-card--compact" : string.Empty)">
     <div class="cap-card__image-wrap">
         @if (!string.IsNullOrEmpty(ImageUrl))
         {
@@ -45,6 +45,7 @@
     [Parameter] public string ProgressLabel { get; set; } = "Progress";
     [Parameter] public int Progress { get; set; }
     [Parameter] public string? ImageUrl { get; set; }
+    [Parameter] public bool Compact { get; set; }
 
     private static string GetCategoryClass(string? categoryName)
     {
