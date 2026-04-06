@@ -13,6 +13,7 @@ namespace ProyectoSocioEconomico.Application.Interfaces
         Task<Caso?> ObtenerPorBeneficiadoIdAsync(int usuarioId);
         Task<bool> UsuarioYaTieneCasoAsync(int usuarioId);
         Task Crear(Caso caso);
+        Task Actualizar(Caso caso);
         Task<List<Categoria>> ObtenerCategorias();
     }
 }

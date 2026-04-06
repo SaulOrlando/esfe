@@ -101,10 +101,33 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        public async Task Actualizar(Caso caso)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            var casoExistente = await context.Casos.FirstOrDefaultAsync(c => c.Id == caso.Id);
+            if (casoExistente == null)
+            {
+                throw new InvalidOperationException("No se encontró el caso a actualizar.");
+            }
+
+            casoExistente.Titulo = caso.Titulo;
+            casoExistente.Descripcion = caso.Descripcion;
+            casoExistente.IdCategoria = caso.IdCategoria;
+            casoExistente.Estado = caso.Estado;
+            casoExistente.ImagenUrl = caso.ImagenUrl;
+            casoExistente.FechaLimite = caso.FechaLimite;
+
+            await context.SaveChangesAsync();
+        }
+
         public async Task<List<Categoria>> ObtenerCategorias()
         {
             using var context = await _contextFactory.CreateDbContextAsync();
-            return await context.Categorias.ToListAsync();
+            return await context.Categorias
+                .Where(c => c.Estado == "Activo")
+                .OrderBy(c => c.Nombre)
+                .ToListAsync();
         }
     }
 }

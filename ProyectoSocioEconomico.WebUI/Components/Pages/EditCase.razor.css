@@ -1,40 +1,27 @@
-/* ═══════════════════════════════════════════════════════════════
-   EditCase.razor.css
-   Scoped styles – always use div.ec-page as root for specificity
-   ═══════════════════════════════════════════════════════════════ */
-
-/* ── TOKENS ──────────────────────────────────────────────────── */
 div.ec-page {
-    --ec-yellow:        #f5bb00;
-    --ec-yellow-dark:   #d9a600;
-    --ec-yellow-light:  #fef9e7;
-    --ec-green:         #22c55e;
-    --ec-green-dark:    #16a34a;
-    --ec-blue:          #3b82f6;
-    --ec-bg:            #f4f3ee;
-    --ec-white:         #ffffff;
-    --ec-text-dark:     #111111;
-    --ec-text-mid:      #4a4a4a;
-    --ec-text-muted:    #888;
-    --ec-border:        #dddbd2;
-    --ec-input-bg:      #f9f8f5;
-    --ec-shadow-card:   0 2px 16px rgba(0,0,0,0.07);
-    --ec-radius:        14px;
+    --ec-yellow: #f5bb00;
+    --ec-yellow-dark: #d9a600;
+    --ec-yellow-light: #fef9e7;
+    --ec-bg: #f4f3ee;
+    --ec-white: #ffffff;
+    --ec-text-dark: #111111;
+    --ec-text-mid: #4a4a4a;
+    --ec-text-muted: #888;
+    --ec-border: #dddbd2;
+    --ec-input-bg: #f9f8f5;
+    --ec-shadow-card: 0 2px 16px rgba(0,0,0,0.07);
+    --ec-radius: 14px;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    min-height: 100vh;
     background-color: var(--ec-bg);
     padding: 2.5rem 2.5rem 7rem;
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
-    max-width: 1060px;
+    max-width: 1120px;
     margin: 0 auto;
     width: 100%;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   PAGE HEADER
-   ═══════════════════════════════════════════════════════════════ */
 div.ec-page .ec-page-header {
     display: flex;
     align-items: flex-start;
@@ -43,56 +30,49 @@ div.ec-page .ec-page-header {
     flex-wrap: wrap;
 }
 
-div.ec-page .ec-page-header .ec-page-header__left .ec-page-header__title {
+div.ec-page .ec-page-header__title {
     font-size: 1.9rem;
     font-weight: 900;
-    color: var(--ec-blue);
+    color: var(--ec-text-dark);
     letter-spacing: -0.03em;
     line-height: 1.15;
     margin-bottom: 0.3rem;
 }
 
-div.ec-page .ec-page-header .ec-page-header__left .ec-page-header__subtitle {
-    font-size: 0.875rem;
+div.ec-page .ec-page-header__subtitle {
+    font-size: 0.92rem;
     color: var(--ec-text-muted);
 }
 
-/* Status badge */
-div.ec-page .ec-page-header .ec-status-badge {
+div.ec-page .ec-status-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     background: var(--ec-white);
     border: 1.5px solid var(--ec-border);
     border-radius: 99px;
-    padding: 0.4rem 1rem 0.4rem 0.7rem;
+    padding: 0.45rem 1rem 0.45rem 0.75rem;
     box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    flex-shrink: 0;
 }
 
-div.ec-page .ec-page-header .ec-status-badge .ec-status-badge__icon {
-    color: var(--ec-green);
-    font-size: 1rem;
-    line-height: 1;
+div.ec-page .ec-status-badge__icon {
+    color: var(--ec-yellow-dark);
 }
 
-div.ec-page .ec-page-header .ec-status-badge .ec-status-badge__label {
+div.ec-page .ec-status-badge__label {
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.07em;
     color: var(--ec-text-muted);
 }
 
-div.ec-page .ec-page-header .ec-status-badge .ec-status-badge__value {
+div.ec-page .ec-status-badge__value {
     font-size: 0.82rem;
     font-weight: 800;
-    color: var(--ec-green-dark);
+    color: var(--ec-text-dark);
     letter-spacing: 0.04em;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BODY LAYOUT
-   ═══════════════════════════════════════════════════════════════ */
 div.ec-page .ec-body {
     display: grid;
     grid-template-columns: 1fr 280px;
@@ -100,17 +80,13 @@ div.ec-page .ec-body {
     align-items: start;
 }
 
-/* ── MAIN COLUMN ── */
-div.ec-page .ec-body .ec-main {
+div.ec-page .ec-main {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   SHARED CARD
-   ═══════════════════════════════════════════════════════════════ */
-div.ec-page .ec-body .ec-main .ec-card {
+div.ec-page .ec-card {
     background: var(--ec-white);
     border: 1px solid var(--ec-border);
     border-radius: var(--ec-radius);
@@ -121,18 +97,20 @@ div.ec-page .ec-body .ec-main .ec-card {
     gap: 1.25rem;
 }
 
-/* Card title */
-div.ec-page .ec-body .ec-main .ec-card .ec-card__title {
+div.ec-page .ec-card--message {
+    max-width: 42rem;
+}
+
+div.ec-page .ec-card__title {
     display: flex;
     align-items: center;
     gap: 0.6rem;
     font-size: 1.05rem;
     font-weight: 800;
     color: var(--ec-text-dark);
-    letter-spacing: -0.01em;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-card__title .ec-card__title-icon {
+div.ec-page .ec-card__title-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -143,119 +121,93 @@ div.ec-page .ec-body .ec-main .ec-card .ec-card__title .ec-card__title-icon {
     flex-shrink: 0;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-card__title .ec-card__title-icon--yellow {
+div.ec-page .ec-card__title-icon--yellow {
     background: rgba(245,187,0,0.13);
     color: var(--ec-yellow-dark);
 }
 
-/* ── FORM GRID ── */
-div.ec-page .ec-body .ec-main .ec-card .ec-form-grid--2col {
+div.ec-page .ec-form-grid--2col {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.25rem;
 }
 
-/* Field */
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field {
+div.ec-page .ec-field.bulma-field {
     margin-bottom: 0;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field--full {
+div.ec-page .ec-field--full {
     grid-column: 1 / -1;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field--narrow {
-    max-width: 260px;
+div.ec-page .ec-field--narrow {
+    max-width: 320px;
 }
 
-/* Label */
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-label.bulma-label {
+div.ec-page .ec-label.bulma-label {
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--ec-text-mid);
     margin-bottom: 0.45rem;
 }
 
-/* Input */
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-input.bulma-input {
+div.ec-page .ec-input.bulma-input,
+div.ec-page .ec-select,
+div.ec-page .ec-textarea.bulma-textarea {
     background: var(--ec-input-bg);
     border: 1.5px solid var(--ec-border);
     border-radius: 8px;
-    height: 2.85rem;
     font-size: 0.9rem;
     color: var(--ec-text-dark);
-    padding: 0 1rem;
     box-shadow: none;
-    transition: border-color 0.18s, box-shadow 0.18s;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-input.bulma-input::placeholder {
-    color: #c0bdb5;
+div.ec-page .ec-input.bulma-input,
+div.ec-page .ec-select {
+    height: 2.85rem;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-input.bulma-input:focus {
-    border-color: var(--ec-blue);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.13);
-    outline: none;
+div.ec-page .ec-input.bulma-input {
+    padding: 0 1rem;
 }
 
-/* Select */
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .bulma-select.bulma-is-fullwidth.ec-select-wrap {
+div.ec-page .ec-select-wrap.bulma-select.bulma-is-fullwidth {
     width: 100%;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .bulma-select.bulma-is-fullwidth.ec-select-wrap .ec-select {
-    background: var(--ec-input-bg);
-    border: 1.5px solid var(--ec-border);
-    border-radius: 8px;
-    height: 2.85rem;
-    font-size: 0.9rem;
-    color: var(--ec-text-dark);
+div.ec-page .ec-select {
     width: 100%;
     padding-left: 1rem;
     cursor: pointer;
-    box-shadow: none;
-    transition: border-color 0.18s, box-shadow 0.18s;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .bulma-select.bulma-is-fullwidth.ec-select-wrap .ec-select:focus {
-    border-color: var(--ec-blue);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.13);
-    outline: none;
-}
-
-/* Textarea */
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-textarea.bulma-textarea {
-    background: var(--ec-input-bg);
-    border: 1.5px solid var(--ec-border);
-    border-radius: 8px;
-    font-size: 0.9rem;
+div.ec-page .ec-textarea.bulma-textarea {
     font-family: inherit;
-    color: var(--ec-text-dark);
     padding: 0.85rem 1rem;
     resize: vertical;
-    box-shadow: none;
     line-height: 1.7;
-    min-height: 150px;
-    transition: border-color 0.18s, box-shadow 0.18s;
+    min-height: 170px;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-textarea.bulma-textarea:focus {
-    border-color: var(--ec-blue);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.13);
+div.ec-page .ec-input.bulma-input:focus,
+div.ec-page .ec-select:focus,
+div.ec-page .ec-textarea.bulma-textarea:focus {
+    border-color: var(--ec-yellow);
+    box-shadow: 0 0 0 3px rgba(245,187,0,0.13);
     outline: none;
 }
 
-/* Word count */
-div.ec-page .ec-body .ec-main .ec-card .ec-char-count {
-    font-size: 0.75rem;
+div.ec-page .ec-char-count,
+div.ec-page .ec-field-note {
+    font-size: 0.76rem;
     color: var(--ec-text-muted);
-    text-align: right;
-    margin-top: 0.35rem;
 }
 
-/* Money input */
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-money-wrap {
+div.ec-page .ec-char-count {
+    text-align: right;
+}
+
+div.ec-page .ec-money-wrap {
     display: flex;
     align-items: center;
     background: var(--ec-input-bg);
@@ -263,177 +215,69 @@ div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-c
     border-radius: 8px;
     height: 2.85rem;
     overflow: hidden;
-    transition: border-color 0.18s, box-shadow 0.18s;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-money-wrap:focus-within {
-    border-color: var(--ec-blue);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.13);
+div.ec-page .ec-money-wrap--disabled {
+    background: #f1efe8;
+    border-color: #e4dfcf;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-money-wrap .ec-money-prefix {
+div.ec-page .ec-money-prefix {
     padding: 0 0.6rem 0 1rem;
     font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--ec-text-muted);
-    flex-shrink: 0;
-    user-select: none;
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-money-wrap .ec-input--money.bulma-input {
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    height: 100%;
-    padding: 0;
-    font-size: 0.9rem;
-    color: var(--ec-text-dark);
-    box-shadow: none;
-    flex: 1;
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-field.bulma-field .ec-control.bulma-control .ec-money-wrap .ec-input--money.bulma-input:focus {
-    outline: none;
-    box-shadow: none;
-    border: none;
-}
-
-/* Field note */
-div.ec-page .ec-body .ec-main .ec-card .ec-field--narrow .ec-field-note {
-    font-size: 0.76rem;
-    color: var(--ec-text-muted);
-    margin-top: 0.4rem;
-}
-
-/* ── CASE EVIDENCE ── */
-div.ec-page .ec-body .ec-main .ec-card .ec-card__evidence-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-card__evidence-header .ec-doc-count {
-    font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
     color: var(--ec-text-muted);
-    text-transform: uppercase;
 }
 
-/* Evidence grid */
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid {
+div.ec-page .ec-input--money.bulma-input {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+div.ec-page .ec-input--money.bulma-input[disabled] {
+    color: var(--ec-text-mid);
+    -webkit-text-fill-color: var(--ec-text-mid);
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+div.ec-page .ec-summary-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
 }
 
-/* Existing doc thumbnail */
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-thumb {
-    position: relative;
-    aspect-ratio: 3/2;
-    border-radius: 10px;
-    overflow: hidden;
+div.ec-page .ec-summary-item {
     border: 1px solid var(--ec-border);
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-thumb .ec-evidence-thumb__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-thumb .ec-evidence-thumb__remove {
-    position: absolute;
-    top: 0.4rem;
-    right: 0.4rem;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.55);
-    border: none;
-    color: #fff;
-    font-size: 0.65rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.15s;
-    opacity: 0;
-    transition: opacity 0.18s;
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-thumb:hover .ec-evidence-thumb__remove {
-    opacity: 1;
-}
-
-/* Add evidence box */
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-add {
-    aspect-ratio: 3/2;
-    border: 1.5px dashed var(--ec-border);
-    border-radius: 10px;
-    background: #fafaf7;
+    border-radius: 12px;
+    padding: 1rem;
+    background: #fcfbf8;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: border-color 0.18s, background 0.18s;
+    gap: 0.35rem;
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-add:hover {
-    border-color: var(--ec-yellow);
-    background: var(--ec-yellow-light);
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-add .ec-evidence-add__input {
-    display: none;
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-add .ec-evidence-add__icon {
-    font-size: 1.35rem;
-    color: var(--ec-text-muted);
-}
-
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid .ec-evidence-add .ec-evidence-add__label {
-    font-size: 0.68rem;
+div.ec-page .ec-summary-item__label {
+    font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: var(--ec-text-muted);
     text-transform: uppercase;
-}
-
-/* Evidence note */
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.4rem;
-    font-size: 0.78rem;
     color: var(--ec-text-muted);
-    line-height: 1.55;
-    padding: 0.75rem 0.9rem;
-    background: rgba(245,187,0,0.06);
-    border-radius: 8px;
-    border: 1px solid rgba(245,187,0,0.18);
 }
 
-div.ec-page .ec-body .ec-main .ec-card .ec-evidence-note .bulma-icon {
-    color: var(--ec-yellow-dark);
-    flex-shrink: 0;
-    margin-top: 1px;
+div.ec-page .ec-summary-item__value {
+    color: var(--ec-text-dark);
+    font-size: 1rem;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RIGHT SIDEBAR — TIPS
-   ═══════════════════════════════════════════════════════════════ */
-div.ec-page .ec-body aside.ec-sidebar {
+div.ec-page aside.ec-sidebar {
     position: sticky;
     top: 1.5rem;
 }
 
-div.ec-page .ec-body aside.ec-sidebar .ec-tips-card {
+div.ec-page .ec-tips-card {
     background: var(--ec-yellow-light);
     border: 1px solid rgba(245,187,0,0.25);
     border-radius: var(--ec-radius);
@@ -441,7 +285,7 @@ div.ec-page .ec-body aside.ec-sidebar .ec-tips-card {
     box-shadow: 0 2px 12px rgba(245,187,0,0.1);
 }
 
-div.ec-page .ec-body aside.ec-sidebar .ec-tips-card .ec-tips-card__title {
+div.ec-page .ec-tips-card__title {
     display: flex;
     align-items: center;
     gap: 0.55rem;
@@ -449,16 +293,13 @@ div.ec-page .ec-body aside.ec-sidebar .ec-tips-card .ec-tips-card__title {
     font-weight: 800;
     color: var(--ec-text-dark);
     margin-bottom: 1.15rem;
-    letter-spacing: -0.01em;
 }
 
-div.ec-page .ec-body aside.ec-sidebar .ec-tips-card .ec-tips-card__title .ec-tips-card__icon {
+div.ec-page .ec-tips-card__icon {
     color: var(--ec-yellow-dark);
-    font-size: 1rem;
 }
 
-/* Tips list */
-div.ec-page .ec-body aside.ec-sidebar .ec-tips-card ol.ec-tips-list {
+div.ec-page ol.ec-tips-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -467,13 +308,13 @@ div.ec-page .ec-body aside.ec-sidebar .ec-tips-card ol.ec-tips-list {
     margin: 0;
 }
 
-div.ec-page .ec-body aside.ec-sidebar .ec-tips-card ol.ec-tips-list .ec-tips-list__item {
+div.ec-page .ec-tips-list__item {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
 }
 
-div.ec-page .ec-body aside.ec-sidebar .ec-tips-card ol.ec-tips-list .ec-tips-list__item .ec-tips-list__num {
+div.ec-page .ec-tips-list__num {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -488,7 +329,7 @@ div.ec-page .ec-body aside.ec-sidebar .ec-tips-card ol.ec-tips-list .ec-tips-lis
     margin-top: 1px;
 }
 
-div.ec-page .ec-body aside.ec-sidebar .ec-tips-card ol.ec-tips-list .ec-tips-list__item strong {
+div.ec-page .ec-tips-list__item strong {
     display: block;
     font-size: 0.82rem;
     font-weight: 700;
@@ -496,16 +337,13 @@ div.ec-page .ec-body aside.ec-sidebar .ec-tips-card ol.ec-tips-list .ec-tips-lis
     margin-bottom: 0.2rem;
 }
 
-div.ec-page .ec-body aside.ec-sidebar .ec-tips-card ol.ec-tips-list .ec-tips-list__item p {
+div.ec-page .ec-tips-list__item p {
     font-size: 0.78rem;
     color: var(--ec-text-mid);
     line-height: 1.5;
     margin: 0;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   BOTTOM ACTION BAR
-   ═══════════════════════════════════════════════════════════════ */
 div.ec-page .ec-action-bar {
     position: fixed;
     bottom: 0;
@@ -522,57 +360,54 @@ div.ec-page .ec-action-bar {
     box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
 }
 
-div.ec-page .ec-action-bar .ec-action-bar__cancel {
+div.ec-page .ec-action-bar__cancel {
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--ec-text-muted);
-    text-decoration: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
     padding: 0 0.5rem;
-    transition: color 0.15s;
 }
 
-div.ec-page .ec-action-bar .ec-action-bar__cancel:hover {
+div.ec-page .ec-action-bar__cancel:hover {
     color: var(--ec-text-dark);
 }
 
-div.ec-page .ec-action-bar .ec-btn-update.bulma-button.bulma-is-warning {
+div.ec-page .ec-btn-update.bulma-button.bulma-is-warning,
+div.ec-page .ec-btn-back {
     background-color: var(--ec-yellow);
     color: #1a1a1a;
     border: none;
     border-radius: 10px;
-    height: 3rem;
+    min-height: 3rem;
     padding: 0 1.75rem;
     font-size: 0.95rem;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    cursor: pointer;
+    text-decoration: none;
     box-shadow: 0 3px 12px rgba(245,187,0,0.3);
-    transition: background-color 0.15s, transform 0.12s, box-shadow 0.15s;
 }
 
-div.ec-page .ec-action-bar .ec-btn-update.bulma-button.bulma-is-warning:hover {
+div.ec-page .ec-btn-update.bulma-button.bulma-is-warning:hover,
+div.ec-page .ec-btn-back:hover {
     background-color: var(--ec-yellow-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 5px 18px rgba(245,187,0,0.42);
 }
 
-div.ec-page .ec-action-bar .ec-btn-update.bulma-button.bulma-is-warning:active {
-    transform: translateY(0);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 860px) {
     div.ec-page .ec-body {
         grid-template-columns: 1fr;
     }
 
-    div.ec-page .ec-body aside.ec-sidebar {
+    div.ec-page aside.ec-sidebar {
         position: static;
-        order: -1;
+    }
+
+    div.ec-page .ec-summary-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -581,23 +416,23 @@ div.ec-page .ec-action-bar .ec-btn-update.bulma-button.bulma-is-warning:active {
         padding: 1.5rem 1rem 7rem;
     }
 
-    div.ec-page .ec-body .ec-main .ec-card {
+    div.ec-page .ec-card {
         padding: 1.35rem 1.1rem;
     }
 
-    div.ec-page .ec-body .ec-main .ec-card .ec-form-grid--2col {
+    div.ec-page .ec-form-grid--2col {
         grid-template-columns: 1fr;
     }
 
-    div.ec-page .ec-body .ec-main .ec-card .ec-field--narrow {
+    div.ec-page .ec-field--narrow {
         max-width: 100%;
     }
 
-    div.ec-page .ec-body .ec-main .ec-card .ec-evidence-grid {
-        grid-template-columns: 1fr 1fr;
+    div.ec-page .ec-page-header__title {
+        font-size: 1.5rem;
     }
 
-    div.ec-page .ec-page-header .ec-page-header__left .ec-page-header__title {
-        font-size: 1.5rem;
+    div.ec-page .ec-action-bar {
+        flex-direction: column;
     }
 }
