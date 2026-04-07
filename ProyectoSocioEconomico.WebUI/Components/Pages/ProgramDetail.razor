@@ -13,7 +13,6 @@
 else
 {
     <div class="pd-page">
-        <!-- ═══════════════ HERO ═══════════════ -->
         <div class="pd-hero">
             @if (!string.IsNullOrEmpty(Program.ImagenUrl))
             {
@@ -30,13 +29,10 @@ else
             </div>
         </div>
 
-        <!-- ═══════════════ BODY ═══════════════ -->
         <div class="pd-body">
 
-            <!-- ── LEFT / MAIN COLUMN ── -->
             <div class="pd-body__main">
 
-                <!-- Mission Statement -->
                 <section class="pd-section">
                     <h2 class="pd-section__heading">
                         <span class="pd-section__heading-icon">
@@ -47,7 +43,6 @@ else
                     <p class="pd-section__text">@Program.Descripcion</p>
                 </section>
 
-                <!-- Impact Goals (Based on Cases) -->
                 <section class="pd-section">
                     <h3 class="pd-section__subheading">Program Impact Goals</h3>
                     @if (Program.IdCasos.Any())
@@ -83,7 +78,6 @@ else
                     }
                 </section>
 
-                <!-- Socioeconomic Impact Data -->
                 <section class="pd-impact-card">
                     <div class="pd-impact-card__header">
                         <div>
@@ -125,9 +119,8 @@ else
                     </div>
                 </section>
 
-            </div><!-- /pd-body__main -->
+            </div>
 
-            <!-- ── RIGHT SIDEBAR ── -->
             <aside class="pd-body__sidebar">
                 <div class="pd-support-card">
                     <h3 class="pd-support-card__title">Support This Program</h3>
@@ -144,7 +137,7 @@ else
                 </div>
             </aside>
 
-        </div><!-- /pd-body -->
+        </div>
     </div>
 }
 
@@ -178,7 +171,7 @@ else
         return new List<MetricItem>
         {
             new("Cases Progress", $"{casosCompletados} of {totalCasos} Completed", CalcularPorcentaje(totalCasos, casosCompletados)),
-            new("Community Engagement", $"{totalDonadores} Active Donors", Math.Min(totalDonadores * 5, 100)), // Dummy calc for progress
+            new("Community Engagement", $"{totalDonadores} Active Donors", Math.Min(totalDonadores * 5, 100)),
             new("Overall Funding", totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV")), 
                 CalcularPorcentaje(Program.MetaFinanciera, totalRecaudado))
         };
