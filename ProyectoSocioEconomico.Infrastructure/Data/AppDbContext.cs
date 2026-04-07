@@ -67,6 +67,7 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.IdCategoria)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
+            entity.Ignore(e => e.IdProgramas);
         });
 
         modelBuilder.Entity<Categoria>(entity =>
@@ -101,6 +102,8 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.IdDonador, "IX_Donaciones_IdDonador");
 
+            entity.HasIndex(e => e.IdPrograma, "IX_Donaciones_IdPrograma");
+
             entity.Property(e => e.Estado).HasMaxLength(20);
             entity.Property(e => e.MetodoPago).HasMaxLength(50);
             entity.Property(e => e.Monto).HasColumnType("decimal(18, 2)");
@@ -111,6 +114,10 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.IdDonadorNavigation).WithMany(p => p.Donaciones)
                 .HasForeignKey(d => d.IdDonador)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.IdProgramaNavigation).WithMany(p => p.Donaciones)
+                .HasForeignKey(d => d.IdPrograma)
                 .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
@@ -165,6 +172,8 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.CreadoPorNavigation).WithMany(p => p.Programas)
                 .HasForeignKey(d => d.CreadoPor)
                 .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.Ignore(e => e.IdCasos);
         });
 
         modelBuilder.Entity<Retiro>(entity =>

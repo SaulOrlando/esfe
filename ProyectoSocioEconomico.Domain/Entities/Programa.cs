@@ -29,6 +29,8 @@ public partial class Programa
 
     public virtual Categoria IdCategoriaNavigation { get; set; } = null!;
 
+    public virtual ICollection<Donacione> Donaciones { get; set; } = new List<Donacione>();
+
     public virtual ICollection<InscripcionesVoluntario> InscripcionesVoluntarios { get; set; } = new List<InscripcionesVoluntario>();
 
     [NotMapped]

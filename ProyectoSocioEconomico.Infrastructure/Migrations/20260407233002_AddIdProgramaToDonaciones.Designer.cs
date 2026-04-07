@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProyectoSocioEconomico.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using ProyectoSocioEconomico.Infrastructure.Data;
 namespace ProyectoSocioEconomico.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260407233002_AddIdProgramaToDonaciones")]
+    partial class AddIdProgramaToDonaciones
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -575,7 +578,7 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("ProyectoSocioEconomico.Domain.Entities.Programa", "IdProgramaNavigation")
-                        .WithMany("Donaciones")
+                        .WithMany()
                         .HasForeignKey("IdPrograma");
 
                     b.Navigation("IdCasoNavigation");
@@ -677,8 +680,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
 
             modelBuilder.Entity("ProyectoSocioEconomico.Domain.Entities.Programa", b =>
                 {
-                    b.Navigation("Donaciones");
-
                     b.Navigation("InscripcionesVoluntarios");
                 });
 

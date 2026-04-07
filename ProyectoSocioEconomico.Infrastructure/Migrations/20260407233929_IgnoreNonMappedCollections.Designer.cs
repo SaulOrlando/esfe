@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProyectoSocioEconomico.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using ProyectoSocioEconomico.Infrastructure.Data;
 namespace ProyectoSocioEconomico.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260407233929_IgnoreNonMappedCollections")]
+    partial class IgnoreNonMappedCollections
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,7 +209,12 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<int?>("ProgramaId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ProgramaId");
 
                     b.HasIndex(new[] { "IdCaso" }, "IX_Donaciones_IdCaso");
 
@@ -575,8 +583,12 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("ProyectoSocioEconomico.Domain.Entities.Programa", "IdProgramaNavigation")
-                        .WithMany("Donaciones")
+                        .WithMany()
                         .HasForeignKey("IdPrograma");
+
+                    b.HasOne("ProyectoSocioEconomico.Domain.Entities.Programa", null)
+                        .WithMany("Donaciones")
+                        .HasForeignKey("ProgramaId");
 
                     b.Navigation("IdCasoNavigation");
 

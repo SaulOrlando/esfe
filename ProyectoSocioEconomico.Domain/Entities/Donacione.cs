@@ -7,7 +7,9 @@ public partial class Donacione
 {
     public int Id { get; set; }
 
-    public int IdCaso { get; set; }
+    public int? IdCaso { get; set; }
+
+    public int? IdPrograma { get; set; }
 
     public int IdDonador { get; set; }
 
@@ -23,7 +25,9 @@ public partial class Donacione
 
     public virtual ICollection<Comprobante> Comprobantes { get; set; } = new List<Comprobante>();
 
-    public virtual Caso IdCasoNavigation { get; set; } = null!;
+    public virtual Caso? IdCasoNavigation { get; set; }
+
+    public virtual Programa? IdProgramaNavigation { get; set; }
 
     public virtual Usuario IdDonadorNavigation { get; set; } = null!;
 }

@@ -1,142 +1,167 @@
 @page "/programs/{Id:int}"
 @using ProyectoSocioEconomico.Application.Interfaces
 @using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.WebUI.Services
 @using System.Globalization
 @inject IProgramaService ProgramaService
+@inject IUsuarioService UsuarioService
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
 
 @if (Program == null)
 {
     <div class="bulma-container">
-        <p>Loading program details...</p>
+        <p>Cargando detalles del programa...</p>
     </div>
 }
 else
 {
-    <div class="pd-page">
-        <div class="pd-hero">
-            @if (!string.IsNullOrEmpty(Program.ImagenUrl))
-            {
-                <img class="pd-hero__image" src="@Program.ImagenUrl" alt="@Program.Nombre" />
-            }
-            else
-            {
-                <img class="pd-hero__image" src="https://images.unsplash.com/photo-1548438294-1ad5d5f4f063?w=1200&q=80" alt="Placeholder" />
-            }
-            <div class="pd-hero__overlay"></div>
-            <div class="pd-hero__content">
-                <span class="pd-hero__status-badge">@Program.Estado.ToUpper()</span>
-                <h1 class="pd-hero__title">@Program.Nombre</h1>
-            </div>
-        </div>
+    var totalRecaudado = Program.Donaciones?.Where(d => d.Estado == "Completado").Sum(d => d.Monto) ?? 0m;
+    var progreso = CalcularPorcentaje(Program.MetaFinanciera, totalRecaudado);
+    var puedeDonar = !string.Equals(Program.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase);
 
-        <div class="pd-body">
+    <div class="cd-page">
+        <div class="cd-layout">
+            <main class="cd-main">
+                <article class="cd-hero-card">
+                    <div class="cd-hero-card__image-wrap">
+                        @if (!string.IsNullOrEmpty(Program.ImagenUrl))
+                        {
+                            <img class="cd-hero-card__image" src="@Program.ImagenUrl" alt="@Program.Nombre" />
+                        }
+                        else
+                        {
+                            <img class="cd-hero-card__image" src="https://images.unsplash.com/photo-1548438294-1ad5d5f4f063?w=1200&q=80" alt="Placeholder" />
+                        }
+                        <div class="cd-hero-card__overlay"></div>
+                        <div class="cd-hero-card__identity">
+                            <img class="cd-hero-card__avatar" src="@(Program.CreadoPorNavigation?.ImagenPerfil ?? "wwwroot/uploads/profiles/DefaultProfile.png")" alt="Avatar" />
+                            <div class="cd-hero-card__id-text">
+                                <h1 class="cd-hero-card__name">@Program.Nombre</h1>
+                                <span class="cd-hero-card__location">
+                                    <i class="fas fa-user-tie"></i> Creado por @(Program.CreadoPorNavigation?.Nombre) @(Program.CreadoPorNavigation?.Apellido)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="pd-body__main">
+                    <div class="cd-hero-card__body">
+                        <div class="cd-tags">
+                            <span class="cd-tag cd-tag--verified">
+                                <i class="fas fa-check-circle"></i> PROGRAMA INSTITUCIONAL
+                            </span>
+                            <span class="cd-tag">@Program.IdCategoriaNavigation?.Nombre.ToUpper()</span>
+                            <span class="cd-tag">@Program.Estado.ToUpper()</span>
+                        </div>
+                        <div class="cd-impact">
+                            <h2 class="cd-impact__title">Resumen del Impacto</h2>
+                            <p class="cd-impact__quote">
+                                Este programa busca proporcionar apoyo directo para cubrir necesidades de @Program.IdCategoriaNavigation?.Nombre.
+                            </p>
+                        </div>
+                    </div>
+                </article>
 
-                <section class="pd-section">
-                    <h2 class="pd-section__heading">
-                        <span class="pd-section__heading-icon">
-                            <i class="fas fa-flag"></i>
-                        </span>
-                        Mission Statement
-                    </h2>
-                    <p class="pd-section__text">@Program.Descripcion</p>
+                <section class="cd-story-card">
+                    <h3 class="cd-story-card__title">
+                        <i class="fas fa-book-open cd-story-card__title-icon"></i>
+                        Descripción del Programa
+                    </h3>
+                    <div class="cd-story-card__body">
+                        <p>@Program.Descripcion</p>
+                    </div>
                 </section>
 
-                <section class="pd-section">
-                    <h3 class="pd-section__subheading">Program Impact Goals</h3>
-                    @if (Program.IdCasos.Any())
-                    {
-                        <div class="pd-goals-grid">
-                            @foreach (var caso in Program.IdCasos)
-                            {
-                                decimal totalRecaudado = caso.Donaciones.Sum(d => d.Monto);
-                                int progreso = CalcularPorcentaje(caso.Meta, totalRecaudado);
-
-                                <div class="pd-goal-card" @key="caso.Id">
-                                    <span class="pd-goal-card__icon">
-                                        <i class="fas fa-bullseye"></i>
-                                    </span>
-                                    <p class="pd-goal-card__value">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</p>
-                                    <p class="pd-goal-card__desc">@caso.Titulo</p>
-                                    <div class="pd-goal-card__progress-wrap">
-                                        <progress class="bulma-progress bulma-is-success pd-goal-card__bar"
-                                                  value="@progreso" max="100">
-                                            @progreso%
-                                        </progress>
-                                        <p class="pd-goal-card__progress-label">Goal: @caso.Meta.ToString("C", CultureInfo.GetCultureInfo("es-SV")) (@progreso%)</p>
-                                    </div>
-                                </div>
-                            }
+                <section class="cd-metrics-card">
+                    <div class="cd-vuln">
+                        <span class="cd-vuln__label">ESTADO ACTUAL</span>
+                        <div class="cd-vuln__ring-wrap">
+                            <svg class="cd-vuln__svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e6e4dc" stroke-width="8" />
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#22c55e" stroke-width="8"
+                                        stroke-dasharray="@(progreso * 2.82) 282" stroke-linecap="round" transform="rotate(-90 50 50)" />
+                            </svg>
+                            <div class="cd-vuln__center">
+                                <span class="cd-vuln__score">@progreso<span class="cd-vuln__denom">%</span></span>
+                                <span class="cd-vuln__badge">RECAUDADO</span>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="cd-metric-analysis">
+                        <span class="cd-metric-analysis__label">Análisis de Meta Financiera</span>
+                        <div class="cd-metric-row">
+                            <div class="cd-metric-row__header">
+                                <span class="cd-metric-row__name">Monto Recaudado</span>
+                                <span class="cd-metric-row__pct">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                            </div>
+                            <div class="cd-metric-row__track">
+                                <div class="cd-metric-row__fill" style="width: @progreso%"></div>
+                            </div>
+                        </div>
+                        <div class="cd-metric-row">
+                            <div class="cd-metric-row__header">
+                                <span class="cd-metric-row__name">Meta del Programa</span>
+                                <span class="cd-metric-row__pct">@Program.MetaFinanciera.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="cd-sidebar">
+                <div class="cd-sidebar__funding">
+                    <div class="cd-sidebar__funding-top">
+                        <span class="cd-sidebar__amount">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                        <span class="cd-sidebar__goal">de @Program.MetaFinanciera.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                    </div>
+                    <div class="cd-sidebar__progress-track">
+                        <div class="cd-sidebar__progress-fill" style="width: @progreso%"></div>
+                    </div>
+                    <div class="cd-sidebar__funding-meta">
+                        <span class="cd-sidebar__funded-pct">@progreso% COMPLETADO</span>
+                        <span class="cd-sidebar__days-left">@Program.Donaciones?.Count(d => d.Estado == "Completado") DONANTES</span>
+                    </div>
+
+                    @if (puedeDonar)
+                    {
+                        <button type="button"
+                                class="bulma-button bulma-is-warning bulma-is-fullwidth cd-sidebar__btn-support"
+                                @onclick="HandleDonateClick">
+                            <i class="fas fa-heart"></i>
+                            <strong>Contribuir al Programa</strong>
+                        </button>
                     }
                     else
                     {
-                        <div class="bulma-notification bulma-is-light">
-                            Este programa ya no tiene casos asociados. Su seguimiento se realiza a nivel del programa.
-                        </div>
+                        <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
+                            <i class="fas fa-lock"></i>
+                            <strong>Programa inactivo</strong>
+                        </button>
                     }
-                </section>
+                </div>
 
-                <section class="pd-impact-card">
-                    <div class="pd-impact-card__header">
+                <div class="cd-sidebar__trust">
+                    <div class="cd-sidebar__trust-item">
+                        <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--green">
+                            <i class="fas fa-shield-heart"></i>
+                        </div>
                         <div>
-                            <h3 class="pd-impact-card__title">Socioeconomic Impact Data</h3>
-                            <p class="pd-impact-card__subtitle">Real-time progress vs Baseline metrics</p>
-                        </div>
-                        <div class="pd-impact-card__legend">
-                            <span class="pd-impact-card__legend-item">
-                                <span class="pd-impact-card__legend-dot pd-impact-card__legend-dot--current"></span>
-                                CURRENT
-                            </span>
-                            <span class="pd-impact-card__legend-item">
-                                <span class="pd-impact-card__legend-dot pd-impact-card__legend-dot--target"></span>
-                                TARGET
-                            </span>
+                            <h4 class="cd-sidebar__trust-title">Donación Institucional</h4>
+                            <p class="cd-sidebar__trust-desc">Tu aporte apoya directamente las metas del programa.</p>
                         </div>
                     </div>
-
-                    <div class="pd-impact-card__metrics">
-                        @{
-                            var metrics = GetProgramMetrics();
-                            foreach (var metric in metrics)
-                            {
-                                <div class="pd-metric">
-                                    <div class="pd-metric__header">
-                                        <span class="pd-metric__label">@metric.Label</span>
-                                        <span class="pd-metric__achievement">@metric.Achievement</span>
-                                    </div>
-                                    <div class="pd-metric__track">
-                                        <div class="pd-metric__bar-bg">
-                                            <div class="pd-metric__bar-fill" style="width: @(metric.Progress)%">
-                                                <span class="pd-metric__bar-text">@(metric.Progress)% PROGRESS</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
+                    <div class="cd-sidebar__trust-item">
+                        <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--yellow">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div>
+                            <h4 class="cd-sidebar__trust-title">Transparencia Total</h4>
+                            <p class="cd-sidebar__trust-desc">Reportes regulares sobre el impacto del programa.</p>
+                        </div>
                     </div>
-                </section>
-
-            </div>
-
-            <aside class="pd-body__sidebar">
-                <div class="pd-support-card">
-                    <h3 class="pd-support-card__title">Support This Program</h3>
-                    <p class="pd-support-card__desc">
-                        Your contribution directly funds the infrastructure and training initiatives within this program.
-                    </p>
-                    <p class="pd-support-card__desc">
-                        Meta financiera: @Program.MetaFinanciera.ToString("C", CultureInfo.GetCultureInfo("es-SV"))
-                    </p>
-                    <a href="/donate/program/@Program.Id"
-                       class="bulma-button bulma-is-warning bulma-is-fullwidth pd-support-card__btn">
-                        <strong>Contribute to Program</strong>
-                    </a>
                 </div>
             </aside>
-
         </div>
     </div>
 }
@@ -145,10 +170,20 @@ else
     [Parameter] public int Id { get; set; }
 
     private Programa? Program { get; set; }
+    private Usuario? CurrentUser { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Program = await ProgramaService.ObtenerPorIdConDetallesAsync(Id);
+
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userIdStr = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (int.TryParse(userIdStr, out var userId))
+        {
+            CurrentUser = await UsuarioService.ObtenerPorId(userId);
+        }
     }
 
     private int CalcularPorcentaje(decimal meta, decimal actual)
@@ -157,23 +192,9 @@ else
         return Math.Clamp((int)Math.Round((actual / meta) * 100), 0, 100);
     }
 
-    private record MetricItem(string Label, string Achievement, int Progress);
-
-    private List<MetricItem> GetProgramMetrics()
+    private void HandleDonateClick()
     {
-        if (Program == null || Program.IdCasos == null) return new();
-
-        var totalCasos = Program.IdCasos.Count;
-        var casosCompletados = Program.IdCasos.Count(c => c.Donaciones.Sum(d => d.Monto) >= c.Meta);
-        var totalDonadores = Program.IdCasos.SelectMany(c => c.Donaciones).Select(d => d.IdDonador).Distinct().Count();
-        var totalRecaudado = Program.IdCasos.SelectMany(c => c.Donaciones).Sum(d => d.Monto);
-
-        return new List<MetricItem>
-        {
-            new("Cases Progress", $"{casosCompletados} of {totalCasos} Completed", CalcularPorcentaje(totalCasos, casosCompletados)),
-            new("Community Engagement", $"{totalDonadores} Active Donors", Math.Min(totalDonadores * 5, 100)),
-            new("Overall Funding", totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV")), 
-                CalcularPorcentaje(Program.MetaFinanciera, totalRecaudado))
-        };
+        // Enviar a DonacionProgram sin validación (como pidió el usuario)
+        Navigation.NavigateTo($"/donate/program/{Id}");
     }
 }

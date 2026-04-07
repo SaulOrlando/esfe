@@ -1,7 +1,6 @@
 @page "/donate/program/{ProgramId:int}"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.EntityFrameworkCore
 @using ProyectoSocioEconomico.Application.Interfaces
 @using ProyectoSocioEconomico.Domain.Entities
 @using ProyectoSocioEconomico.Infrastructure.Data
@@ -20,7 +19,7 @@
     {
         <div class="dn-card dn-card--message">
             <h1 class="dn-card__title">Cargando checkout...</h1>
-            <p class="dn-card__subtitle">Estamos preparando la información de la donación del programa.</p>
+            <p class="dn-card__subtitle">Estamos preparando la información de la donación.</p>
         </div>
     }
     else if (Program is null)
@@ -40,7 +39,7 @@
                 <div class="dn-card">
                     <div class="dn-card__top">
                         <h1 class="dn-card__title">Apoyar este programa</h1>
-                        <p class="dn-card__subtitle">Las donaciones a programa requieren una relación con casos, y esa relación ya no existe en el modelo actual.</p>
+                        <p class="dn-card__subtitle">Su contribución se registra directamente como apoyo a este programa institucional.</p>
                     </div>
 
                     @if (!string.IsNullOrWhiteSpace(FeedbackMessage))
@@ -53,15 +52,8 @@
                     <section class="dn-step">
                         <h2 class="dn-step__heading">
                             <span class="dn-step__num">1</span>
-                            Estado actual
+                            Seleccione el monto
                         </h2>
-                        <div class="bulma-notification bulma-is-warning bulma-is-light">
-                            Esta vista quedó deshabilitada porque `Programa` ya no está relacionado con `Caso`.
-                        </div>
-                    </section>
-
-                    <section class="dn-step">
-                        <h2 class="dn-step__heading"><span class="dn-step__num">2</span> Seleccione el monto</h2>
 
                         <div class="dn-amounts">
                             @foreach (var preset in PresetAmounts)
@@ -88,7 +80,10 @@
                     </section>
 
                     <section class="dn-step">
-                        <h2 class="dn-step__heading"><span class="dn-step__num">3</span> Método de pago</h2>
+                        <h2 class="dn-step__heading">
+                            <span class="dn-step__num">2</span>
+                            Método de pago
+                        </h2>
 
                         <div class="dn-methods">
                             <button type="button"
@@ -176,7 +171,7 @@
                     <div class="dn-submit-wrap">
                         <button type="submit"
                                 class="bulma-button bulma-is-warning bulma-is-fullwidth dn-btn-complete"
-                                disabled="@IsSubmitDisabled">
+                                disabled="@(IsSubmitting || CurrentUser is null || IsProgramClosed)">
                             <strong>@(IsSubmitting ? "Procesando..." : "Completar donación")</strong>
                         </button>
                         <p class="dn-submit-note">
@@ -203,19 +198,9 @@
 
                         <div class="dn-sidebar__summary">
                             <div class="dn-sidebar__summary-row">
-                                <span class="dn-sidebar__summary-label">Meta financiera</span>
-                                <span class="dn-sidebar__summary-value">
-                                    @Program.MetaFinanciera.ToString("C", CurrencyCulture)
-                                </span>
-                            </div>
-                            <div class="dn-sidebar__summary-row">
-                                <span class="dn-sidebar__summary-label">Caso seleccionado</span>
-                                <span class="dn-sidebar__summary-value">No aplica</span>
-                            </div>
-                            <div class="dn-sidebar__summary-row">
                                 <span class="dn-sidebar__summary-label">Monto de donación</span>
                                 <span class="dn-sidebar__summary-value dn-sidebar__summary-value--yellow">
-                                    @SelectedDonationAmount.ToString("C", CurrencyCulture)
+                                    @SelectedDonationAmount.ToString("C", CultureInfo.GetCultureInfo("es-SV"))
                                 </span>
                             </div>
                             <div class="dn-sidebar__summary-row">
@@ -226,7 +211,7 @@
                             <div class="dn-sidebar__summary-row dn-sidebar__summary-row--total">
                                 <span class="dn-sidebar__summary-label">Total</span>
                                 <span class="dn-sidebar__summary-value dn-sidebar__summary-value--total">
-                                    @SelectedDonationAmount.ToString("C", CurrencyCulture)
+                                    @SelectedDonationAmount.ToString("C", CultureInfo.GetCultureInfo("es-SV"))
                                 </span>
                             </div>
                         </div>
@@ -240,7 +225,7 @@
                     <div class="dn-sidebar__secure-text">
                         <p class="dn-sidebar__secure-title">DONACIÓN SEGURA</p>
                         <p class="dn-sidebar__secure-desc">
-                            El programa ya no usa casos vinculados para registrar donaciones.
+                            El aporte se registra directamente como apoyo institucional al programa seleccionado.
                         </p>
                     </div>
                 </div>
@@ -283,8 +268,10 @@
                 <div class="dn-modal__icon">
                     <i class="fas fa-circle-exclamation"></i>
                 </div>
-                <h2 class="dn-modal__title">@UnavailableDialogTitle</h2>
-                <p class="dn-modal__text">@UnavailableDialogMessage</p>
+                <h2 class="dn-modal__title">Este programa ya no acepta donaciones</h2>
+                <p class="dn-modal__text">
+                    El programa ha sido deshabilitado o ha finalizado, por lo que ya no puede recibir más aportes.
+                </p>
                 <div class="dn-modal__actions">
                     <button type="button" class="dn-modal__btn dn-modal__btn--primary" @onclick="GoToProgramDetail">
                         Volver al programa
@@ -298,11 +285,9 @@
 @code {
     [Parameter] public int ProgramId { get; set; }
 
-    private static readonly CultureInfo CurrencyCulture = CultureInfo.GetCultureInfo("es-SV");
-
     private Programa? Program { get; set; }
     private Usuario? CurrentUser { get; set; }
-    private DonationProgramFormModel FormModel { get; set; } = new();
+    private DonationFormModel FormModel { get; set; } = new();
     private readonly List<decimal> PresetAmounts = new() { 10, 25, 50, 100 };
     private decimal SelectedAmount { get; set; } = 25;
     private bool IsLoading { get; set; } = true;
@@ -311,23 +296,11 @@
     private bool ShowLoginRequiredDialog { get; set; }
     private bool ShowProgramUnavailableDialog { get; set; }
     private string? FeedbackMessage { get; set; }
-    private string UnavailableDialogTitle { get; set; } = "Este programa no puede recibir donaciones";
-    private string UnavailableDialogMessage { get; set; } =
-        "Las donaciones directas al programa no están disponibles porque el programa ya no tiene relación con casos.";
 
-    private bool IsSubmitDisabled => true;
-
-    private List<Caso> AvailableCases => new();
-
-    private Caso? SelectedCase => null;
     private decimal SelectedDonationAmount => FormModel.CustomAmount > 0 ? FormModel.CustomAmount.Value : SelectedAmount;
+    private bool IsProgramClosed => Program is not null && string.Equals(Program.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase);
 
     protected override async Task OnInitializedAsync()
-    {
-        await LoadPageAsync();
-    }
-
-    private async Task LoadPageAsync()
     {
         try
         {
@@ -351,35 +324,17 @@
                 IsSuccess = false;
             }
 
-            if (Program is not null)
+            if (CurrentUser is not null && IsProgramClosed)
             {
-                EvaluateProgramAvailability();
+                ShowProgramUnavailableDialog = true;
+                FeedbackMessage = "Este programa no está disponible para nuevas donaciones.";
+                IsSuccess = false;
             }
         }
         finally
         {
             IsLoading = false;
         }
-    }
-
-    private void EvaluateProgramAvailability()
-    {
-        if (Program is null)
-        {
-            return;
-        }
-
-        if (string.Equals(Program.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase))
-        {
-            ShowUnavailableDialog(
-                "Este programa ya no acepta donaciones",
-                "El programa se encuentra inactivo y ya no está disponible para recibir nuevos aportes.");
-            return;
-        }
-
-        ShowUnavailableDialog(
-            "Donación no disponible",
-            "Programa y Caso ya no están relacionados, así que esta donación no puede registrarse por esta pantalla.");
     }
 
     private void SelectAmount(decimal amount)
@@ -420,23 +375,63 @@
             return;
         }
 
-        EvaluateProgramAvailability();
-        if (ShowProgramUnavailableDialog)
+        if (IsProgramClosed)
         {
-            FeedbackMessage = UnavailableDialogMessage;
+            ShowProgramUnavailableDialog = true;
+            FeedbackMessage = "Este programa no está disponible para nuevas donaciones.";
             IsSuccess = false;
             return;
         }
 
-        FeedbackMessage = "La donación directa a programas está deshabilitada porque ya no existe relación entre programa y caso.";
-        IsSuccess = false;
-    }
+        if (SelectedDonationAmount <= 0)
+        {
+            FeedbackMessage = "Seleccione un monto válido para donar.";
+            IsSuccess = false;
+            return;
+        }
 
-    private void ShowUnavailableDialog(string title, string message)
-    {
-        UnavailableDialogTitle = title;
-        UnavailableDialogMessage = message;
-        ShowProgramUnavailableDialog = true;
+        if (FormModel.PaymentMethod == "Tarjeta" &&
+            (string.IsNullOrWhiteSpace(FormModel.CardName) ||
+             string.IsNullOrWhiteSpace(FormModel.CardNumber) ||
+             string.IsNullOrWhiteSpace(FormModel.CardExpiry) ||
+             string.IsNullOrWhiteSpace(FormModel.CardCvc)))
+        {
+            FeedbackMessage = "Complete los datos de la tarjeta para continuar.";
+            IsSuccess = false;
+            return;
+        }
+
+        IsSubmitting = true;
+
+        try
+        {
+            var donation = new Donacione
+            {
+                IdPrograma = Program.Id,
+                IdDonador = CurrentUser.Id,
+                Monto = SelectedDonationAmount,
+                Anonimo = FormModel.DonateAnonymously,
+                FechaDonacion = DateTime.Now,
+                Estado = "Completado",
+                MetodoPago = FormModel.PaymentMethod
+            };
+
+            DbContext.Donaciones.Add(donation);
+            await DbContext.SaveChangesAsync();
+
+            IsSuccess = true;
+            FeedbackMessage = "La donación se registró correctamente.";
+            Navigation.NavigateTo($"/programs/{Program.Id}", true);
+        }
+        catch (Exception ex)
+        {
+            IsSuccess = false;
+            FeedbackMessage = "No se pudo procesar la donación: " + ex.Message;
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
     }
 
     private string GetProgramImage()
@@ -453,7 +448,7 @@
     {
         if (string.IsNullOrWhiteSpace(Program?.Descripcion))
         {
-            return "Su apoyo ayudará directamente a financiar este programa.";
+            return "Su apoyo ayudará directamente a financiar las metas de este programa.";
         }
 
         return Program.Descripcion.Length <= 140
@@ -482,11 +477,8 @@
         Navigation.NavigateTo("/login");
     }
 
-    private sealed class DonationProgramFormModel
+    private sealed class DonationFormModel
     {
-        [Required(ErrorMessage = "Seleccione un caso del programa.")]
-        public int? SelectedCaseId { get; set; }
-
         [Range(typeof(decimal), "0.01", "99999999", ErrorMessage = "Ingrese un monto válido.")]
         public decimal? CustomAmount { get; set; }
 
