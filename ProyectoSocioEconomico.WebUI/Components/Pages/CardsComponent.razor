@@ -15,11 +15,12 @@
             <div class="programs-home-grid">
                 @foreach (var program in Programs)
                 {
-                    <ProgramCardComponent Id="@program.Id"
+                    <ProgramCardComponent @key="program.Id"
+                                          Id="@program.Id"
                                           Title="@program.Nombre"
                                           Description="@program.Descripcion"
                                           Category="@GetCategoryName(program)"
-                                          ProgressLabel="Progreso"
+                                          ProgressLabel="Meta"
                                           Progress="@CalculateOverallProgress(program)"
                                           ImageUrl="@program.ImagenUrl"
                                           Compact="true" />
@@ -48,17 +49,6 @@
 
     private static int CalculateOverallProgress(Programa program)
     {
-        decimal totalMeta = program.MetaFinanciera;
-        decimal totalRecaudado = program.IdCasos
-            .SelectMany(caso => caso.Donaciones ?? [])
-            .Where(donacion => string.Equals(donacion.Estado, "Completado", StringComparison.OrdinalIgnoreCase))
-            .Sum(donacion => donacion.Monto);
-
-        if (totalMeta <= 0)
-        {
-            return 0;
-        }
-
-        return Math.Clamp((int)Math.Round((totalRecaudado / totalMeta) * 100), 0, 100);
+        return program.MetaFinanciera > 0 ? 100 : 0;
     }
 }

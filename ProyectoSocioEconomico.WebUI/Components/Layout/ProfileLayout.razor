@@ -14,14 +14,14 @@
         <section class="bulma-navbar-brand">
             <a class="bulma-navbar-item bulma-title" href="/">AidPortal</a>
         </section>
-        <section class="bulma-navbar-menu">
-            <ul class="bulma-navbar-start">
+        <div class="bulma-navbar-menu">
+            <div class="bulma-navbar-start">
                 <a class="bulma-navbar-item" href="/programs">Programas</a>
                 <a class="bulma-navbar-item" href="/about-us">Acerca de nosotros</a>
                 <a class="bulma-navbar-item" href="/cases">Casos</a>
                 @* <a class="bulma-navbar-item" href="#">Ser volunatario</a> *@
-            </ul>
-            <section class="bulma-navbar-end bulma-is-flex bulma-is-align-items-center">
+            </div>
+            <div class="bulma-navbar-end bulma-is-flex bulma-is-align-items-center">
                 <AuthorizeView>
                     <Authorized>
                         <AuthorizeView Roles="beneficiado" Context="innerContext">
@@ -47,8 +47,8 @@
                         </div>
                     </NotAuthorized>
                 </AuthorizeView>
-            </section>
-        </section>
+            </div>
+        </div>
     </nav>
 
     <main>

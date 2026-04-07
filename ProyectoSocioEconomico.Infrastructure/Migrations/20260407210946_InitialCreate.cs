@@ -236,28 +236,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CasosProgramas",
-                columns: table => new
-                {
-                    IdCaso = table.Column<int>(type: "int", nullable: false),
-                    IdPrograma = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CasosProgramas", x => new { x.IdCaso, x.IdPrograma });
-                    table.ForeignKey(
-                        name: "FK_CasosProgramas_Casos_IdCaso",
-                        column: x => x.IdCaso,
-                        principalTable: "Casos",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_CasosProgramas_Programas_IdPrograma",
-                        column: x => x.IdPrograma,
-                        principalTable: "Programas",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "InscripcionesVoluntarios",
                 columns: table => new
                 {
@@ -338,11 +316,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                 column: "IdCategoria");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CasosProgramas_IdPrograma",
-                table: "CasosProgramas",
-                column: "IdPrograma");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Comprobantes_DonacionId",
                 table: "Comprobantes",
                 column: "DonacionId");
@@ -401,9 +374,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "CasosProgramas");
-
             migrationBuilder.DropTable(
                 name: "Comprobantes");
 

@@ -40,7 +40,7 @@
                 <div class="dn-card">
                     <div class="dn-card__top">
                         <h1 class="dn-card__title">Apoyar este programa</h1>
-                        <p class="dn-card__subtitle">La donación se registrará en uno de los casos vinculados a este programa.</p>
+                        <p class="dn-card__subtitle">Las donaciones a programa requieren una relación con casos, y esa relación ya no existe en el modelo actual.</p>
                     </div>
 
                     @if (!string.IsNullOrWhiteSpace(FeedbackMessage))
@@ -53,38 +53,15 @@
                     <section class="dn-step">
                         <h2 class="dn-step__heading">
                             <span class="dn-step__num">1</span>
-                            Seleccione el caso del programa
+                            Estado actual
                         </h2>
-
-                        <div class="bulma-field dn-field">
-                            <label class="bulma-label dn-label" for="program-case">Casos disponibles</label>
-                            <div class="bulma-control dn-control">
-                                <div class="bulma-select bulma-is-fullwidth dn-select-wrap">
-                                    <InputSelect id="program-case" class="dn-select" @bind-Value="FormModel.SelectedCaseId">
-                                        <option value="">Seleccione un caso</option>
-                                        @foreach (var linkedCase in AvailableCases)
-                                        {
-                                            <option value="@linkedCase.Id">@linkedCase.Titulo</option>
-                                        }
-                                    </InputSelect>
-                                </div>
-                            </div>
-                            <ValidationMessage For="@(() => FormModel.SelectedCaseId)" class="bulma-help bulma-is-danger" />
-                            @if (SelectedCase is not null)
-                            {
-                                <p class="dn-step__note">
-                                    Meta del caso: @SelectedCase.Meta.ToString("C", CurrencyCulture) | Recaudado:
-                                    @SelectedCase.Donaciones.Sum(d => d.Monto).ToString("C", CurrencyCulture)
-                                </p>
-                            }
+                        <div class="bulma-notification bulma-is-warning bulma-is-light">
+                            Esta vista quedó deshabilitada porque `Programa` ya no está relacionado con `Caso`.
                         </div>
                     </section>
 
                     <section class="dn-step">
-                        <h2 class="dn-step__heading">
-                            <span class="dn-step__num">2</span>
-                            Seleccione el monto
-                        </h2>
+                        <h2 class="dn-step__heading"><span class="dn-step__num">2</span> Seleccione el monto</h2>
 
                         <div class="dn-amounts">
                             @foreach (var preset in PresetAmounts)
@@ -111,10 +88,7 @@
                     </section>
 
                     <section class="dn-step">
-                        <h2 class="dn-step__heading">
-                            <span class="dn-step__num">3</span>
-                            Método de pago
-                        </h2>
+                        <h2 class="dn-step__heading"><span class="dn-step__num">3</span> Método de pago</h2>
 
                         <div class="dn-methods">
                             <button type="button"
@@ -236,7 +210,7 @@
                             </div>
                             <div class="dn-sidebar__summary-row">
                                 <span class="dn-sidebar__summary-label">Caso seleccionado</span>
-                                <span class="dn-sidebar__summary-value">@(SelectedCase?.Titulo ?? "Pendiente")</span>
+                                <span class="dn-sidebar__summary-value">No aplica</span>
                             </div>
                             <div class="dn-sidebar__summary-row">
                                 <span class="dn-sidebar__summary-label">Monto de donación</span>
@@ -266,7 +240,7 @@
                     <div class="dn-sidebar__secure-text">
                         <p class="dn-sidebar__secure-title">DONACIÓN SEGURA</p>
                         <p class="dn-sidebar__secure-desc">
-                            El aporte se registra en uno de los casos vinculados a este programa.
+                            El programa ya no usa casos vinculados para registrar donaciones.
                         </p>
                     </div>
                 </div>
@@ -339,18 +313,13 @@
     private string? FeedbackMessage { get; set; }
     private string UnavailableDialogTitle { get; set; } = "Este programa no puede recibir donaciones";
     private string UnavailableDialogMessage { get; set; } =
-        "Para recibir donaciones, el programa necesita al menos un caso asociado disponible para recaudar.";
+        "Las donaciones directas al programa no están disponibles porque el programa ya no tiene relación con casos.";
 
-    private bool IsSubmitDisabled => IsSubmitting || CurrentUser is null || !AvailableCases.Any();
+    private bool IsSubmitDisabled => true;
 
-    private List<Caso> AvailableCases =>
-        Program?.IdCasos?
-            .Where(c => !string.Equals(c.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase))
-            .Where(c => c.Donaciones.Sum(d => d.Monto) < c.Meta)
-            .OrderBy(c => c.Titulo)
-            .ToList() ?? new();
+    private List<Caso> AvailableCases => new();
 
-    private Caso? SelectedCase => AvailableCases.FirstOrDefault(c => c.Id == FormModel.SelectedCaseId);
+    private Caso? SelectedCase => null;
     private decimal SelectedDonationAmount => FormModel.CustomAmount > 0 ? FormModel.CustomAmount.Value : SelectedAmount;
 
     protected override async Task OnInitializedAsync()
@@ -374,11 +343,6 @@
             }
 
             FormModel.PaymentMethod = "Tarjeta";
-
-            if (AvailableCases.Count == 1)
-            {
-                FormModel.SelectedCaseId = AvailableCases[0].Id;
-            }
 
             if (CurrentUser is null)
             {
@@ -413,20 +377,9 @@
             return;
         }
 
-        if (!Program.IdCasos.Any())
-        {
-            ShowUnavailableDialog(
-                "Este programa no tiene casos asociados",
-                "Para recibir donaciones, el programa necesita al menos un caso asociado.");
-            return;
-        }
-
-        if (!AvailableCases.Any())
-        {
-            ShowUnavailableDialog(
-                "Este programa no tiene casos disponibles",
-                "Todos los casos asociados ya alcanzaron su meta o están inactivos.");
-        }
+        ShowUnavailableDialog(
+            "Donación no disponible",
+            "Programa y Caso ya no están relacionados, así que esta donación no puede registrarse por esta pantalla.");
     }
 
     private void SelectAmount(decimal amount)
@@ -475,87 +428,8 @@
             return;
         }
 
-        if (FormModel.SelectedCaseId is null)
-        {
-            FeedbackMessage = "Seleccione un caso del programa para continuar.";
-            IsSuccess = false;
-            return;
-        }
-
-        var selectedCase = SelectedCase;
-        if (selectedCase is null)
-        {
-            FeedbackMessage = "El caso seleccionado ya no está disponible para recibir donaciones.";
-            IsSuccess = false;
-            return;
-        }
-
-        if (selectedCase.IdBeneficiado == CurrentUser.Id)
-        {
-            FeedbackMessage = "No puede donar a un caso propio desde este programa.";
-            IsSuccess = false;
-            return;
-        }
-
-        if (SelectedDonationAmount <= 0)
-        {
-            FeedbackMessage = "Seleccione un monto válido para donar.";
-            IsSuccess = false;
-            return;
-        }
-
-        if (FormModel.PaymentMethod == "Tarjeta" &&
-            (string.IsNullOrWhiteSpace(FormModel.CardName) ||
-             string.IsNullOrWhiteSpace(FormModel.CardNumber) ||
-             string.IsNullOrWhiteSpace(FormModel.CardExpiry) ||
-             string.IsNullOrWhiteSpace(FormModel.CardCvc)))
-        {
-            FeedbackMessage = "Complete los datos de la tarjeta para continuar.";
-            IsSuccess = false;
-            return;
-        }
-
-        IsSubmitting = true;
-
-        try
-        {
-            var donation = new Donacione
-            {
-                IdCaso = selectedCase.Id,
-                IdDonador = CurrentUser.Id,
-                Monto = SelectedDonationAmount,
-                Anonimo = FormModel.DonateAnonymously,
-                FechaDonacion = DateTime.Now,
-                Estado = "Completado",
-                MetodoPago = FormModel.PaymentMethod
-            };
-
-            DbContext.Donaciones.Add(donation);
-            await DbContext.SaveChangesAsync();
-
-            selectedCase = await DbContext.Casos
-                .Include(c => c.Donaciones)
-                .FirstOrDefaultAsync(c => c.Id == selectedCase.Id);
-
-            if (selectedCase is not null && selectedCase.Donaciones.Sum(d => d.Monto) >= selectedCase.Meta)
-            {
-                selectedCase.Estado = "Inactivo";
-                await DbContext.SaveChangesAsync();
-            }
-
-            IsSuccess = true;
-            FeedbackMessage = "La donación al programa se registró correctamente.";
-            Navigation.NavigateTo($"/programs/{Program.Id}", true);
-        }
-        catch (Exception ex)
-        {
-            IsSuccess = false;
-            FeedbackMessage = "No se pudo procesar la donación: " + ex.Message;
-        }
-        finally
-        {
-            IsSubmitting = false;
-        }
+        FeedbackMessage = "La donación directa a programas está deshabilitada porque ya no existe relación entre programa y caso.";
+        IsSuccess = false;
     }
 
     private void ShowUnavailableDialog(string title, string message)

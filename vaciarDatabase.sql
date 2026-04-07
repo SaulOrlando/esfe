@@ -8,7 +8,6 @@ GO
 -- para evitar errores de restricción
 -- =============================================
 -- Tablas "hijas" (dependientes)
-DELETE FROM [dbo].[CasosProgramas];
 DELETE FROM [dbo].[InscripcionesVoluntarios];
 DELETE FROM [dbo].[Notificaciones];
 DELETE FROM [dbo].[Comprobantes];

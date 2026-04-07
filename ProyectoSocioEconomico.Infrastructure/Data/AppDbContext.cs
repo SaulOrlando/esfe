@@ -67,21 +67,6 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.IdCategoria)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
-            entity.HasMany(d => d.IdProgramas).WithMany(p => p.IdCasos)
-                .UsingEntity<Dictionary<string, object>>(
-                    "CasosPrograma",
-                    r => r.HasOne<Programa>().WithMany()
-                        .HasForeignKey("IdPrograma")
-                        .OnDelete(DeleteBehavior.ClientSetNull),
-                    l => l.HasOne<Caso>().WithMany()
-                        .HasForeignKey("IdCaso")
-                        .OnDelete(DeleteBehavior.ClientSetNull),
-                    j =>
-                    {
-                        j.HasKey("IdCaso", "IdPrograma");
-                        j.ToTable("CasosProgramas");
-                        j.HasIndex(new[] { "IdPrograma" }, "IX_CasosProgramas_IdPrograma");
-                    });
         });
 
         modelBuilder.Entity<Categoria>(entity =>

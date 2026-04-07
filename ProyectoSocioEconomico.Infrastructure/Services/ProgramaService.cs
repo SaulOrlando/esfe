@@ -23,8 +23,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Programas
                 .Include(p => p.IdCategoriaNavigation)
-                .Include(p => p.IdCasos)
-                    .ThenInclude(c => c.Donaciones)
                 .ToListAsync();
         }
 
@@ -33,10 +31,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Programas
                 .Include(p => p.IdCategoriaNavigation)
-                .Include(p => p.IdCasos)
-                    .ThenInclude(c => c.Donaciones)
-                .Include(p => p.IdCasos)
-                    .ThenInclude(c => c.IdCategoriaNavigation)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -75,18 +69,12 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             var programa = await context.Programas
-                .Include(p => p.IdCasos)
                 .Include(p => p.InscripcionesVoluntarios)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (programa is null)
             {
                 return;
-            }
-
-            if (programa.IdCasos.Any())
-            {
-                programa.IdCasos.Clear();
             }
 
             if (programa.InscripcionesVoluntarios.Any())

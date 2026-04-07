@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ProyectoSocioEconomico.Domain.Entities;
 
 public partial class Caso
@@ -33,5 +35,6 @@ public partial class Caso
 
     public virtual ICollection<Retiro> Retiros { get; set; } = new List<Retiro>();
 
+    [NotMapped]
     public virtual ICollection<Programa> IdProgramas { get; set; } = new List<Programa>();
 }

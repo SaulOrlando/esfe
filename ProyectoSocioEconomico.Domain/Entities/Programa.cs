@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace ProyectoSocioEconomico.Domain.Entities;
 
 public partial class Programa
@@ -29,5 +31,6 @@ public partial class Programa
 
     public virtual ICollection<InscripcionesVoluntario> InscripcionesVoluntarios { get; set; } = new List<InscripcionesVoluntario>();
 
+    [NotMapped]
     public virtual ICollection<Caso> IdCasos { get; set; } = new List<Caso>();
 }

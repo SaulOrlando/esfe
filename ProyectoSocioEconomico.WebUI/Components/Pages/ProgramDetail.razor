@@ -50,28 +50,37 @@ else
                 <!-- Impact Goals (Based on Cases) -->
                 <section class="pd-section">
                     <h3 class="pd-section__subheading">Program Impact Goals</h3>
-                    <div class="pd-goals-grid">
-                        @foreach (var caso in Program.IdCasos)
-                        {
-                            decimal totalRecaudado = caso.Donaciones.Sum(d => d.Monto);
-                            int progreso = CalcularPorcentaje(caso.Meta, totalRecaudado);
+                    @if (Program.IdCasos.Any())
+                    {
+                        <div class="pd-goals-grid">
+                            @foreach (var caso in Program.IdCasos)
+                            {
+                                decimal totalRecaudado = caso.Donaciones.Sum(d => d.Monto);
+                                int progreso = CalcularPorcentaje(caso.Meta, totalRecaudado);
 
-                            <div class="pd-goal-card">
-                                <span class="pd-goal-card__icon">
-                                    <i class="fas fa-bullseye"></i>
-                                </span>
-                                <p class="pd-goal-card__value">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</p>
-                                <p class="pd-goal-card__desc">@caso.Titulo</p>
-                                <div class="pd-goal-card__progress-wrap">
-                                    <progress class="bulma-progress bulma-is-success pd-goal-card__bar"
-                                              value="@progreso" max="100">
-                                        @progreso%
-                                    </progress>
-                                    <p class="pd-goal-card__progress-label">Goal: @caso.Meta.ToString("C", CultureInfo.GetCultureInfo("es-SV")) (@progreso%)</p>
+                                <div class="pd-goal-card" @key="caso.Id">
+                                    <span class="pd-goal-card__icon">
+                                        <i class="fas fa-bullseye"></i>
+                                    </span>
+                                    <p class="pd-goal-card__value">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</p>
+                                    <p class="pd-goal-card__desc">@caso.Titulo</p>
+                                    <div class="pd-goal-card__progress-wrap">
+                                        <progress class="bulma-progress bulma-is-success pd-goal-card__bar"
+                                                  value="@progreso" max="100">
+                                            @progreso%
+                                        </progress>
+                                        <p class="pd-goal-card__progress-label">Goal: @caso.Meta.ToString("C", CultureInfo.GetCultureInfo("es-SV")) (@progreso%)</p>
+                                    </div>
                                 </div>
-                            </div>
-                        }
-                    </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bulma-notification bulma-is-light">
+                            Este programa ya no tiene casos asociados. Su seguimiento se realiza a nivel del programa.
+                        </div>
+                    }
                 </section>
 
                 <!-- Socioeconomic Impact Data -->

@@ -12,7 +12,7 @@ using ProyectoSocioEconomico.Infrastructure.Data;
 namespace ProyectoSocioEconomico.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260406215038_InitialCreate")]
+    [Migration("20260407210946_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,21 +24,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CasosPrograma", b =>
-                {
-                    b.Property<int>("IdCaso")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdPrograma")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdCaso", "IdPrograma");
-
-                    b.HasIndex(new[] { "IdPrograma" }, "IX_CasosProgramas_IdPrograma");
-
-                    b.ToTable("CasosProgramas", (string)null);
-                });
 
             modelBuilder.Entity("ProyectoSocioEconomico.Domain.Entities.Caso", b =>
                 {
@@ -547,19 +532,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     b.HasIndex(new[] { "IdRol" }, "IX_Usuarios_IdRol");
 
                     b.ToTable("Usuarios");
-                });
-
-            modelBuilder.Entity("CasosPrograma", b =>
-                {
-                    b.HasOne("ProyectoSocioEconomico.Domain.Entities.Caso", null)
-                        .WithMany()
-                        .HasForeignKey("IdCaso")
-                        .IsRequired();
-
-                    b.HasOne("ProyectoSocioEconomico.Domain.Entities.Programa", null)
-                        .WithMany()
-                        .HasForeignKey("IdPrograma")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProyectoSocioEconomico.Domain.Entities.Caso", b =>

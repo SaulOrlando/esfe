@@ -55,13 +55,13 @@
                         <a class="color-primary" href="/programs">Ver mas</a>
                     </div>
                     <section class="bulma-section icons-container">
-                        <CategoryComponent Title="Salud" IdCategoria="4" Href="/programs?category=salud" Icon="fa-heart-pulse" ColorClass="icon-category__icon--health" />
-                        <CategoryComponent Title="Educacion" IdCategoria="3" Href="/programs?category=educacion" Icon="fa-book-open" ColorClass="icon-category__icon--education" />
-                        <CategoryComponent Title="Infraestructura" IdCategoria="1" Href="/programs?category=infraestructura" Icon="fa-wrench" ColorClass="icon-category__icon--infrastructure" />
-                        <CategoryComponent Title="Desastres naturales" Icon="fa-person-walking-arrow-loop-left"
+                        <CategoryComponent @key="4" Title="Salud" IdCategoria="4" Href="/programs?category=salud" Icon="fa-heart-pulse" ColorClass="icon-category__icon--health" />
+                        <CategoryComponent @key="3" Title="Educacion" IdCategoria="3" Href="/programs?category=educacion" Icon="fa-book-open" ColorClass="icon-category__icon--education" />
+                        <CategoryComponent @key="1" Title="Infraestructura" IdCategoria="1" Href="/programs?category=infraestructura" Icon="fa-wrench" ColorClass="icon-category__icon--infrastructure" />
+                        <CategoryComponent @key="5" Title="Desastres naturales" Icon="fa-person-walking-arrow-loop-left"
                                            IdCategoria="5" Href="/programs?category=desastres%20naturales"
                                            ColorClass="icon-category__icon--disaster-relief" />
-                        <CategoryComponent Title="Naturaleza" IdCategoria="2" Href="/programs?category=naturaleza" Icon="fa-leaf" ColorClass="icon-category__icon--environment" />
+                        <CategoryComponent @key="2" Title="Naturaleza" IdCategoria="2" Href="/programs?category=naturaleza" Icon="fa-leaf" ColorClass="icon-category__icon--environment" />
                     </section>
                     <section
                         class="bulma-section bulma-is-flex bulma-is-justify-content-space-between bg-cream-color section-redondeado">

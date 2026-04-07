@@ -48,11 +48,12 @@
         {
             @foreach (var program in PagedPrograms)
             {
-                <ProgramCardComponent Id="@program.Id"
+                <ProgramCardComponent @key="program.Id"
+                                      Id="@program.Id"
                                       Title="@program.Nombre"
                                       Description="@program.Descripcion"
                                       Category="@GetCategoryName(program)"
-                                      ProgressLabel="Progress"
+                                      ProgressLabel="Meta"
                                       Progress="@CalculateOverallProgress(program)"
                                       ImageUrl="@program.ImagenUrl" />
             }
@@ -165,11 +166,6 @@
 
     private int CalculateOverallProgress(Programa p)
     {
-        decimal totalMeta = p.MetaFinanciera;
-        decimal totalRecaudado = p.IdCasos.SelectMany(c => c.Donaciones).Sum(d => d.Monto);
-
-        if (totalMeta <= 0) return 0;
-
-        return Math.Clamp((int)Math.Round((totalRecaudado / totalMeta) * 100), 0, 100);
+        return p.MetaFinanciera > 0 ? 100 : 0;
     }
 }
