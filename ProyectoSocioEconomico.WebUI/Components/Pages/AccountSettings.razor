@@ -14,7 +14,6 @@
 <div class="as-page">
     <main class="as-main">
 
-        <!-- Page title -->
         <div class="as-main__header">
             <h1 class="as-main__title">Account Settings</h1>
             <p class="as-main__subtitle">Manage your public profile, security protocols, and connectivity.</p>
@@ -26,7 +25,6 @@
         }
         else
         {
-            <!-- ── PROFILE CARD ── -->
             <section class="as-card">
                 <div class="as-profile">
                     <div class="as-profile__avatar-wrap">
@@ -61,7 +59,6 @@
                     </div>
                 </section>
 
-                <!-- ── PERSONAL INFORMATION ── -->
                 <div class="as-section-heading">
                     <span class="as-section-heading__icon">
                         <i class="fas fa-id-card-clip"></i>
@@ -72,7 +69,6 @@
                 <section class="as-card">
                     <div class="as-form-grid">
 
-                        <!-- First Name -->
                         <div class="bulma-field as-field">
                             <label class="bulma-label as-label" for="first-name">Nombre</label>
                             <div class="bulma-control as-control">
@@ -80,7 +76,6 @@
                             </div>
                         </div>
 
-                        <!-- Last Name -->
                         <div class="bulma-field as-field">
                             <label class="bulma-label as-label" for="last-name">Apellido</label>
                             <div class="bulma-control as-control">
@@ -88,7 +83,6 @@
                             </div>
                         </div>
 
-                        <!-- Email -->
                         <div class="bulma-field as-field">
                             <label class="bulma-label as-label" for="email">Email Address</label>
                             <div class="bulma-control as-control">
@@ -96,7 +90,6 @@
                             </div>
                         </div>
 
-                        <!-- Phone Number -->
                         <div class="bulma-field as-field">
                             <label class="bulma-label as-label" for="phone">Número de Teléfono</label>
                             <div class="as-phone-group" style="display: flex; gap: 0.5rem;">
@@ -111,7 +104,6 @@
                             </div>
                         </div>
 
-                        <!-- Country (Stored in Direccion) -->
                         <div class="bulma-field as-field" id="country-field">
                             <label class="bulma-label as-label" for="country">País de Residencia</label>
                             <div class="bulma-control as-control">
@@ -130,7 +122,6 @@
                     </div>
                 </section>
 
-                <!-- ── SECURITY ── -->
                 <div class="as-section-heading">
                     <span class="as-section-heading__icon as-section-heading__icon--yellow">
                         <i class="fas fa-shield-halved"></i>
@@ -154,7 +145,6 @@
 
                     <div class="as-form-grid as-form-grid--3col">
 
-                        <!-- Current Password -->
                         <div class="bulma-field as-field">
                             <label class="bulma-label as-label" for="current-pw">Current Password</label>
                             <div class="bulma-control bulma-has-icons-right as-control">
@@ -167,7 +157,6 @@
                             </div>
                         </div>
 
-                        <!-- New Password -->
                         <div class="bulma-field as-field">
                             <label class="bulma-label as-label" for="new-pw">New Password</label>
                             <div class="bulma-control bulma-has-icons-right as-control">
@@ -179,8 +168,7 @@
                             </div>
                         </div>
 
-                        <!-- Confirm Password -->
-                        <div class="bulma-field as-field">
+                       <div class="bulma-field as-field">
                             <label class="bulma-label as-label" for="confirm-pw">Confirm Password</label>
                             <div class="bulma-control bulma-has-icons-right as-control">
                                 <input id="confirm-pw" class="bulma-input as-input" type="@(ShowConfirm ? "text" : "password")"
@@ -196,7 +184,6 @@
                     </div>
                 </section>
 
-                <!-- Logout button -->
                 <div class="bulma-field as-field">
                     <label class="bulma-label as-label">&nbsp;</label>
                     <div class="bulma-control">
@@ -206,7 +193,6 @@
                         </button>
                     </div>
                 </div>
-                <!-- ── SAVE BUTTON ── -->
                 <div class="as-save-row">
                     <button class="bulma-button bulma-is-success as-btn-save" @onclick="HandleSave">
                         <span class="bulma-icon bulma-is-small"><i class="fas fa-floppy-disk"></i></span>

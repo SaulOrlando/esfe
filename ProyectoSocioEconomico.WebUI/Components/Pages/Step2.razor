@@ -8,11 +8,9 @@
 
 <div class="register-page">
 
-    @* ─────────────── MAIN CONTENT ─────────────── *@
     <main class="register-page__main">
         <div class="register-page__card">
 
-            <!-- PROGRESS (Same as Step 1) -->
             <div class="register-page__progress-section">
                 <div class="register-page__progress-header">
                     <span class="register-page__step-label">Paso 2 de 3</span>
@@ -21,7 +19,6 @@
                           max="100">66%</progress>
             </div>
 
-            <!-- HEADING -->
             <div class="register-page__heading-block">
                 <h1 class="register-page__title">Documentación Legal</h1>
                 <p class="register-page__subtitle">
@@ -30,7 +27,6 @@
                 </p>
             </div>
 
-            <!-- FORM FIELDS -->
             <div class="register-page__form">
 
                 @if (!string.IsNullOrEmpty(mensajeError))
@@ -40,7 +36,6 @@
                     </div>
                 }
 
-                <!-- DUI Number -->
                 <div class="register-page__field bulma-field">
                     <label class="register-page__label bulma-label">Número de DUI</label>
                     <div class="register-page__control bulma-control bulma-has-icons-left">
@@ -67,7 +62,6 @@
                     }
                 </div>
 
-                <!-- Date of Birth -->
                 <div class="register-page__field bulma-field">
                     <label class="register-page__label bulma-label">Fecha de Nacimiento</label>
                     <div class="register-page__control bulma-control bulma-has-icons-left">
@@ -90,7 +84,6 @@
                     }
                 </div>
 
-                <!-- DUI Photo Upload -->
                 <div class="register-page__field bulma-field">
                     <label class="register-page__label bulma-label">Subir fotos de DUI (Frente y Reverso)</label>
                     <div class="columns is-mobile is-variable is-2">
@@ -120,7 +113,6 @@
                     <p class="bulma-help bulma-has-text-grey">Formatos permitidos: JPG, PNG, WEBP.</p>
                 </div>
 
-                <!-- Navigation -->
                 <div class="register-page__nav-buttons">
                     <button class="bulma-button bulma-is-ghost" @onclick="GoBack">
                          Atrás

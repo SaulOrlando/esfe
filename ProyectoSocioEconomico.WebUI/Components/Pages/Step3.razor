@@ -13,11 +13,9 @@
 @inject IUsuarioService UsuarioService
 
 <div class="rp3-page">
-    <!-- ── MAIN ── -->
     <main class="rp3-main">
         <div class="rp3-card">
 
-            <!-- ── PROGRESS ── -->
             <div class="rp3-progress-section">
                 <div class="rp3-progress-section__header">
                     <span class="rp3-progress-section__eyebrow">PROCESO DE REGISTRO</span>
@@ -31,13 +29,11 @@
                 </div>
             </div>
 
-            <!-- ── HEADING ── -->
             <div class="rp3-heading">
                 <h1 class="rp3-heading__title">Seguridad y Configuración</h1>
                 <p class="rp3-heading__subtitle">Finaliza tus credencialess.</p>
             </div>
 
-            <!-- ── FORM ── -->
             <div class="rp3-form">
 
                 @if (!string.IsNullOrEmpty(mensajeError))
@@ -47,7 +43,6 @@
                     </div>
                 }
 
-                <!-- Email -->
                 <div class="bulma-field rp3-field">
                     <label class="bulma-label rp3-label" for="email">Correo Electrónico</label>
                     <div class="bulma-control bulma-has-icons-right rp3-control">
@@ -64,10 +59,8 @@
                     }
                 </div>
 
-                <!-- Passwords row -->
                 <div class="rp3-passwords-row">
 
-                    <!-- Create Password -->
                     <div class="bulma-field rp3-field rp3-field--half">
                         <label class="bulma-label rp3-label" for="password">Crear Contraseña</label>
                         <div class="bulma-control bulma-has-icons-right rp3-control">
@@ -85,7 +78,6 @@
                         }
                     </div>
 
-                    <!-- Confirm Password -->
                     <div class="bulma-field rp3-field rp3-field--half">
                         <label class="bulma-label rp3-label" for="confirm-password">Confirmar Contraseña</label>
                         <div class="bulma-control bulma-has-icons-right rp3-control">
@@ -103,7 +95,6 @@
                         }
                     </div>
                 </div>
-                <!-- Terms -->
                 <div class="bulma-field rp3-field rp3-field--terms">
                     <label class="bulma-checkbox rp3-checkbox">
                         <input type="checkbox" class="rp3-checkbox__input" @bind="AgreeTerms" />
@@ -118,14 +109,13 @@
                     </label>
                 </div>
 
-                <!-- Submit -->
                 <button type="button" class="bulma-button bulma-is-warning bulma-is-fullwidth rp3-btn-create"
                         disabled="@(!AgreeTerms)" @onclick="HandleSubmit">
                     <strong>Crear Cuenta</strong>
                 </button>
 
-            </div><!-- /rp3-form -->
-        </div><!-- /rp3-card -->
+            </div>
+        </div>
     </main>
 </div>
 

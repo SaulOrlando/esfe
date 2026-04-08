@@ -6,7 +6,6 @@
 
 <div class="cap-page">
 
-    <!-- ═══════════════ HEADER ═══════════════ -->
     <div class="cap-header">
         <h1 class="cap-header__title">Community Aid Programs</h1>
         <p class="cap-header__subtitle">
@@ -15,7 +14,6 @@
         </p>
     </div>
 
-    <!-- ═══════════════ SEARCH + FILTERS ═══════════════ -->
     <div class="cap-toolbar">
         <div class="bulma-control bulma-has-icons-left cap-toolbar__search-wrap">
             <input class="bulma-input cap-toolbar__search"
@@ -42,7 +40,6 @@
         </div>
     </div>
 
-    <!-- ═══════════════ PROGRAM GRID ═══════════════ -->
     <div class="cap-grid">
         @if (PagedPrograms != null)
         {
@@ -60,7 +57,6 @@
         }
     </div>
 
-    <!-- ═══════════════ PAGINATION ═══════════════ -->
     <nav class="cap-pagination" aria-label="pagination">
         <button class="cap-pagination__btn"
                 disabled="@(CurrentPage == 1)"

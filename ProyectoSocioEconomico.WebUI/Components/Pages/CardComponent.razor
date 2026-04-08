@@ -3,7 +3,6 @@
 
 <div class="bulma-card card-custom">
 
-    <!-- Imagen -->
     <div class="bulma-card-image">
         <figure class="bulma-image">
             @if (!string.IsNullOrEmpty(ImageUrl))
@@ -17,7 +16,6 @@
         </figure>
     </div>
 
-    <!-- Contenido -->
     <div class="bulma-card-content">
         <p class="bulma-title bulma-is-4 title-custom">@Title</p>
 
@@ -25,7 +23,6 @@
             @Description
         </div>
 
-        <!-- Sección de progreso -->
         <div class="progress-container">
             <div class="bulma-is-flex bulma-is-justify-content-space-between bulma-mb-2">
                 <span class="bulma-has-text-weight-semibold">Recaudado:</span>
@@ -37,7 +34,6 @@
         </div>
     </div>
 
-    <!-- Footer con botón -->
     <footer class="bulma-card-footer">
         <button class="bulma-card-footer-item bulma-button btn-donate">
             Dona ahora

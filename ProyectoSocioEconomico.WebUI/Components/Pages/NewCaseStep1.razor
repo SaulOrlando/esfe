@@ -12,7 +12,6 @@
 
 <div class="nc1-page">
 
-    <!-- ═══════════════ PAGE HEADER ═══════════════ -->
     <div class="nc1-header">
         <div class="nc1-header__top">
             <div>
@@ -21,7 +20,6 @@
             <span class="nc1-header__pct">50% Complete</span>
         </div>
 
-        <!-- Progress bar -->
         <div class="nc1-progress-wrap">
             <div class="nc1-progress-track">
                 <div class="nc1-progress-fill" style="width: 50%"></div>
@@ -29,12 +27,10 @@
         </div>
     </div>
 
-    <!-- ═══════════════ FORM CARD ═══════════════ -->
     <div class="nc1-card">
         <EditForm Model="CaseState" OnValidSubmit="HandleNextStep" FormName="NewCaseStep1Form">
             <DataAnnotationsValidator />
 
-            <!-- Row 1: Category + Title -->
             <div class="nc1-row nc1-row--2col">
 
                 <div class="bulma-field nc1-field">
@@ -75,7 +71,6 @@
 
             </div>
 
-            <!-- Row 2: Description -->
             <div class="bulma-field nc1-field">
                 <label class="bulma-label nc1-label" for="description">
                     Detailed Description
@@ -93,7 +88,6 @@
                 <ValidationMessage For="@(() => CaseState.Description)" class="bulma-help bulma-is-danger" />
             </div>
 
-            <!-- Row 3: Target Financial Goal -->
             <div class="bulma-field nc1-field nc1-field--half">
                 <label class="bulma-label nc1-label" for="goal">
                     Target Financial Goal
@@ -110,13 +104,8 @@
                     </div>
                 </div>
                 <ValidationMessage For="@(() => CaseState.FinancialGoal)" class="bulma-help bulma-is-danger" />
-                @* <p class="nc1-field-note">
-                    <span class="bulma-icon bulma-is-small"><i class="far fa-circle-info"></i></span>
-                    This is the total amount required to fully fund and close this aid case.
-                </p> *@
             </div>
 
-            <!-- Action row -->
             <div class="nc1-actions">
                 <p class="nc1-actions__security">
                     <span class="bulma-icon bulma-is-small"><i class="fas fa-lock"></i></span>
@@ -131,7 +120,7 @@
                 </div>
             </div>
         </EditForm>
-    </div><!-- /nc1-card -->
+    </div>
 </div>
 
 @code {
