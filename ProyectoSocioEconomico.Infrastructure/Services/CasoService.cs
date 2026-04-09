@@ -64,6 +64,7 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             return await context.Casos
                 .Include(c => c.IdCategoriaNavigation)
                 .Include(c => c.IdBeneficiadoNavigation)
+                .Include(c => c.Donaciones)
                 .OrderByDescending(c => c.FechaCreacion)
                 .FirstOrDefaultAsync(c => c.IdBeneficiado == usuarioId);
         }

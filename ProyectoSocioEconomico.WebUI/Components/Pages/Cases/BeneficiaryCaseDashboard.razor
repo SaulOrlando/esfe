@@ -1,68 +1,168 @@
 @namespace ProyectoSocioEconomico.WebUI.Components.Pages
 @*
   BeneficiaryCaseDashboard.razor
-  Propósito: Dashboard del beneficiario que muestra casos, métricas y accesos rápidos para gestionar su campaña.
+  Propósito: Dashboard del beneficiario con diseño "Portfolio" actualizado (bw- classes).
 *@
 @page "/beneficiary/dashboard"
 @using ProyectoSocioEconomico.Domain.Entities
 @using ProyectoSocioEconomico.Application.Interfaces
+@using System.Globalization
 @inject ICasoService CasoService
 @inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthStateProvider
 
-<div class="bcd-page">
-    <div class="bcd-header">
-        <h1 class="bcd-title">Mi Panel de Casos</h1>
-        <p class="bcd-subtitle">Administra tus campañas y revisa el estado de las donaciones</p>
-    </div>
+<div class="bw-page">
+    <main class="bw-main">
+        <div class="bw-main__header">
+            <div>
+                <h1 class="bw-main__title">Mi Panel de Beneficiario</h1>
+                <p class="bw-main__subtitle">Monitorea el progreso de tus campañas y gestiona tus fondos.</p>
+            </div>
+            @if (activeCase != null)
+            {
+                 <a href="/cases/new/step1" class="bw-btn-history">
+                    <i class="fas fa-plus-circle"></i> Nueva Campaña
+                </a>
+            }
+        </div>
 
-    <div class="bcd-content">
-            @if (Cases == null)
-            {
-                <div class="bcd-empty-state">
-                    <p>Cargando...</p>
+        @if (Cases == null)
+        {
+            <div class="bw-card" style="text-align:center; padding: 4rem;">
+                <p class="bw-main__subtitle">Cargando datos del panel...</p>
+            </div>
+        }
+        else if (!Cases.Any())
+        {
+            <div class="bw-card" style="text-align:center; padding: 5rem 2rem;">
+                <div style="font-size: 4rem; color: var(--bw-text-muted); margin-bottom: 1.5rem;">
+                    <i class="fas fa-folder-open"></i>
                 </div>
-            }
-            else if (!Cases.Any())
-            {
-                <div class="bcd-empty-state">
-                    <div class="bcd-empty-icon">
-                        <i class="fas fa-folder-open"></i>
-                    </div>
-                    <p>No tienes campañas activas.</p>
-                    <a href="/cases/new/step1" class="bulma-button bulma-is-warning mt-4">Crear mi primera campaña</a>
+                <h2 class="bw-main__title" style="font-size: 1.5rem;">Aún no tienes campañas</h2>
+                <p class="bw-main__subtitle" style="margin-bottom: 2rem;">Comienza hoy mismo a recaudar fondos para tu causa.</p>
+                <a href="/cases/new/step1" class="bw-btn-withdraw" style="max-width: 300px; margin: 0 auto; text-decoration: none;">
+                    Crear mi primera campaña
+                </a>
+            </div>
+        }
+        else
+        {
+            @* STATS GRID (Calculado sobre el caso activo principal) *@
+            <div class="bw-stats-grid">
+                <div class="bw-stat-card">
+                    <div class="bw-stat-card__icon" style="color: var(--bw-green);"><i class="fas fa-hand-holding-dollar"></i></div>
+                    <span class="bw-stat-card__label">Total Recaudado</span>
+                    <span class="bw-stat-card__value">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
                 </div>
-            }
-            else
-            {
-                <div class="bcd-list">
+                <div class="bw-stat-card">
+                    <div class="bw-stat-card__icon" style="color: var(--bw-yellow);"><i class="fas fa-bullseye"></i></div>
+                    <span class="bw-stat-card__label">Meta del Caso</span>
+                    <span class="bw-stat-card__value">@metaTotal.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                </div>
+                <div class="bw-stat-card">
+                    <div class="bw-stat-card__icon" style="color: #ef4444;"><i class="fas fa-hourglass-half"></i></div>
+                    <span class="bw-stat-card__label">Restante</span>
+                    <span class="bw-stat-card__value">@restante.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                </div>
+                <div class="bw-stat-card">
+                    <div class="bw-stat-card__icon" style="color: #3b82f6;"><i class="fas fa-users"></i></div>
+                    <span class="bw-stat-card__label">Donantes</span>
+                    <span class="bw-stat-card__value">@totalDonantes</span>
+                </div>
+            </div>
+
+            @* LISTA DE CAMPAÑAS *@
+            <div class="bw-card">
+                <h2 class="bw-section-title"><i class="fas fa-list-check"></i> Gestión de Campañas</h2>
+                
+                <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
                     @foreach (var c in Cases)
                     {
-                        <div class="bcd-item">
-                            <h3>@c.Titulo</h3>
-                            <p>@c.Descripcion</p>
-                            <a href="/cases/@c.Id" class="bulma-button bulma-is-light">Ver Detalles</a>
+                        var pct = metaTotal > 0 ? (int)Math.Round((totalRecaudado / metaTotal) * 100) : 0;
+                        <div style="border: 1px solid var(--bw-border); border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 2rem;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                    <h3 style="font-size: 1.2rem; font-weight: 700; margin:0;">@c.Titulo</h3>
+                                    <span style="font-size: 0.7rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 99px; background: #e0f2fe; color: #0369a1; text-transform: uppercase;">
+                                        @c.Estado
+                                    </span>
+                                </div>
+                                <p style="font-size: 0.9rem; color: var(--bw-text-mid); margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    @c.Descripcion
+                                </p>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <div style="flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden;">
+                                        <div style="width: @(pct)%; height: 100%; background: var(--bw-green);"></div>
+                                    </div>
+                                    <span style="font-size: 0.85rem; font-weight: 700; color: var(--bw-text-mid);">@pct%</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 0.75rem;">
+                                <a href="/cases/@c.Id" class="bw-btn-edit">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                @if (c.Estado == "Activo")
+                                {
+                                    <button class="bw-btn-edit" style="background: white; border-color: var(--bw-border);">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
-            }
-    </div>
+            </div>
+
+            @* ACCESO RÁPIDO A RETIRO (Solo visual para este dashboard) *@
+            <div class="bw-card" style="border-left: 5px solid var(--bw-green);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 class="bw-section-title" style="margin-bottom: 0.5rem;"><i class="fas fa-wallet"></i> Fondos Disponibles</h2>
+                        <p class="bw-main__subtitle">Puedes solicitar el desembolso una vez alcances el 100% o la fecha límite.</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 2rem; font-weight: 900; color: var(--bw-green);">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</div>
+                        <button class="bw-btn-withdraw" style="margin-top: 0.5rem; height: 2.8rem; font-size: 0.95rem; padding: 0 1.5rem;">
+                            Solicitar Retiro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </main>
 </div>
 
 @code {
     private List<Caso>? Cases;
+    private Caso? activeCase;
+    private decimal totalRecaudado = 0;
+    private decimal metaTotal = 0;
+    private decimal restante = 0;
+    private int totalDonantes = 0;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var idStr = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
         if (int.TryParse(idStr, out var userId))
         {
             Cases = new List<Caso>();
-            var c = await CasoService.ObtenerPorBeneficiadoIdAsync(userId);
-            if (c != null) Cases.Add(c);
+            activeCase = await CasoService.ObtenerPorBeneficiadoIdAsync(userId);
+            
+            if (activeCase != null)
+            {
+                Cases.Add(activeCase);
+                
+                // Cálculos de estadísticas
+                totalRecaudado = activeCase.Donaciones?.Where(d => d.Estado == "Completado").Sum(d => d.Monto) ?? 0;
+                metaTotal = activeCase.Meta;
+                restante = Math.Max(0, metaTotal - totalRecaudado);
+                totalDonantes = activeCase.Donaciones?.Count(d => d.Estado == "Completado") ?? 0;
+            }
         }
     }
 }
