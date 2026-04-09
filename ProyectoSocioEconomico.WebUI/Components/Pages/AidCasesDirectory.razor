@@ -121,6 +121,9 @@
     [SupplyParameterFromQuery(Name = "q")]
     private string? QueryFromUrl { get; set; }
 
+    [SupplyParameterFromQuery(Name = "category")]
+    private string? CategoryFromUrl { get; set; }
+
     private string SearchQuery  { get; set; } = string.Empty;
     private string ActiveFilter { get; set; } = "all";
     private int    CurrentPage  { get; set; } = 1;
@@ -146,6 +149,8 @@
     protected override void OnParametersSet()
     {
         SearchQuery = QueryFromUrl?.Trim() ?? string.Empty;
+        var normalizedCategory = CategoryFromUrl?.Trim().ToLowerInvariant();
+        ActiveFilter = Filters.Any(filter => filter.Key == normalizedCategory) ? normalizedCategory! : "all";
         CurrentPage = 1;
     }
 

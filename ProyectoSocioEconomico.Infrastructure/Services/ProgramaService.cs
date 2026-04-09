@@ -71,6 +71,7 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             var programa = await context.Programas
+                .Include(p => p.Donaciones)
                 .Include(p => p.InscripcionesVoluntarios)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -82,6 +83,14 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             if (programa.InscripcionesVoluntarios.Any())
             {
                 context.InscripcionesVoluntarios.RemoveRange(programa.InscripcionesVoluntarios);
+            }
+
+            if (programa.Donaciones.Any())
+            {
+                foreach (var donacion in programa.Donaciones)
+                {
+                    donacion.IdPrograma = null;
+                }
             }
 
             context.Programas.Remove(programa);
