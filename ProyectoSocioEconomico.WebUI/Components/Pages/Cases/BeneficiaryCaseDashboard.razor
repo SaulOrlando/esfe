@@ -18,27 +18,35 @@
     </div>
 
     <div class="bcd-content">
-        <div class="bcd-list">
             @if (Cases == null)
             {
-                <p>Cargando...</p>
+                <div class="bcd-empty-state">
+                    <p>Cargando...</p>
+                </div>
             }
             else if (!Cases.Any())
             {
-                <p>No tienes campañas activas.</p>
+                <div class="bcd-empty-state">
+                    <div class="bcd-empty-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <p>No tienes campañas activas.</p>
+                    <a href="/cases/new/step1" class="bulma-button bulma-is-warning mt-4">Crear mi primera campaña</a>
+                </div>
             }
             else
             {
-                @foreach (var c in Cases)
-                {
-                    <div class="bcd-item">
-                        <h3>@c.Titulo</h3>
-                        <p>@c.Descripcion</p>
-                        <a href="/cases/@c.Id/edit" class="bulma-button bulma-is-light">Editar</a>
-                    </div>
-                }
+                <div class="bcd-list">
+                    @foreach (var c in Cases)
+                    {
+                        <div class="bcd-item">
+                            <h3>@c.Titulo</h3>
+                            <p>@c.Descripcion</p>
+                            <a href="/cases/@c.Id" class="bulma-button bulma-is-light">Ver Detalles</a>
+                        </div>
+                    }
+                </div>
             }
-        </div>
     </div>
 </div>
 
