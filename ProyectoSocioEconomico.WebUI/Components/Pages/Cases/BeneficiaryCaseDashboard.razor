@@ -19,12 +19,6 @@
                 <h1 class="bw-main__title">Mi Panel de Beneficiario</h1>
                 <p class="bw-main__subtitle">Monitorea el progreso de tus campañas y gestiona tus fondos.</p>
             </div>
-            @if (activeCase != null)
-            {
-                 <a href="/cases/new/step1" class="bw-btn-history">
-                    <i class="fas fa-plus-circle"></i> Nueva Campaña
-                </a>
-            }
         </div>
 
         @if (Cases == null)
@@ -40,10 +34,7 @@
                     <i class="fas fa-folder-open"></i>
                 </div>
                 <h2 class="bw-main__title" style="font-size: 1.5rem;">Aún no tienes campañas</h2>
-                <p class="bw-main__subtitle" style="margin-bottom: 2rem;">Comienza hoy mismo a recaudar fondos para tu causa.</p>
-                <a href="/cases/new/step1" class="bw-btn-withdraw" style="max-width: 300px; margin: 0 auto; text-decoration: none;">
-                    Crear mi primera campaña
-                </a>
+                <p class="bw-main__subtitle">Comienza hoy mismo a recaudar fondos para tu causa.</p>
             </div>
         }
         else
