@@ -142,6 +142,16 @@
             return;
         }
 
+        var idStr = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(idStr, out var userId))
+        {
+            if (await CasoService.UsuarioYaTieneCasoAsync(userId))
+            {
+                Navigation.NavigateTo("/?caseWarning=duplicate");
+                return;
+            }
+        }
+
         categories = await CasoService.ObtenerCategorias();
     }
 

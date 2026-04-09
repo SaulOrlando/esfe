@@ -15,7 +15,8 @@ builder.Services.AddInfrastructure(connectionString);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents()
+    .AddHubOptions(options => options.MaximumReceiveMessageSize = 1024 * 1024 * 15); // 15MB
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();

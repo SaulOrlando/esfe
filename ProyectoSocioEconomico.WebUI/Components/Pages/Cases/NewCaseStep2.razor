@@ -394,15 +394,14 @@
 
         isSubmitting = true;
         await JSRuntime.InvokeVoidAsync("console.log", "OnSubmitClicked started");
-        Console.WriteLine("OnSubmitClicked started");
 
         bankValidationError = null;
         certificationError = null;
         thumbnailError = null;
+        submissionError = null;
 
         try
         {
-            // Minimal submission flow: ensure thumbnail exists and certification checked
             if (CaseState.ThumbnailData == null)
             {
                 thumbnailError = "Se requiere una imagen de portada.";
@@ -417,9 +416,39 @@
                 return;
             }
 
-            // Placeholder: real implementation should call CasoService to create the case
-            // await CasoService.CrearDesdeNuevoCaseStateAsync(CaseState);
+            var userId = await GetAuthenticatedUserIdAsync();
+            if (userId == null)
+            {
+                submissionError = "No se pudo identificar al usuario autenticado.";
+                return;
+            }
 
+            // 1. Guardar Imagen de Portada (Miniatura)
+            string? thumbnailPath = await SaveThumbnailAsync();
+
+            // 2. Crear Entidad Caso
+            var nuevoCaso = new Caso
+            {
+                IdBeneficiado = userId.Value,
+                Titulo = CaseState.CaseTitle,
+                Descripcion = CaseState.Description,
+                IdCategoria = CaseState.CategoryId ?? 1,
+                Meta = CaseState.FinancialGoal,
+                ImagenUrl = thumbnailPath,
+                Estado = "Activo",
+                FechaCreacion = DateTime.Now,
+                FechaLimite = DateTime.Now.AddMonths(3) // Por defecto 3 meses
+            };
+
+            // 3. Guardar en Base de Datos
+            await CasoService.Crear(nuevoCaso);
+
+            // 4. Guardar Evidencias (usando el ID generado si es posible, o asociándolo al usuario)
+            // Como CasoService.Crear guarda en DB, nuevoCaso.Id ya debería estar poblado
+            await SaveEvidenceFilesAsync(nuevoCaso.Id);
+
+            // 5. Resetear estado y navegar
+            CaseState.Reset();
             Navigation.NavigateTo("/beneficiary/dashboard");
         }
         catch (Exception ex)
@@ -430,6 +459,54 @@
         finally
         {
             isSubmitting = false;
+        }
+    }
+
+    private async Task<string?> SaveThumbnailAsync()
+    {
+        if (CaseState.ThumbnailData == null) return null;
+
+        try
+        {
+            var uploadsFolder = Path.Combine(Environment.WebRootPath, "uploads", "cases");
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            var extension = Path.GetExtension(CaseState.ThumbnailName) ?? ".jpg";
+            var fileName = $"case_{Guid.NewGuid():N}{extension}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            await File.WriteAllBytesAsync(filePath, CaseState.ThumbnailData);
+            return $"/uploads/cases/{fileName}";
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Error saving thumbnail:", ex.Message);
+            return null;
+        }
+    }
+
+    private async Task SaveEvidenceFilesAsync(int casoId)
+    {
+        if (!CaseState.EvidenceFiles.Any()) return;
+
+        try
+        {
+            var evidenceFolder = Path.Combine(Environment.WebRootPath, "uploads", "cases", "evidence", casoId.ToString());
+            if (!Directory.Exists(evidenceFolder)) Directory.CreateDirectory(evidenceFolder);
+
+            for (int i = 0; i < CaseState.EvidenceFiles.Count; i++)
+            {
+                var data = CaseState.EvidenceFiles[i];
+                var originalName = CaseState.EvidenceFileNames[i];
+                var extension = Path.GetExtension(originalName) ?? ".jpg";
+                var fileName = $"evidence_{i}_{Guid.NewGuid():N}{extension}";
+                var filePath = Path.Combine(evidenceFolder, fileName);
+                await File.WriteAllBytesAsync(filePath, data);
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", "Error saving evidence files:", ex.Message);
         }
     }
 
