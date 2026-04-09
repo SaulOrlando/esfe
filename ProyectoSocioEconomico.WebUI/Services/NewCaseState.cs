@@ -1,3 +1,6 @@
+// NewCaseState.cs
+// Propósito: Servicio de estado (scoped) que mantiene datos temporales durante el flujo de
+// creación de un nuevo caso en varios pasos (Step1/Step2). Se registra como scoped en Program.cs.
 using System.ComponentModel.DataAnnotations;
 
 namespace ProyectoSocioEconomico.WebUI.Services;

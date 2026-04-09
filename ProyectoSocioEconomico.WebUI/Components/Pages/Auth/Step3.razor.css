@@ -135,7 +135,7 @@ div.rp3-page main.rp3-main .rp3-card .rp3-heading .rp3-heading__subtitle {
     line-height: 1.6;
 }
 
-/* ── FORM ────────────────────────────────────────────────────── */
+/* ── FORM ───────────────────────────────────────────────────── */
 div.rp3-page main.rp3-main .rp3-card .rp3-form {
     display: flex;
     flex-direction: column;
@@ -167,32 +167,12 @@ div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-i
     transition: border-color 0.18s, box-shadow 0.18s;
 }
 
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input.bulma-input::placeholder {
-    color: #b0ada5;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input.bulma-input:focus {
-    border-color: var(--rp3-yellow);
-    box-shadow: 0 0 0 3px rgba(245, 187, 0, 0.18);
-    outline: none;
-}
-
 /* Right icon */
 div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input-icon.bulma-icon.bulma-is-right {
     color: #a0a09a;
     height: 3rem;
     width: 2.75rem;
     pointer-events: none;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input-icon--clickable.bulma-icon.bulma-is-right {
-    pointer-events: all;
-    cursor: pointer;
-    transition: color 0.18s;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input-icon--clickable.bulma-icon.bulma-is-right:hover {
-    color: var(--rp3-text-dark);
 }
 
 /* ── PASSWORDS ROW ───────────────────────────────────────────── */
@@ -202,97 +182,13 @@ div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-passwords-row {
     gap: 1rem;
 }
 
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-passwords-row .rp3-field--half.bulma-field {
-    margin-bottom: 0;
-}
-
-
-/* Profile card button */
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-profile-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.55rem;
-    padding: 1.5rem 1rem;
-    background: #ffffff;
-    border: 1.5px solid var(--rp3-border);
-    border-radius: 12px;
-    cursor: pointer;
-    text-align: center;
-    transition: border-color 0.18s, box-shadow 0.18s;
-    box-shadow: var(--rp3-shadow);
-    outline: none;
-}
-
-
 /* ── TERMS CHECKBOX ──────────────────────────────────────────── */
 div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field {
     margin-top: 0.5rem;
     margin-bottom: 0;
 }
 
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.65rem;
-    cursor: pointer;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__box {
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--rp3-border);
-    border-radius: 4px;
-    background: var(--rp3-input-bg);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
-    transition: border-color 0.18s, background 0.18s;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__input:checked + .rp3-checkbox__box {
-    background: var(--rp3-yellow);
-    border-color: var(--rp3-yellow);
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__input:checked + .rp3-checkbox__box::after {
-    content: "";
-    display: block;
-    width: 5px;
-    height: 9px;
-    border: 2px solid #1a1a1a;
-    border-top: none;
-    border-left: none;
-    transform: rotate(45deg) translateY(-1px);
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__text {
-    font-size: 0.85rem;
-    color: var(--rp3-text-mid);
-    line-height: 1.55;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__text .rp3-link {
-    color: var(--rp3-yellow-dark);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-field--terms.bulma-field .rp3-checkbox.bulma-checkbox .rp3-checkbox__text .rp3-link:hover {
-    text-decoration: underline;
-}
-
-/* ── CREATE ACCOUNT BUTTON ───────────────────────────────────── */
+/* ── CREATE ACCOUNT BUTTON ─────────────────────────────────---- */
 div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulma-is-warning.bulma-is-fullwidth {
     background-color: var(--rp3-yellow);
     color: #1a1a1a;
@@ -304,22 +200,6 @@ div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulm
     box-shadow: 0 4px 14px rgba(245, 187, 0, 0.35);
     cursor: pointer;
     transition: background-color 0.18s, box-shadow 0.18s, transform 0.12s;
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulma-is-warning.bulma-is-fullwidth:not([disabled]):hover {
-    background-color: var(--rp3-yellow-dark);
-    box-shadow: 0 6px 20px rgba(245, 187, 0, 0.45);
-    transform: translateY(-1px);
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulma-is-warning.bulma-is-fullwidth:not([disabled]):active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(245, 187, 0, 0.3);
-}
-
-div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-btn-create.bulma-button.bulma-is-warning.bulma-is-fullwidth[disabled] {
-    opacity: 0.55;
-    cursor: not-allowed;
 }
 
 /* ── RESPONSIVE ──────────────────────────────────────────────── */

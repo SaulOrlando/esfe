@@ -1,3 +1,7 @@
+// CustomAuthenticationStateProvider.cs
+// Propósito: AuthenticationStateProvider personalizado que gestiona la sesión de usuario
+// almacenando/recuperando un objeto Usuario en ProtectedLocalStorage y emitiendo cambios
+// de estado de autenticación a la aplicación Blazor.
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using ProyectoSocioEconomico.Domain.Entities;

@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@* App.razor
+   Propósito: Documento raíz que representa la plantilla HTML principal para la app Blazor.
+   Contiene referencias a recursos (CSS/JS), el root router y componentes globales como
+   `ReconnectModal`. Mantener en la raíz `Components/`.
+*@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -13,7 +18,6 @@
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="@Assets[key: "lib/bulma/css/versions/bulma-prefixed.min.css"]" />
     <link rel="stylesheet" href="@Assets[key: "css/styles.css"]"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <HeadOutlet @rendermode="InteractiveServer" />

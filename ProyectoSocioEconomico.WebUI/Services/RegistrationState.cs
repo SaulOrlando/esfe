@@ -1,3 +1,6 @@
+// RegistrationState.cs
+// Propósito: Servicio de estado (scoped) usado durante el proceso de registro en varios pasos.
+// Mantiene temporalmente los datos del formulario entre páginas del flujo de registro.
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace ProyectoSocioEconomico.WebUI.Services;

@@ -1,29 +1,32 @@
+@*
+  Home.razor
+  Propósito: Página principal (home) de la aplicación. Contiene el buscador, la sección
+  "Explorar categorias" y renderiza componentes de resumen (CardsComponent). También
+  muestra un diálogo cuando el usuario intenta crear un caso duplicado.
+*@
 @page "/"
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
 @inject NavigationManager Navigation
 
-@if (showDuplicateCaseDialog)
-{
-    <dialog class="home-duplicate-dialog" open aria-labelledby="duplicate-case-title">
-        <article class="home-duplicate-dialog__card">
-            <div class="home-duplicate-dialog__icon" aria-hidden="true">
-                <i class="fa-solid fa-circle-exclamation"></i>
-            </div>
-            <p class="home-duplicate-dialog__eyebrow">Caso ya registrado</p>
-            <h2 id="duplicate-case-title" class="home-duplicate-dialog__title">Solo puedes crear un caso por persona</h2>
-            <p class="home-duplicate-dialog__body">
-                Ya tienes un caso registrado en la plataforma. Si necesitas cambios, debes revisar ese caso actual.
-            </p>
-            <div class="home-duplicate-dialog__actions">
-                <button type="button" class="bulma-button bulma-is-warning home-duplicate-dialog__button"
-                        @onclick="CloseDuplicateCaseDialog">
-                    Entendido
-                </button>
-            </div>
-        </article>
-    </dialog>
-}
+<dialog class="home-duplicate-dialog" @attributes="DialogAttributes" aria-labelledby="duplicate-case-title">
+    <article class="home-duplicate-dialog__card">
+        <div class="home-duplicate-dialog__icon" aria-hidden="true">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <p class="home-duplicate-dialog__eyebrow">Caso ya registrado</p>
+        <h2 id="duplicate-case-title" class="home-duplicate-dialog__title">Solo puedes crear un caso por persona</h2>
+        <p class="home-duplicate-dialog__body">
+            Ya tienes un caso registrado en la plataforma. Si necesitas cambios, debes revisar ese caso actual.
+        </p>
+        <div class="home-duplicate-dialog__actions">
+            <button type="button" class="bulma-button bulma-is-warning home-duplicate-dialog__button"
+                    @onclick="CloseDuplicateCaseDialog">
+                Entendido
+            </button>
+        </div>
+    </article>
+</dialog>
 
 <PageTitle>Home</PageTitle>
 
@@ -125,4 +128,7 @@
             NavigateToCasesSearch();
         }
     }
+
+    private IReadOnlyDictionary<string, object> DialogAttributes =>
+        showDuplicateCaseDialog ? new Dictionary<string, object> { ["open"] = true } : new Dictionary<string, object>();
 }

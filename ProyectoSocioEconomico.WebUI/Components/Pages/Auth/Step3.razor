@@ -1,3 +1,9 @@
+@namespace ProyectoSocioEconomico.WebUI.Components.Pages
+@*
+  Step3.razor
+  Propósito: Tercer paso del flujo de registro. Maneja seguridad, creación de credenciales,
+  validación de email y creación del usuario en la base de datos.
+*@
 @page "/registrarse/step3"
 @using System.Text.RegularExpressions
 @using Microsoft.EntityFrameworkCore
@@ -103,7 +109,7 @@
                             Acepto los
                             <span class="rp3-link">Términos de Servicio</span>
                             y la
-                            <span href="/privacy" class="rp3-link">Política de Privacidad</span>.
+                            <span class="rp3-link">Política de Privacidad</span>.
                             Entiendo que mis datos serán utilizados para el análisis socioeconómico.
                         </span>
                     </label>
@@ -183,12 +189,6 @@
         return !string.IsNullOrWhiteSpace(pwd) && pwd.Length >= 8;
     }
 
-    private string GetBarClass(int bar)
-    {
-        if (StrengthScore == 0) return string.Empty;
-        return bar <= StrengthScore ? "rp3-strength__bar--filled" : string.Empty;
-    }
-
     private async Task HandleSubmit()
     {
         mensajeError = string.Empty;
@@ -220,38 +220,34 @@
 
         try
         {
-            // 1. Verificar si el email ya existe
             if (await DbContext.Usuarios.AnyAsync(u => u.Email == RegState.Email))
             {
                 mensajeError = "El correo electrónico ya está registrado.";
                 return;
             }
 
-            // 2. Obtener Rol "Donador"
             var rolDonador = await DbContext.Roles.FirstOrDefaultAsync(r => r.Nombre.ToLower() == "donador");
             if (rolDonador == null)
             {
-                rolDonador = new Role 
-                { 
-                    Nombre = "Donador", 
-                    Descripcion = "Usuario que realiza donaciones", 
-                    Estado = "Activo" 
+                rolDonador = new Role
+                {
+                    Nombre = "Donador",
+                    Descripcion = "Usuario que realiza donaciones",
+                    Estado = "Activo"
                 };
                 DbContext.Roles.Add(rolDonador);
                 await DbContext.SaveChangesAsync();
             }
 
-            // 3. Guardar Archivos DUI
             string frontPath = await SaveFileData(RegState.DuiFrontData, RegState.DuiFrontName, "front");
             string backPath = await SaveFileData(RegState.DuiBackData, RegState.DuiBackName, "back");
 
-            // 4. Crear Usuario
             var nuevoUsuario = new Usuario
             {
                 Nombre = RegState.FirstName,
                 Apellido = RegState.LastName,
                 Email = RegState.Email,
-                PasswordHash = UsuarioService.HashPassword(RegState.Password), 
+                PasswordHash = UsuarioService.HashPassword(RegState.Password),
                 FechaNacimiento = RegState.BirthDate ?? DateTime.Now,
                 Dui = RegState.DuiNumber,
                 Telefono = RegState.PhoneNumber,
@@ -267,12 +263,10 @@
             DbContext.Usuarios.Add(nuevoUsuario);
             await DbContext.SaveChangesAsync();
 
-            // 5. Iniciar sesión automáticamente
             await AuthStateProvider.NotifyUserLogin(nuevoUsuario);
 
-            // 6. Finalizar
             RegState.Reset();
-            Navigation.NavigateTo("/"); 
+            Navigation.NavigateTo("/");
         }
         catch (Exception ex)
         {
@@ -288,7 +282,6 @@
         var relativePath = Path.Combine("uploads", "documents", "dui", fileName);
         var physicalPath = Path.Combine(Environment.WebRootPath, relativePath);
 
-        // Asegurar que el directorio existe
         var directory = Path.GetDirectoryName(physicalPath);
         if (!Directory.Exists(directory)) Directory.CreateDirectory(directory!);
 
