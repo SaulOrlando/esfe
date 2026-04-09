@@ -1,0 +1,60 @@
+@namespace ProyectoSocioEconomico.WebUI.Components.Pages
+@*
+  BeneficiaryCaseDashboard.razor
+  Propósito: Dashboard del beneficiario que muestra casos, métricas y accesos rápidos para gestionar su campaña.
+*@
+@page "/beneficiary/dashboard"
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.Application.Interfaces
+@inject ICasoService CasoService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="bcd-page">
+    <div class="bcd-header">
+        <h1 class="bcd-title">Mi Panel de Casos</h1>
+        <p class="bcd-subtitle">Administra tus campañas y revisa el estado de las donaciones</p>
+    </div>
+
+    <div class="bcd-content">
+        <div class="bcd-list">
+            @if (Cases == null)
+            {
+                <p>Cargando...</p>
+            }
+            else if (!Cases.Any())
+            {
+                <p>No tienes campañas activas.</p>
+            }
+            else
+            {
+                @foreach (var c in Cases)
+                {
+                    <div class="bcd-item">
+                        <h3>@c.Titulo</h3>
+                        <p>@c.Descripcion</p>
+                        <a href="/cases/@c.Id/edit" class="bulma-button bulma-is-light">Editar</a>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Caso>? Cases;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var idStr = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(idStr, out var userId))
+        {
+            Cases = new List<Caso>();
+            var c = await CasoService.ObtenerPorBeneficiadoIdAsync(userId);
+            if (c != null) Cases.Add(c);
+        }
+    }
+}

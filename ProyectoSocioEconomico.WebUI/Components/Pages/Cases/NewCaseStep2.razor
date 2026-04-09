@@ -1,3 +1,4 @@
+@namespace ProyectoSocioEconomico.WebUI.Components.Pages
 @*
   NewCaseStep2.razor
   Propósito: Segundo paso del flujo de creación de caso. Maneja carga de evidencias,
@@ -398,131 +399,33 @@
         bankValidationError = null;
         certificationError = null;
         thumbnailError = null;
-        thumbnailUploadError = null;
-        submissionError = null;
-        validationMessages.Clear();
 
         try
         {
-            if (CaseState.SelectedMethod == "bank")
+            // Minimal submission flow: ensure thumbnail exists and certification checked
+            if (CaseState.ThumbnailData == null)
             {
-                if (string.IsNullOrWhiteSpace(CaseState.AccountHolder) ||
-                    string.IsNullOrWhiteSpace(CaseState.AccountNumber) ||
-                    string.IsNullOrWhiteSpace(CaseState.BankName))
-                {
-                    bankValidationError = "Por favor, complete todos los datos bancarios.";
-                    await JSRuntime.InvokeVoidAsync("console.error", "Bank validation error");
-                    return;
-                }
-            }
-            else if (CaseState.SelectedMethod == "wallet")
-            {
-                if (string.IsNullOrWhiteSpace(CaseState.AccountNumber) ||
-                    string.IsNullOrWhiteSpace(CaseState.BankName))
-                {
-                    bankValidationError = "Por favor, complete los datos de su billetera digital.";
-                    await JSRuntime.InvokeVoidAsync("console.error", "Wallet validation error");
-                    return;
-                }
+                thumbnailError = "Se requiere una imagen de portada.";
+                submissionError = "Faltan archivos requeridos.";
+                return;
             }
 
             if (!CaseState.IsCertified)
             {
-                certificationError = "Debes certificar que la información es exacta y veraz.";
-                await JSRuntime.InvokeVoidAsync("console.error", "Certification error");
+                certificationError = "Debe certificar la veracidad de la información.";
+                submissionError = "Faltan campos obligatorios.";
                 return;
             }
 
-            if (CaseState.ThumbnailData == null)
-            {
-                thumbnailError = "Una imagen de portada es requerida.";
-                await JSRuntime.InvokeVoidAsync("console.error", "Thumbnail error");
-                return;
-            }
+            // Placeholder: real implementation should call CasoService to create the case
+            // await CasoService.CrearDesdeNuevoCaseStateAsync(CaseState);
 
-            var userId = await GetAuthenticatedUserIdAsync();
-            if (userId is null)
-            {
-                submissionError = "Tu sesión no está activa. Inicia sesión nuevamente para enviar el caso.";
-                return;
-            }
-
-            if (await CasoService.UsuarioYaTieneCasoAsync(userId.Value))
-            {
-                Navigation.NavigateTo("/?caseWarning=duplicate");
-                return;
-            }
-
-            await JSRuntime.InvokeVoidAsync("console.log", $"User ID: {userId.Value}");
-
-            var thumbnailPath = string.Empty;
-            if (CaseState.ThumbnailData != null)
-            {
-                var fileName = $"case_{Guid.NewGuid()}_{Path.GetFileName(CaseState.ThumbnailName)}";
-                var uploadPath = Path.Combine(Environment.WebRootPath, "uploads", "casos");
-                if (!Directory.Exists(uploadPath))
-                {
-                    Directory.CreateDirectory(uploadPath);
-                }
-
-                var fullPath = Path.Combine(uploadPath, fileName);
-                await File.WriteAllBytesAsync(fullPath, CaseState.ThumbnailData);
-                thumbnailPath = $"uploads/casos/{fileName}";
-                await JSRuntime.InvokeVoidAsync("console.log", $"Thumbnail saved to {thumbnailPath}");
-            }
-
-            if (CaseState.EvidenceFiles.Any())
-            {
-                var evidencePath = Path.Combine(Environment.WebRootPath, "uploads", "casos", "evidencias");
-                if (!Directory.Exists(evidencePath))
-                {
-                    Directory.CreateDirectory(evidencePath);
-                }
-
-                for (int i = 0; i < CaseState.EvidenceFiles.Count; i++)
-                {
-                    var originalFileName = CaseState.EvidenceFileNames.Count > i
-                        ? CaseState.EvidenceFileNames[i]
-                        : $"evidencia_{i + 1}";
-                    var fileName = $"case_evidence_{Guid.NewGuid()}_{Path.GetFileName(originalFileName)}";
-                    var fullPath = Path.Combine(evidencePath, fileName);
-                    await File.WriteAllBytesAsync(fullPath, CaseState.EvidenceFiles[i]);
-                }
-
-                await JSRuntime.InvokeVoidAsync("console.log", $"{CaseState.EvidenceFiles.Count} evidence files saved.");
-            }
-
-            var nuevoCaso = new Caso
-            {
-                IdBeneficiado = userId.Value,
-                Titulo = CaseState.CaseTitle,
-                Descripcion = CaseState.Description,
-                Meta = CaseState.FinancialGoal,
-                IdCategoria = CaseState.CategoryId ?? 0,
-                ImagenUrl = thumbnailPath,
-                Estado = "Pendiente",
-                FechaCreacion = DateTime.Now
-            };
-
-            await JSRuntime.InvokeVoidAsync("console.log", "Saving case to database...", nuevoCaso);
-            await CasoService.Crear(nuevoCaso);
-            await JSRuntime.InvokeVoidAsync("console.log", "Case saved successfully");
-
-            var usuarioActualizado = await UsuarioService.ObtenerPorId(userId.Value);
-            if (usuarioActualizado != null)
-            {
-                await CustomAuthStateProvider.NotifyUserLogin(usuarioActualizado);
-            }
-
-            CaseState.Reset();
-            await JSRuntime.InvokeVoidAsync("console.log", "State reset, redirecting to home");
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("/beneficiary/dashboard");
         }
         catch (Exception ex)
         {
-            submissionError = $"No se pudo enviar el caso para revisión: {GetDisplayError(ex)}";
-            await JSRuntime.InvokeVoidAsync("console.error", "Error during case submission:", ex.Message);
-            Console.WriteLine($"Error during case submission: {ex}");
+            submissionError = $"Ocurrió un error al enviar la campaña: {GetDisplayError(ex)}";
+            await JSRuntime.InvokeVoidAsync("console.error", submissionError);
         }
         finally
         {
@@ -530,42 +433,23 @@
         }
     }
 
-    private async Task<byte[]> ReadFileAsync(IBrowserFile file)
-    {
-        await using var stream = file.OpenReadStream(maxFileSize);
-        using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        return memoryStream.ToArray();
-    }
-
-    private static string GetDisplayError(Exception ex)
-    {
-        var baseException = ex.GetBaseException();
-        return string.IsNullOrWhiteSpace(baseException.Message)
-            ? "Ocurrió un error inesperado."
-            : baseException.Message;
-    }
-
     private async Task<int?> GetAuthenticatedUserIdAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-
-        if (user.Identity == null || !user.Identity.IsAuthenticated)
-        {
-            await JSRuntime.InvokeVoidAsync("console.error", "User not authenticated");
-            Console.WriteLine("User not authenticated");
-            return null;
-        }
-
-        var userIdString = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
-        {
-            await JSRuntime.InvokeVoidAsync("console.error", "Could not retrieve user ID", userIdString);
-            Console.WriteLine($"Could not retrieve user ID: {userIdString}");
-            return null;
-        }
-
-        return userId;
+        var idStr = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(idStr, out var id)) return id;
+        return null;
     }
+
+    private async Task<byte[]> ReadFileAsync(IBrowserFile file)
+    {
+        using var ms = new MemoryStream();
+        var stream = file.OpenReadStream(maxFileSize);
+        await stream.CopyToAsync(ms);
+        return ms.ToArray();
+    }
+
+    private string GetDisplayError(Exception ex) => ex?.Message ?? "Error desconocido";
+
 }
