@@ -1,0 +1,244 @@
+@namespace ProyectoSocioEconomico.WebUI.Components.Pages
+@*
+  CaseDetail.razor
+  Propósito: Página que muestra los detalles completos de un caso (campaña), permite
+  ver progreso, donar (si está autenticado) y muestra métricas y diálogo de login.
+*@
+@page "/cases/{Id:int}"
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.WebUI.Services
+@using System.Globalization
+@inject ICasoService CasoService
+@inject IUsuarioService UsuarioService
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+@if (Caso == null)
+{
+    <div class="bulma-container">
+        <p>Cargando detalles del caso...</p>
+    </div>
+}
+else
+{
+    var totalRecaudado = Caso.Donaciones?.Where(d => d.Estado == "Completado").Sum(d => d.Monto) ?? 0m;
+    var progreso = CalcularPorcentaje(Caso.Meta, totalRecaudado);
+    var puedeDonar = !string.Equals(Caso.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase) && totalRecaudado < Caso.Meta;
+
+    <div class="cd-page">
+        <div class="cd-layout">
+            <main class="cd-main">
+                <article class="cd-hero-card">
+                    <div class="cd-hero-card__image-wrap">
+                        @if (!string.IsNullOrEmpty(Caso.ImagenUrl))
+                        {
+                            <img class="cd-hero-card__image" src="@Caso.ImagenUrl" alt="@Caso.Titulo" />
+                        }
+                        else
+                        {
+                            <img class="cd-hero-card__image" src="https://images.unsplash.com/photo-1548438294-1ad5d5f4f063?w=1200&q=80" alt="Placeholder" />
+                        }
+                        <div class="cd-hero-card__overlay"></div>
+                        <div class="cd-hero-card__identity">
+                            <img class="cd-hero-card__avatar" src="@(Caso.IdBeneficiadoNavigation?.ImagenPerfil ?? "wwwroot/uploads/profiles/DefaultProfile.png")" alt="Avatar" />
+                            <div class="cd-hero-card__id-text">
+                                <h1 class="cd-hero-card__name">@Caso.Titulo</h1>
+                                <span class="cd-hero-card__location">
+                                    <i class="fas fa-location-dot"></i> @(Caso.IdBeneficiadoNavigation?.Nombre) @(Caso.IdBeneficiadoNavigation?.Apellido)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cd-hero-card__body">
+                        <div class="cd-tags">
+                            <span class="cd-tag cd-tag--verified">
+                                <i class="fas fa-check-circle"></i> CASO VERIFICADO
+                            </span>
+                            <span class="cd-tag">@Caso.IdCategoriaNavigation?.Nombre.ToUpper()</span>
+                            <span class="cd-tag">@Caso.Estado.ToUpper()</span>
+                        </div>
+                        <div class="cd-impact">
+                            <h2 class="cd-impact__title">Resumen del Impacto</h2>
+                            <p class="cd-impact__quote">
+                                Este caso busca proporcionar apoyo directo para cubrir necesidades de @Caso.IdCategoriaNavigation?.Nombre.
+                            </p>
+                        </div>
+                    </div>
+                </article>
+
+                <section class="cd-story-card">
+                    <h3 class="cd-story-card__title">
+                        <i class="fas fa-book-open cd-story-card__title-icon"></i>
+                        Historia del Caso
+                    </h3>
+                    <div class="cd-story-card__body">
+                        <p>@Caso.Descripcion</p>
+                    </div>
+                </section>
+
+                <section class="cd-metrics-card">
+                    <div class="cd-vuln">
+                        <span class="cd-vuln__label">ESTADO ACTUAL</span>
+                        <div class="cd-vuln__ring-wrap">
+                            <svg class="cd-vuln__svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e6e4dc" stroke-width="8" />
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#22c55e" stroke-width="8"
+                                        stroke-dasharray="@(progreso * 2.82) 282" stroke-linecap="round" transform="rotate(-90 50 50)" />
+                            </svg>
+                            <div class="cd-vuln__center">
+                                <span class="cd-vuln__score">@progreso<span class="cd-vuln__denom">%</span></span>
+                                <span class="cd-vuln__badge">RECAUDADO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cd-metric-analysis">
+                        <span class="cd-metric-analysis__label">Análisis de Meta</span>
+                        <div class="cd-metric-row">
+                            <div class="cd-metric-row__header">
+                                <span class="cd-metric-row__name">Monto Recaudado</span>
+                                <span class="cd-metric-row__pct">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                            </div>
+                            <div class="cd-metric-row__track">
+                                <div class="cd-metric-row__fill" style="width: @progreso%"></div>
+                            </div>
+                        </div>
+                        <div class="cd-metric-row">
+                            <div class="cd-metric-row__header">
+                                <span class="cd-metric-row__name">Meta Financiera</span>
+                                <span class="cd-metric-row__pct">@Caso.Meta.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="cd-sidebar">
+                <div class="cd-sidebar__funding">
+                    <div class="cd-sidebar__funding-top">
+                        <span class="cd-sidebar__amount">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                        <span class="cd-sidebar__goal">de @Caso.Meta.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                    </div>
+                    <div class="cd-sidebar__progress-track">
+                        <div class="cd-sidebar__progress-fill" style="width: @progreso%"></div>
+                    </div>
+                    <div class="cd-sidebar__funding-meta">
+                        <span class="cd-sidebar__funded-pct">@progreso% COMPLETADO</span>
+                        <span class="cd-sidebar__days-left">@Caso.Donaciones?.Count(d => d.Estado == "Completado") DONANTES</span>
+                    </div>
+
+                    @if (puedeDonar)
+                    {
+                        <button type="button"
+                                class="bulma-button bulma-is-warning bulma-is-fullwidth cd-sidebar__btn-support"
+                                @onclick="HandleDonateClick">
+                            <i class="fas fa-heart"></i>
+                            <strong>Donar Ahora</strong>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
+                            <i class="fas fa-lock"></i>
+                            <strong>Meta alcanzada</strong>
+                        </button>
+                    }
+                </div>
+
+                <div class="cd-sidebar__trust">
+                    <div class="cd-sidebar__trust-item">
+                        <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--green">
+                            <i class="fas fa-shield-heart"></i>
+                        </div>
+                        <div>
+                            <h4 class="cd-sidebar__trust-title">Donación Segura</h4>
+                            <p class="cd-sidebar__trust-desc">Tu aporte llega íntegramente al beneficiario verificado.</p>
+                        </div>
+                    </div>
+                    <div class="cd-sidebar__trust-item">
+                        <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--yellow">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div>
+                            <h4 class="cd-sidebar__trust-title">Transparencia Total</h4>
+                            <p class="cd-sidebar__trust-desc">Recibe reportes sobre el uso de los fondos.</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+        @if (ShowLoginRequiredDialog)
+        {
+            <div class="cd-modal">
+                <div class="cd-modal__card">
+                    <div class="cd-modal__icon">
+                        <i class="fas fa-user-lock"></i>
+                    </div>
+                    <h2 class="cd-modal__title">Debe iniciar sesión para donar</h2>
+                    <p class="cd-modal__text">
+                        Para registrar una donación necesita ingresar con su cuenta. Después podrá continuar con el apoyo a este caso.
+                    </p>
+                    <div class="cd-modal__actions">
+                        <button type="button" class="cd-modal__btn cd-modal__btn--ghost" @onclick="CloseLoginRequiredDialog">
+                            Cerrar
+                        </button>
+                        <button type="button" class="cd-modal__btn cd-modal__btn--primary" @onclick="GoToLogin">
+                            Ir a iniciar sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Caso? Caso { get; set; }
+    private Usuario? CurrentUser { get; set; }
+    private bool ShowLoginRequiredDialog { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Caso = await CasoService.ObtenerPorIdConDetallesAsync(Id);
+
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userIdStr = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (int.TryParse(userIdStr, out var userId))
+        {
+            CurrentUser = await UsuarioService.ObtenerPorId(userId);
+        }
+    }
+
+    private int CalcularPorcentaje(decimal meta, decimal actual)
+    {
+        if (meta <= 0) return 0;
+        return Math.Clamp((int)Math.Round((actual / meta) * 100), 0, 100);
+    }
+
+    private void HandleDonateClick()
+    {
+        if (CurrentUser is null)
+        {
+            ShowLoginRequiredDialog = true;
+            return;
+        }
+
+        Navigation.NavigateTo($"/donate/{Id}");
+    }
+
+    private void CloseLoginRequiredDialog()
+    {
+        ShowLoginRequiredDialog = false;
+    }
+
+    private void GoToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+}

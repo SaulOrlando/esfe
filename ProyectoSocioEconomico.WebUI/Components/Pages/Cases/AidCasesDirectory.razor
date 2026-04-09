@@ -1,0 +1,215 @@
+@namespace ProyectoSocioEconomico.WebUI.Components.Pages
+@*
+  AidCasesDirectory.razor
+  Propósito: Página que lista casos de ayuda directos. Incluye búsqueda, filtros y listado
+  paginado de casos. Recupera datos mediante `ICasoService`.
+*@
+@page "/cases"
+@using Microsoft.AspNetCore.Components
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using System.Globalization
+@inject ICasoService CasoService
+
+<div class="cap-page">
+
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <div class="cap-header">
+        <h1 class="cap-header__title">Direct Aid Cases</h1>
+        <p class="cap-header__subtitle">
+            Support individual cases and families in need. Your direct contribution makes a tangible difference
+            in someone's life today.
+        </p>
+    </div>
+
+    <!-- ═══════════════ SEARCH + FILTERS ═══════════════ -->
+    <div class="cap-toolbar">
+        <div class="bulma-control bulma-has-icons-left cap-toolbar__search-wrap">
+            <input class="bulma-input cap-toolbar__search"
+                   type="text"
+                   placeholder="Search for cases (e.g., 'Medical emergency')"
+                   @bind="SearchQuery"
+                   @oninput="OnSearch" />
+            <span class="bulma-icon bulma-is-left cap-toolbar__search-icon">
+                <i class="fas fa-magnifying-glass"></i>
+            </span>
+        </div>
+
+        <div class="cap-toolbar__filters">
+            @foreach (var filter in Filters)
+            {
+                <button class="cap-filter-btn @(ActiveFilter == filter.Key ? "cap-filter-btn--active" : "")"
+                        @onclick="() => SetFilter(filter.Key)">
+                    <span class="bulma-icon bulma-is-small">
+                        <i class="@filter.Icon"></i>
+                    </span>
+                    @filter.Label
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- ═══════════════ CASE GRID ═══════════════ -->
+    <div class="cap-grid">
+        @if (PagedCases != null)
+        {
+            @foreach (var caso in PagedCases)
+            {
+                <article class="cap-card">
+                    <div class="cap-card__image-wrap">
+                        @if (!string.IsNullOrEmpty(caso.ImagenUrl))
+                        {
+                            <img class="cap-card__image" src="@caso.ImagenUrl" alt="@caso.Titulo" />
+                        }
+                        else
+                        {
+                            <img class="cap-card__image" src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600&q=80" alt="Default Image" />
+                        }
+                        <span class="cap-card__tag @GetCategoryClass(caso.IdCategoriaNavigation?.Nombre)">
+                            @caso.IdCategoriaNavigation?.Nombre.ToUpper()
+                        </span>
+                    </div>
+
+                    <div class="cap-card__body">
+                        <h2 class="cap-card__title">@caso.Titulo</h2>
+                        <p class="cap-card__desc">@caso.Descripcion</p>
+                        
+                        <div class="cap-card__progress-block">
+                            <div class="cap-card__progress-header">
+                                <span class="cap-card__progress-label">Recaudado: @((caso.Donaciones?.Sum(d => d.Monto) ?? 0m).ToString("C", CultureInfo.GetCultureInfo("es-SV")))</span>
+                                <span class="cap-card__progress-pct">@CalcularPorcentaje(caso.Meta, caso.Donaciones?.Sum(d => d.Monto) ?? 0m)%</span>
+                            </div>
+                            <progress class="bulma-progress bulma-is-success cap-card__progress-bar" value="@CalcularPorcentaje(caso.Meta, caso.Donaciones?.Sum(d => d.Monto) ?? 0m)" max="100">@CalcularPorcentaje(caso.Meta, caso.Donaciones?.Sum(d => d.Monto) ?? 0m)%</progress>
+                        </div>
+
+                        <a href="/cases/@caso.Id" class="bulma-button bulma-is-warning bulma-is-fullwidth cap-card__btn">
+                            <strong>Ver Detalles</strong>
+                        </a>
+                    </div>
+                </article>
+            }
+        }
+    </div>
+
+    <!-- ═══════════════ PAGINATION ═══════════════ -->
+    <nav class="cap-pagination" aria-label="pagination">
+        <button class="cap-pagination__btn"
+                disabled="@(CurrentPage == 1)"
+                @onclick="() => GoToPage(CurrentPage - 1)">
+            Previous
+        </button>
+
+        @for (int p = 1; p <= TotalPages; p++)
+        {
+            int pageNumber = p;
+            <button class="cap-pagination__btn @(CurrentPage == pageNumber ? "cap-pagination__btn--active" : "")"
+                    @onclick="() => GoToPage(pageNumber)">
+                @pageNumber
+            </button>
+        }
+
+        <button class="cap-pagination__btn"
+                disabled="@(CurrentPage == TotalPages)"
+                @onclick="() => GoToPage(CurrentPage + 1)">
+            Next
+        </button>
+    </nav>
+
+</div>
+
+@code {
+    private record FilterOption(string Key, string Label, string Icon);
+
+    [SupplyParameterFromQuery(Name = "q")]
+    private string? QueryFromUrl { get; set; }
+
+    private string SearchQuery  { get; set; } = string.Empty;
+    private string ActiveFilter { get; set; } = "all";
+    private int    CurrentPage  { get; set; } = 1;
+    private const int PageSize  = 6;
+
+    private List<FilterOption> Filters = new()
+    {
+        new("all",            "Todos",          "fas fa-table-cells-large"),
+        new("salud",          "Salud",          "fas fa-heart-pulse"),
+        new("educacion",      "Educación",      "fas fa-graduation-cap"),
+        new("infraestructura","Infraestructura","fas fa-wrench"),
+        new("desastres naturales", "Desastres Naturales", "fas fa-house-chimney-crack"),
+        new("naturaleza",     "Naturaleza",     "fas fa-leaf"),
+    };
+
+    private List<Caso> AllCases = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllCases = await CasoService.ObtenerTodosConDetallesAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        SearchQuery = QueryFromUrl?.Trim() ?? string.Empty;
+        CurrentPage = 1;
+    }
+
+    private IEnumerable<Caso> FilteredCases =>
+        AllCases
+            .Where(c => ActiveFilter == "all" || IsMatch(c.IdCategoriaNavigation?.Nombre, ActiveFilter))
+            .Where(c => string.IsNullOrWhiteSpace(SearchQuery) ||
+                        (c.Titulo?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (c.Descripcion?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false));
+
+    private bool IsMatch(string? categoryName, string filterKey)
+    {
+        if (string.IsNullOrEmpty(categoryName)) return false;
+        var name = categoryName.ToLower();
+        
+        // Normalización para búsqueda flexible
+        if (filterKey == "salud" && name.Contains("salud")) return true;
+        if (filterKey == "educacion" && (name.Contains("educacion") || name.Contains("educación"))) return true;
+        if (filterKey == "infraestructura" && (name.Contains("infraestructura") || name.Contains("vivienda"))) return true;
+        if (filterKey == "desastres naturales" && (name.Contains("desastres") || name.Contains("emergencia"))) return true;
+        if (filterKey == "naturaleza" && name.Contains("naturaleza")) return true;
+        
+        return name == filterKey;
+    }
+
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)FilteredCases.Count() / PageSize));
+
+    private IEnumerable<Caso> PagedCases =>
+        FilteredCases.Skip((CurrentPage - 1) * PageSize).Take(PageSize);
+
+    private void SetFilter(string key)
+    {
+        ActiveFilter = key;
+        CurrentPage  = 1;
+    }
+
+    private void OnSearch(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value?.ToString() ?? string.Empty;
+        CurrentPage = 1;
+    }
+
+    private void GoToPage(int page)
+    {
+        if (page >= 1 && page <= TotalPages)
+            CurrentPage = page;
+    }
+
+    private int CalcularPorcentaje(decimal meta, decimal actual)
+    {
+        if (meta <= 0) return 0;
+        return Math.Clamp((int)Math.Round((actual / meta) * 100), 0, 100);
+    }
+
+    private string GetCategoryClass(string? categoryName)
+    {
+        if (string.IsNullOrEmpty(categoryName)) return "";
+        var name = categoryName.ToLower();
+        if (name.Contains("salud")) return "cap-card__tag--health";
+        if (name.Contains("educacion") || name.Contains("educación")) return "cap-card__tag--education";
+        if (name.Contains("infraestructura") || name.Contains("vivienda")) return "cap-card__tag--infrastructure";
+        if (name.Contains("naturaleza")) return "cap-card__tag--environment";
+        return "";
+    }
+}

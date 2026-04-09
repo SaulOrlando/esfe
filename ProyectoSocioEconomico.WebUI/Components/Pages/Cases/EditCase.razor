@@ -1,0 +1,95 @@
+@namespace ProyectoSocioEconomico.WebUI.Components.Pages
+@page "/cases/{Id:int}/edit"
+@page "/cases/edit/{Id:int}"
+@*
+  EditCase.razor
+  Propósito: Página para editar un caso existente. Permite actualizar título, descripción,
+  categoría, meta y estado.
+*@
+@layout EmptyLayout
+@rendermode InteractiveServer
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.WebUI.Services
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@inject ICasoService CasoService
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<div class="ec-page">
+    @if (IsLoading)
+    {
+        <div class="ec-page-header">
+            <div class="ec-page-header__left">
+                <h1 class="ec-page-header__title">Cargando caso...</h1>
+                <p class="ec-page-header__subtitle">Estamos preparando la información para edición.</p>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(ErrorMessage) && FormModel is null)
+    {
+        <section class="ec-card ec-card--message">
+            <h1 class="ec-page-header__title">No se pudo cargar el caso</h1>
+            <p class="ec-page-header__subtitle">@ErrorMessage</p>
+            <a href="/beneficiary/dashboard" class="ec-btn-back">Volver a mi caso</a>
+        </section>
+    }
+    else if (FormModel is not null)
+    {
+        <div class="ec-page-header">
+            <div class="ec-page-header__left">
+                <h1 class="ec-page-header__title">Editar caso</h1>
+                <p class="ec-page-header__subtitle">Actualice la información principal de su caso y guarde los cambios.</p>
+            </div>
+            <div class="ec-status-badge">
+                <span class="ec-status-badge__icon"><i class="fas fa-folder-open"></i></span>
+                <span class="ec-status-badge__label">ESTADO:</span>
+                <span class="ec-status-badge__value">@CurrentCase?.Estado</span>
+            </div>
+        </div>
+
+        <EditForm Model="FormModel" OnValidSubmit="HandleUpdateAsync" FormName="EditCaseForm">
+            <DataAnnotationsValidator />
+
+            <div class="ec-body">
+                <div class="ec-main">
+                    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                    {
+                        <div class="bulma-notification bulma-is-danger bulma-is-light">@ErrorMessage</div>
+                    }
+
+                    <section class="ec-card">
+                        <h2 class="ec-card__title">
+                            <span class="ec-card__title-icon ec-card__title-icon--yellow">
+                                <i class="fas fa-pen-to-square"></i>
+                            </span>
+                            Información general
+                        </h2>
+
+                        <div class="ec-form-grid ec-form-grid--2col">
+                            <div class="bulma-field ec-field">
+                                <label class="bulma-label ec-label" for="case-title">Título del caso</label>
+                                <div class="bulma-control ec-control">
+                                    <InputText id="case-title" class="bulma-input ec-input" @bind-Value="FormModel.CaseTitle" />
+                                </div>
+                                <ValidationMessage For="@(() => FormModel.CaseTitle)" class="bulma-help bulma-is-danger" />
+                            </div>
+
+                            <div class="bulma-field ec-field">
+                                <label class="bulma-label ec-label" for="category">Categoría</label>
+                                <div class="bulma-control ec-control">
+                                    <div class="bulma-select bulma-is-fullwidth ec-select-wrap">
+                                        <InputSelect id="category" class="ec-select" @bind-Value="FormModel.CategoryId">
+                                            <option value="">Seleccione una categoría</option>
+                                            @foreach (var category in Categories)
+                                            {
+                                                <option value="@category.Id">@category.Nombre</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                </div>
+                                <ValidationMessage For="@(() => FormModel.CategoryId)" class="bulma-help bulma-is-danger" />
+                            </div>
+                        </div>
+*** End Patch
