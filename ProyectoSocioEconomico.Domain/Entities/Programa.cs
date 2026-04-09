@@ -19,7 +19,11 @@ public partial class Programa
 
     public DateTime FechaCreacion { get; set; }
 
+    public string TipoPrograma { get; set; } = null!;
+
     public decimal MetaFinanciera { get; set; }
+
+    public int MetaVoluntarios { get; set; }
 
     public int IdCategoria { get; set; }
 

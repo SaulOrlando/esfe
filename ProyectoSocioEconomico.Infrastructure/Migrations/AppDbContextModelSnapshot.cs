@@ -352,10 +352,18 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     b.Property<decimal>("MetaFinanciera")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<int>("MetaVoluntarios")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("TipoPrograma")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
 

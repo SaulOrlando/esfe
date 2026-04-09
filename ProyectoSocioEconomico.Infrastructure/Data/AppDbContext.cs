@@ -163,6 +163,7 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Estado).HasMaxLength(20);
             entity.Property(e => e.MetaFinanciera).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TipoPrograma).HasMaxLength(30);
             entity.Property(e => e.Nombre).HasMaxLength(150);
 
             entity.HasOne(d => d.IdCategoriaNavigation).WithMany(p => p.Programas)

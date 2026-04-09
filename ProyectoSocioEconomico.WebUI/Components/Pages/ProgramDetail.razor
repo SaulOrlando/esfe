@@ -1,16 +1,19 @@
 @*
   ProgramDetail.razor
-  Propósito: Mostrar detalles de un programa, incluyendo casos asociados y métricas.
+  Propósito: Mostrar detalles de un programa, incluyendo metas financieras y/o voluntariado.
 *@
 @page "/programs/{Id:int}"
+@using Microsoft.EntityFrameworkCore
 @using ProyectoSocioEconomico.Application.Interfaces
 @using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.Infrastructure.Data
 @using ProyectoSocioEconomico.WebUI.Services
 @using System.Globalization
 @inject IProgramaService ProgramaService
 @inject IUsuarioService UsuarioService
 @inject CustomAuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
+@inject AppDbContext DbContext
 
 @if (Program == null)
 {
@@ -20,9 +23,16 @@
 }
 else
 {
-    var totalRecaudado = Program.Donaciones?.Where(d => d.Estado == "Completado").Sum(d => d.Monto) ?? 0m;
-    var progreso = CalcularPorcentaje(Program.MetaFinanciera, totalRecaudado);
-    var puedeDonar = !string.Equals(Program.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase);
+    var totalRecaudado = GetTotalRecaudado(Program);
+    var totalVoluntarios = GetTotalVoluntariosActivos(Program);
+    var progresoFinanciero = CalcularPorcentaje(Program.MetaFinanciera, totalRecaudado);
+    var progresoVoluntariado = CalcularPorcentaje(Program.MetaVoluntarios, totalVoluntarios);
+    var progresoPrincipal = GetProgresoPrincipal(Program, progresoFinanciero, progresoVoluntariado);
+    var puedeDonar = ProgramAcceptsDonations(Program) && IsProgramActive(Program);
+    var puedeUnirse = ProgramAcceptsVolunteers(Program) &&
+                      IsProgramActive(Program) &&
+                      !UserIsAlreadyVolunteer &&
+                      !VolunteerCapacityReached(Program, totalVoluntarios);
 
     <div class="cd-page">
         <div class="cd-layout">
@@ -54,6 +64,7 @@ else
                             <span class="cd-tag cd-tag--verified">
                                 <i class="fas fa-check-circle"></i> PROGRAMA INSTITUCIONAL
                             </span>
+                            <span class="cd-tag">@GetProgramTypeLabel(Program).ToUpper()</span>
                             <span class="cd-tag">@Program.IdCategoriaNavigation?.Nombre.ToUpper()</span>
                             <span class="cd-tag">@Program.Estado.ToUpper()</span>
                         </div>
@@ -83,48 +94,90 @@ else
                             <svg class="cd-vuln__svg" viewBox="0 0 100 100">
                                 <circle cx="50" cy="50" r="45" fill="none" stroke="#e6e4dc" stroke-width="8" />
                                 <circle cx="50" cy="50" r="45" fill="none" stroke="#22c55e" stroke-width="8"
-                                        stroke-dasharray="@(progreso * 2.82) 282" stroke-linecap="round" transform="rotate(-90 50 50)" />
+                                        stroke-dasharray="@(progresoPrincipal * 2.82) 282" stroke-linecap="round" transform="rotate(-90 50 50)" />
                             </svg>
                             <div class="cd-vuln__center">
-                                <span class="cd-vuln__score">@progreso<span class="cd-vuln__denom">%</span></span>
-                                <span class="cd-vuln__badge">RECAUDADO</span>
+                                <span class="cd-vuln__score">@progresoPrincipal<span class="cd-vuln__denom">%</span></span>
+                                <span class="cd-vuln__badge">@GetPrimaryProgressLabel(Program)</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="cd-metric-analysis">
-                        <span class="cd-metric-analysis__label">Análisis de Meta Financiera</span>
-                        <div class="cd-metric-row">
-                            <div class="cd-metric-row__header">
-                                <span class="cd-metric-row__name">Monto Recaudado</span>
-                                <span class="cd-metric-row__pct">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                        <span class="cd-metric-analysis__label">Análisis del Programa</span>
+
+                        @if (ProgramAcceptsDonations(Program))
+                        {
+                            <div class="cd-metric-row">
+                                <div class="cd-metric-row__header">
+                                    <span class="cd-metric-row__name">Monto Recaudado</span>
+                                    <span class="cd-metric-row__pct">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                                </div>
+                                <div class="cd-metric-row__track">
+                                    <div class="cd-metric-row__fill" style="width: @progresoFinanciero%"></div>
+                                </div>
                             </div>
-                            <div class="cd-metric-row__track">
-                                <div class="cd-metric-row__fill" style="width: @progreso%"></div>
+                            <div class="cd-metric-row">
+                                <div class="cd-metric-row__header">
+                                    <span class="cd-metric-row__name">Meta del Programa</span>
+                                    <span class="cd-metric-row__pct">@Program.MetaFinanciera.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="cd-metric-row">
-                            <div class="cd-metric-row__header">
-                                <span class="cd-metric-row__name">Meta del Programa</span>
-                                <span class="cd-metric-row__pct">@Program.MetaFinanciera.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                        }
+
+                        @if (ProgramAcceptsVolunteers(Program))
+                        {
+                            <div class="cd-metric-row">
+                                <div class="cd-metric-row__header">
+                                    <span class="cd-metric-row__name">Voluntarios inscritos</span>
+                                    <span class="cd-metric-row__pct">@totalVoluntarios</span>
+                                </div>
+                                <div class="cd-metric-row__track">
+                                    <div class="cd-metric-row__fill" style="width: @progresoVoluntariado%"></div>
+                                </div>
                             </div>
-                        </div>
+                            <div class="cd-metric-row">
+                                <div class="cd-metric-row__header">
+                                    <span class="cd-metric-row__name">Meta de voluntarios</span>
+                                    <span class="cd-metric-row__pct">@Program.MetaVoluntarios</span>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </section>
             </main>
 
             <aside class="cd-sidebar">
+                @if (!string.IsNullOrWhiteSpace(FeedbackMessage))
+                {
+                    <div class="bulma-notification @(IsSuccess ? "bulma-is-success" : "bulma-is-danger") bulma-is-light">
+                        @FeedbackMessage
+                    </div>
+                }
+
                 <div class="cd-sidebar__funding">
-                    <div class="cd-sidebar__funding-top">
-                        <span class="cd-sidebar__amount">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
-                        <span class="cd-sidebar__goal">de @Program.MetaFinanciera.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
-                    </div>
+                    @if (ProgramAcceptsDonations(Program))
+                    {
+                        <div class="cd-sidebar__funding-top">
+                            <span class="cd-sidebar__amount">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                            <span class="cd-sidebar__goal">de @Program.MetaFinanciera.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="cd-sidebar__funding-top">
+                            <span class="cd-sidebar__amount">@totalVoluntarios voluntarios</span>
+                            <span class="cd-sidebar__goal">de @Program.MetaVoluntarios necesarios</span>
+                        </div>
+                    }
+
                     <div class="cd-sidebar__progress-track">
-                        <div class="cd-sidebar__progress-fill" style="width: @progreso%"></div>
+                        <div class="cd-sidebar__progress-fill" style="width: @progresoPrincipal%"></div>
                     </div>
+
                     <div class="cd-sidebar__funding-meta">
-                        <span class="cd-sidebar__funded-pct">@progreso% COMPLETADO</span>
-                        <span class="cd-sidebar__days-left">@Program.Donaciones?.Count(d => d.Estado == "Completado") DONANTES</span>
+                        <span class="cd-sidebar__funded-pct">@progresoPrincipal% COMPLETADO</span>
+                        <span class="cd-sidebar__days-left">@GetSidebarMetaText(Program, totalVoluntarios)</span>
                     </div>
 
                     @if (puedeDonar)
@@ -136,34 +189,61 @@ else
                             <strong>Contribuir al Programa</strong>
                         </button>
                     }
-                    else
+
+                    @if (puedeUnirse)
+                    {
+                        <button type="button"
+                                class="bulma-button bulma-is-success bulma-is-fullwidth cd-sidebar__btn-support"
+                                @onclick="HandleVolunteerSignupAsync"
+                                disabled="@IsJoiningVolunteer">
+                            <i class="fas fa-hands-helping"></i>
+                            <strong>@(IsJoiningVolunteer ? "Registrando..." : "Unirme como voluntario")</strong>
+                        </button>
+                    }
+
+                    @if (ProgramAcceptsVolunteers(Program) && UserIsAlreadyVolunteer)
+                    {
+                        <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
+                            <i class="fas fa-user-check"></i>
+                            <strong>Ya eres voluntario de este programa</strong>
+                        </button>
+                    }
+
+                    @if (!puedeDonar && !puedeUnirse && !UserIsAlreadyVolunteer)
                     {
                         <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
                             <i class="fas fa-lock"></i>
-                            <strong>Programa inactivo</strong>
+                            <strong>@GetDisabledActionText(Program, totalVoluntarios)</strong>
                         </button>
                     }
                 </div>
 
                 <div class="cd-sidebar__trust">
-                    <div class="cd-sidebar__trust-item">
-                        <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--green">
-                            <i class="fas fa-shield-heart"></i>
+                    @if (ProgramAcceptsDonations(Program))
+                    {
+                        <div class="cd-sidebar__trust-item">
+                            <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--green">
+                                <i class="fas fa-shield-heart"></i>
+                            </div>
+                            <div>
+                                <h4 class="cd-sidebar__trust-title">Donación Institucional</h4>
+                                <p class="cd-sidebar__trust-desc">Tu aporte apoya directamente las metas del programa.</p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="cd-sidebar__trust-title">Donación Institucional</h4>
-                            <p class="cd-sidebar__trust-desc">Tu aporte apoya directamente las metas del programa.</p>
+                    }
+
+                    @if (ProgramAcceptsVolunteers(Program))
+                    {
+                        <div class="cd-sidebar__trust-item">
+                            <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--yellow">
+                                <i class="fas fa-people-group"></i>
+                            </div>
+                            <div>
+                                <h4 class="cd-sidebar__trust-title">Voluntariado Comunitario</h4>
+                                <p class="cd-sidebar__trust-desc">Tu tiempo y participación fortalecen el alcance del programa.</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="cd-sidebar__trust-item">
-                        <div class="cd-sidebar__trust-icon cd-sidebar__trust-icon--yellow">
-                            <i class="fas fa-file-invoice-dollar"></i>
-                        </div>
-                        <div>
-                            <h4 class="cd-sidebar__trust-title">Transparencia Total</h4>
-                            <p class="cd-sidebar__trust-desc">Reportes regulares sobre el impacto del programa.</p>
-                        </div>
-                    </div>
+                    }
                 </div>
             </aside>
         </div>
@@ -175,10 +255,14 @@ else
 
     private Programa? Program { get; set; }
     private Usuario? CurrentUser { get; set; }
+    private bool UserIsAlreadyVolunteer { get; set; }
+    private bool IsJoiningVolunteer { get; set; }
+    private bool IsSuccess { get; set; }
+    private string? FeedbackMessage { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Program = await ProgramaService.ObtenerPorIdConDetallesAsync(Id);
+        await LoadProgramAsync();
 
         var authState = await AuthProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -187,18 +271,202 @@ else
         if (int.TryParse(userIdStr, out var userId))
         {
             CurrentUser = await UsuarioService.ObtenerPorId(userId);
+            UpdateVolunteerState();
         }
     }
 
-    private int CalcularPorcentaje(decimal meta, decimal actual)
+    private async Task LoadProgramAsync()
+    {
+        Program = await ProgramaService.ObtenerPorIdConDetallesAsync(Id);
+    }
+
+    private void UpdateVolunteerState()
+    {
+        UserIsAlreadyVolunteer = Program?.InscripcionesVoluntarios?.Any(i =>
+            i.IdUsuario == CurrentUser?.Id &&
+            string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? false;
+    }
+
+    private static decimal GetTotalRecaudado(Programa program)
+    {
+        return program.Donaciones?.Where(d => d.Estado == "Completado").Sum(d => d.Monto) ?? 0m;
+    }
+
+    private static int GetTotalVoluntariosActivos(Programa program)
+    {
+        return program.InscripcionesVoluntarios?.Count(i =>
+            string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? 0;
+    }
+
+    private static int CalcularPorcentaje(decimal meta, decimal actual)
     {
         if (meta <= 0) return 0;
         return Math.Clamp((int)Math.Round((actual / meta) * 100), 0, 100);
     }
 
+    private static int CalcularPorcentaje(int meta, int actual)
+    {
+        if (meta <= 0) return 0;
+        return Math.Clamp((int)Math.Round((decimal)actual / meta * 100), 0, 100);
+    }
+
+    private static bool ProgramAcceptsDonations(Programa program)
+    {
+        return string.Equals(program.TipoPrograma, "Financiero", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(program.TipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool ProgramAcceptsVolunteers(Programa program)
+    {
+        return string.Equals(program.TipoPrograma, "Voluntariado", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(program.TipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsProgramActive(Programa program)
+    {
+        return !string.Equals(program.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool VolunteerCapacityReached(Programa program, int totalVoluntarios)
+    {
+        return ProgramAcceptsVolunteers(program) &&
+               program.MetaVoluntarios > 0 &&
+               totalVoluntarios >= program.MetaVoluntarios;
+    }
+
+    private static int GetProgresoPrincipal(Programa program, int progresoFinanciero, int progresoVoluntariado)
+    {
+        return ProgramAcceptsDonations(program) ? progresoFinanciero : progresoVoluntariado;
+    }
+
+    private static string GetPrimaryProgressLabel(Programa program)
+    {
+        return ProgramAcceptsDonations(program) ? "RECAUDADO" : "VOLUNTARIOS";
+    }
+
+    private static string GetProgramTypeLabel(Programa program)
+    {
+        return program.TipoPrograma switch
+        {
+            "Voluntariado" => "Voluntariado",
+            "Hibrido" => "Híbrido",
+            _ => "Financiero"
+        };
+    }
+
+    private static string GetSidebarMetaText(Programa program, int totalVoluntarios)
+    {
+        if (ProgramAcceptsDonations(program) && ProgramAcceptsVolunteers(program))
+        {
+            var totalDonantes = program.Donaciones?.Count(d => d.Estado == "Completado") ?? 0;
+            return $"{totalDonantes} donantes y {totalVoluntarios} voluntarios";
+        }
+
+        if (ProgramAcceptsVolunteers(program))
+        {
+            return $"{totalVoluntarios} voluntarios inscritos";
+        }
+
+        var donantes = program.Donaciones?.Count(d => d.Estado == "Completado") ?? 0;
+        return $"{donantes} donantes";
+    }
+
+    private static string GetDisabledActionText(Programa program, int totalVoluntarios)
+    {
+        if (!IsProgramActive(program))
+        {
+            return "Programa inactivo";
+        }
+
+        if (ProgramAcceptsVolunteers(program) && VolunteerCapacityReached(program, totalVoluntarios))
+        {
+            return "Meta de voluntarios alcanzada";
+        }
+
+        return "Sin acciones disponibles";
+    }
+
     private void HandleDonateClick()
     {
-        // Enviar a DonacionProgram sin validación (como pidió el usuario)
         Navigation.NavigateTo($"/donate/program/{Id}");
+    }
+
+    private async Task HandleVolunteerSignupAsync()
+    {
+        FeedbackMessage = null;
+
+        if (Program is null)
+        {
+            return;
+        }
+
+        if (CurrentUser is null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (!ProgramAcceptsVolunteers(Program))
+        {
+            FeedbackMessage = "Este programa no acepta voluntariado.";
+            IsSuccess = false;
+            return;
+        }
+
+        if (UserIsAlreadyVolunteer)
+        {
+            FeedbackMessage = "Ya estás inscrito como voluntario en este programa.";
+            IsSuccess = false;
+            return;
+        }
+
+        if (VolunteerCapacityReached(Program, GetTotalVoluntariosActivos(Program)))
+        {
+            FeedbackMessage = "La meta de voluntarios ya fue alcanzada.";
+            IsSuccess = false;
+            return;
+        }
+
+        IsJoiningVolunteer = true;
+
+        try
+        {
+            var exists = await DbContext.InscripcionesVoluntarios.AnyAsync(i =>
+                i.IdPrograma == Program.Id &&
+                i.IdUsuario == CurrentUser.Id &&
+                i.Estado == "Activo");
+
+            if (exists)
+            {
+                UserIsAlreadyVolunteer = true;
+                FeedbackMessage = "Ya estás inscrito como voluntario en este programa.";
+                IsSuccess = false;
+                return;
+            }
+
+            DbContext.InscripcionesVoluntarios.Add(new InscripcionesVoluntario
+            {
+                IdPrograma = Program.Id,
+                IdUsuario = CurrentUser.Id,
+                FechaInscripcion = DateTime.Now,
+                Estado = "Activo"
+            });
+
+            await DbContext.SaveChangesAsync();
+            await LoadProgramAsync();
+            UpdateVolunteerState();
+
+            FeedbackMessage = "Te registraste como voluntario correctamente.";
+            IsSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            FeedbackMessage = "No se pudo registrar el voluntariado: " + ex.Message;
+            IsSuccess = false;
+        }
+        finally
+        {
+            IsJoiningVolunteer = false;
+        }
     }
 }

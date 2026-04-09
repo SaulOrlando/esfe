@@ -12,8 +12,8 @@ using ProyectoSocioEconomico.Infrastructure.Data;
 namespace ProyectoSocioEconomico.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260407233929_IgnoreNonMappedCollections")]
-    partial class IgnoreNonMappedCollections
+    [Migration("20260409162543_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -209,12 +209,7 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<int?>("ProgramaId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ProgramaId");
 
                     b.HasIndex(new[] { "IdCaso" }, "IX_Donaciones_IdCaso");
 
@@ -360,10 +355,18 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     b.Property<decimal>("MetaFinanciera")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<int>("MetaVoluntarios")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("TipoPrograma")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
 
@@ -583,12 +586,8 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("ProyectoSocioEconomico.Domain.Entities.Programa", "IdProgramaNavigation")
-                        .WithMany()
-                        .HasForeignKey("IdPrograma");
-
-                    b.HasOne("ProyectoSocioEconomico.Domain.Entities.Programa", null)
                         .WithMany("Donaciones")
-                        .HasForeignKey("ProgramaId");
+                        .HasForeignKey("IdPrograma");
 
                     b.Navigation("IdCasoNavigation");
 

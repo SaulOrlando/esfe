@@ -25,7 +25,7 @@
                                           Title="@program.Nombre"
                                           Description="@program.Descripcion"
                                           Category="@GetCategoryName(program)"
-                                          ProgressLabel="Meta"
+                                          ProgressLabel="@GetProgressLabel(program)"
                                           Progress="@CalculateOverallProgress(program)"
                                           ImageUrl="@program.ImagenUrl"
                                           Compact="true" />
@@ -52,8 +52,36 @@
         return program.IdCategoriaNavigation?.Nombre ?? "Otro";
     }
 
+    private static string GetProgressLabel(Programa program)
+    {
+        if (SupportsVolunteerGoal(program) && !SupportsFinancialGoal(program))
+        {
+            return "Voluntarios";
+        }
+
+        if (SupportsVolunteerGoal(program) && SupportsFinancialGoal(program))
+        {
+            return "Meta financiera";
+        }
+
+        return "Meta";
+    }
+
     private static int CalculateOverallProgress(Programa program)
     {
+        if (SupportsVolunteerGoal(program) && !SupportsFinancialGoal(program))
+        {
+            var totalVoluntarios = program.InscripcionesVoluntarios?
+                .Count(i => string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? 0;
+
+            if (program.MetaVoluntarios <= 0)
+            {
+                return 0;
+            }
+
+            return Math.Clamp((int)Math.Round((decimal)totalVoluntarios / program.MetaVoluntarios * 100), 0, 100);
+        }
+
         var totalRecaudado = program.Donaciones?
             .Where(d => d.Estado == "Completado")
             .Sum(d => d.Monto) ?? 0m;
@@ -64,5 +92,17 @@
         }
 
         return Math.Clamp((int)Math.Round((totalRecaudado / program.MetaFinanciera) * 100), 0, 100);
+    }
+
+    private static bool SupportsFinancialGoal(Programa program)
+    {
+        return string.Equals(program.TipoPrograma, "Financiero", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(program.TipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool SupportsVolunteerGoal(Programa program)
+    {
+        return string.Equals(program.TipoPrograma, "Voluntariado", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(program.TipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
     }
 }

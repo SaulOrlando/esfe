@@ -35,6 +35,14 @@
             <a href="/programs" class="dn-btn-back">Volver a programas</a>
         </div>
     }
+    else if (!SupportsFinancialGoal(Program))
+    {
+        <div class="dn-card dn-card--message">
+            <h1 class="dn-card__title">Este programa no acepta donaciones monetarias</h1>
+            <p class="dn-card__subtitle">El programa seleccionado está orientado a voluntariado, por lo que no recibe aportes económicos desde este flujo.</p>
+            <a href="/programs/@Program.Id" class="dn-btn-back">Volver al programa</a>
+        </div>
+    }
     else
     {
         <div class="dn-body">
@@ -388,6 +396,13 @@
             return;
         }
 
+        if (!SupportsFinancialGoal(Program))
+        {
+            FeedbackMessage = "Este programa no acepta donaciones monetarias.";
+            IsSuccess = false;
+            return;
+        }
+
         if (SelectedDonationAmount <= 0)
         {
             FeedbackMessage = "Seleccione un monto válido para donar.";
@@ -480,6 +495,12 @@
     private void GoToLogin()
     {
         Navigation.NavigateTo("/login");
+    }
+
+    private static bool SupportsFinancialGoal(Programa program)
+    {
+        return string.Equals(program.TipoPrograma, "Financiero", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(program.TipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
     }
 
     private sealed class DonationFormModel

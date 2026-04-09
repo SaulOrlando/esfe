@@ -23,7 +23,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Programas
                 .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.CreadoPorNavigation)
                 .Include(p => p.Donaciones)
+                .Include(p => p.InscripcionesVoluntarios)
                 .ToListAsync();
         }
 
@@ -32,7 +34,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Programas
                 .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.CreadoPorNavigation)
                 .Include(p => p.Donaciones)
+                .Include(p => p.InscripcionesVoluntarios)
+                    .ThenInclude(i => i.IdUsuarioNavigation)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -60,8 +65,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             currentProgram.Nombre = programa.Nombre;
             currentProgram.Descripcion = programa.Descripcion;
             currentProgram.Estado = programa.Estado;
+            currentProgram.TipoPrograma = programa.TipoPrograma;
             currentProgram.IdCategoria = programa.IdCategoria;
             currentProgram.MetaFinanciera = programa.MetaFinanciera;
+            currentProgram.MetaVoluntarios = programa.MetaVoluntarios;
             currentProgram.ImagenUrl = programa.ImagenUrl;
 
             await context.SaveChangesAsync();

@@ -157,7 +157,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     ImagenUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TipoPrograma = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     MetaFinanciera = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MetaVoluntarios = table.Column<int>(type: "int", nullable: false),
                     IdCategoria = table.Column<int>(type: "int", nullable: false),
                     CreadoPor = table.Column<int>(type: "int", nullable: false)
                 },
@@ -172,35 +174,6 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Programas_Usuarios_CreadoPor",
                         column: x => x.CreadoPor,
-                        principalTable: "Usuarios",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Donaciones",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdCaso = table.Column<int>(type: "int", nullable: false),
-                    IdDonador = table.Column<int>(type: "int", nullable: false),
-                    Monto = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Anonimo = table.Column<bool>(type: "bit", nullable: false),
-                    FechaDonacion = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    MetodoPago = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Donaciones", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Donaciones_Casos_IdCaso",
-                        column: x => x.IdCaso,
-                        principalTable: "Casos",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Donaciones_Usuarios_IdDonador",
-                        column: x => x.IdDonador,
                         principalTable: "Usuarios",
                         principalColumn: "Id");
                 });
@@ -231,6 +204,41 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Retiros_Usuarios_IdBeneficiado",
                         column: x => x.IdBeneficiado,
+                        principalTable: "Usuarios",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Donaciones",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdCaso = table.Column<int>(type: "int", nullable: true),
+                    IdPrograma = table.Column<int>(type: "int", nullable: true),
+                    IdDonador = table.Column<int>(type: "int", nullable: false),
+                    Monto = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Anonimo = table.Column<bool>(type: "bit", nullable: false),
+                    FechaDonacion = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    MetodoPago = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Donaciones", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Donaciones_Casos_IdCaso",
+                        column: x => x.IdCaso,
+                        principalTable: "Casos",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Donaciones_Programas_IdPrograma",
+                        column: x => x.IdPrograma,
+                        principalTable: "Programas",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Donaciones_Usuarios_IdDonador",
+                        column: x => x.IdDonador,
                         principalTable: "Usuarios",
                         principalColumn: "Id");
                 });
@@ -331,6 +339,11 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                 column: "IdDonador");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Donaciones_IdPrograma",
+                table: "Donaciones",
+                column: "IdPrograma");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InscripcionesVoluntarios_IdPrograma",
                 table: "InscripcionesVoluntarios",
                 column: "IdPrograma");
@@ -393,10 +406,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                 name: "Donaciones");
 
             migrationBuilder.DropTable(
-                name: "Programas");
+                name: "Casos");
 
             migrationBuilder.DropTable(
-                name: "Casos");
+                name: "Programas");
 
             migrationBuilder.DropTable(
                 name: "Categorias");

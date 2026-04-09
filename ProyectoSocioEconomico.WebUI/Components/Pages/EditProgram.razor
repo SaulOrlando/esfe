@@ -93,6 +93,20 @@
                             </div>
                         </div>
 
+                        <div class="bulma-field ep-field ep-field--narrow">
+                            <label class="bulma-label ep-label" for="program-type">Tipo de programa</label>
+                            <div class="bulma-control ep-control">
+                                <div class="bulma-select bulma-is-fullwidth ep-select-wrap">
+                                    <InputSelect id="program-type" class="ep-select" @bind-Value="FormModel.ProgramType">
+                                        <option value="Financiero">Financiero</option>
+                                        <option value="Voluntariado">Voluntariado</option>
+                                        <option value="Hibrido">Híbrido</option>
+                                    </InputSelect>
+                                </div>
+                            </div>
+                            <ValidationMessage For="@(() => FormModel.ProgramType)" class="bulma-help bulma-is-danger" />
+                        </div>
+
                         <div class="bulma-field ep-field ep-field--full">
                             <label class="bulma-label ep-label" for="description">Descripción detallada</label>
                             <div class="bulma-control ep-control">
@@ -111,9 +125,11 @@
                             <span class="ep-card__title-icon ep-card__title-icon--yellow">
                                 <i class="fas fa-hand-holding-dollar"></i>
                             </span>
-                            Meta financiera
+                            Metas del programa
                         </h2>
 
+                        @if (SupportsFinancialGoal(FormModel.ProgramType))
+                        {
                         <div class="bulma-field ep-field ep-field--narrow">
                             <label class="bulma-label ep-label" for="amount">Monto meta</label>
                             <div class="bulma-control ep-control">
@@ -127,6 +143,23 @@
                             <ValidationMessage For="@(() => FormModel.RequiredAmount)" class="bulma-help bulma-is-danger" />
                             <p class="ep-field-note">La meta financiera sí puede actualizarse para el programa.</p>
                         </div>
+                        }
+
+                        @if (SupportsVolunteerGoal(FormModel.ProgramType))
+                        {
+                        <div class="bulma-field ep-field ep-field--narrow">
+                            <label class="bulma-label ep-label" for="volunteers-goal">Meta de voluntarios</label>
+                            <div class="bulma-control ep-control">
+                                <InputNumber id="volunteers-goal"
+                                             class="bulma-input ep-input"
+                                             min="1"
+                                             step="1"
+                                             @bind-Value="FormModel.VolunteerGoal" />
+                            </div>
+                            <ValidationMessage For="@(() => FormModel.VolunteerGoal)" class="bulma-help bulma-is-danger" />
+                            <p class="ep-field-note">Define cuántos voluntarios necesita este programa.</p>
+                        </div>
+                        }
                     </section>
 
                     <section class="ep-card">
@@ -261,7 +294,9 @@
                 ProgramTitle = CurrentProgram.Nombre,
                 CategoryId = CurrentProgram.IdCategoria,
                 Description = CurrentProgram.Descripcion,
-                RequiredAmount = CurrentProgram.MetaFinanciera
+                ProgramType = CurrentProgram.TipoPrograma,
+                RequiredAmount = CurrentProgram.MetaFinanciera,
+                VolunteerGoal = CurrentProgram.MetaVoluntarios
             };
         }
         catch (Exception ex)
@@ -294,7 +329,9 @@
             CurrentProgram.Nombre = FormModel.ProgramTitle.Trim();
             CurrentProgram.Descripcion = FormModel.Description.Trim();
             CurrentProgram.IdCategoria = FormModel.CategoryId ?? CurrentProgram.IdCategoria;
-            CurrentProgram.MetaFinanciera = FormModel.RequiredAmount ?? CurrentProgram.MetaFinanciera;
+            CurrentProgram.TipoPrograma = FormModel.ProgramType;
+            CurrentProgram.MetaFinanciera = SupportsFinancialGoal(FormModel.ProgramType) ? FormModel.RequiredAmount ?? 0m : 0m;
+            CurrentProgram.MetaVoluntarios = SupportsVolunteerGoal(FormModel.ProgramType) ? FormModel.VolunteerGoal ?? 0 : 0;
 
             await ProgramaService.ActualizarAsync(CurrentProgram);
             Navigation.NavigateTo("/admin/programs");
@@ -316,7 +353,19 @@
                roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
     }
 
-    private sealed class EditProgramModel
+    private static bool SupportsFinancialGoal(string? tipoPrograma)
+    {
+        return string.Equals(tipoPrograma, "Financiero", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(tipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool SupportsVolunteerGoal(string? tipoPrograma)
+    {
+        return string.Equals(tipoPrograma, "Voluntariado", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(tipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private sealed class EditProgramModel : IValidatableObject
     {
         [Required(ErrorMessage = "El nombre es obligatorio.")]
         [StringLength(120, ErrorMessage = "El nombre no puede exceder 120 caracteres.")]
@@ -329,8 +378,28 @@
         [StringLength(3000, ErrorMessage = "La descripción no puede exceder 3000 caracteres.")]
         public string Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La meta financiera es obligatoria.")]
-        [Range(typeof(decimal), "0.01", "999999999", ErrorMessage = "Ingrese una meta financiera válida.")]
+        [Required(ErrorMessage = "Seleccione el tipo de programa.")]
+        public string ProgramType { get; set; } = "Financiero";
+
         public decimal? RequiredAmount { get; set; }
+
+        public int? VolunteerGoal { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (SupportsFinancialGoal(ProgramType) && (!RequiredAmount.HasValue || RequiredAmount <= 0))
+            {
+                yield return new ValidationResult(
+                    "Ingrese una meta financiera válida.",
+                    new[] { nameof(RequiredAmount) });
+            }
+
+            if (SupportsVolunteerGoal(ProgramType) && (!VolunteerGoal.HasValue || VolunteerGoal <= 0))
+            {
+                yield return new ValidationResult(
+                    "Ingrese una meta de voluntarios válida.",
+                    new[] { nameof(VolunteerGoal) });
+            }
+        }
     }
 }
