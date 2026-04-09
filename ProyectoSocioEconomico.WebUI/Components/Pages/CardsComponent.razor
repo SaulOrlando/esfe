@@ -54,6 +54,15 @@
 
     private static int CalculateOverallProgress(Programa program)
     {
-        return program.MetaFinanciera > 0 ? 100 : 0;
+        var totalRecaudado = program.Donaciones?
+            .Where(d => d.Estado == "Completado")
+            .Sum(d => d.Monto) ?? 0m;
+
+        if (program.MetaFinanciera <= 0)
+        {
+            return 0;
+        }
+
+        return Math.Clamp((int)Math.Round((totalRecaudado / program.MetaFinanciera) * 100), 0, 100);
     }
 }

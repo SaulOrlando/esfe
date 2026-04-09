@@ -23,6 +23,7 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Programas
                 .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.Donaciones)
                 .ToListAsync();
         }
 
