@@ -61,15 +61,15 @@
                         </div>
                     </div>
                 </section>
-                <div class="bulma-field field-terminos">
+                @* <div class="bulma-field field-terminos">
                     <label class="bulma-checkbox">
                         <input type="checkbox" class="bulma-mr-5" @bind="aceptaTerminos" />
                         <span class="bulma-has-text-black">
                             Acepto los términos de servicio y la política de privacidad.
                         </span>
                     </label>
-                </div>
-                <button type="submit" class="bulma-button bulma-is-warning bulma-is-fullwidth" disabled="@guardando">
+                </div> *@
+                <button type="submit" class="bulma-button bulma-is-warning bulma-is-fullwidth bulma-mt-5" disabled="@guardando">
                     @(guardando ? "Ingresando..." : "Iniciar Sesión")
                 </button>
                 <hr />

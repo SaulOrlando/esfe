@@ -4,17 +4,27 @@ div.newcasestep2-page {
     --nc2-green: #22c55e;
     --nc2-green-dark: #15803d;
     --nc2-ink: #18212f;
-    --nc2-muted: #667085;
+    --nc2-muted: #4b5563;
     --nc2-bg: #f3f4f6;
     --nc2-surface: #ffffff;
     --nc2-border: #d7dce5;
     --nc2-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
     min-height: 100vh;
+    color: var(--nc2-ink);
     background:
         radial-gradient(circle at top right, rgba(34, 197, 94, 0.1), transparent 24%),
         radial-gradient(circle at top left, rgba(245, 187, 0, 0.12), transparent 26%),
         linear-gradient(180deg, #fafaf8 0%, var(--nc2-bg) 100%);
     padding: 2.4rem 1.2rem 4rem;
+}
+
+div.newcasestep2-page .bulma-label {
+    color: var(--nc2-ink);
+    font-weight: 700;
+}
+
+div.newcasestep2-page .bulma-input {
+    color: var(--nc2-ink);
 }
 
 div.newcasestep2-page .newcasestep2__container {
@@ -270,7 +280,7 @@ div.newcasestep2-page .newcasestep2__method-card {
     background: #fcfcfb;
     padding: 1rem 1rem 1rem 1.05rem;
     text-align: left;
-    color: inherit;
+    color: var(--nc2-ink);
     cursor: pointer;
     transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
@@ -342,6 +352,12 @@ div.newcasestep2-page .newcasestep2__input.bulma-input {
     border: 1px solid var(--nc2-border);
     border-radius: 14px;
     box-shadow: none;
+    color: var(--nc2-ink);
+}
+
+div.newcasestep2-page .newcasestep2__input.bulma-input::placeholder {
+    color: var(--nc2-muted);
+    opacity: 1;
 }
 
 div.newcasestep2-page .newcasestep2__input.bulma-input:focus,
