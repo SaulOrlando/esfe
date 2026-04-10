@@ -175,6 +175,23 @@ div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-i
     pointer-events: none;
 }
 
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input-icon--clickable.bulma-icon.bulma-is-right {
+    pointer-events: auto;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-control.bulma-control .rp3-input-icon--clickable.bulma-icon.bulma-is-right:focus-visible {
+    outline: 2px solid rgba(245, 187, 0, 0.55);
+    outline-offset: -2px;
+    border-radius: 8px;
+}
+
 /* ── PASSWORDS ROW ───────────────────────────────────────────── */
 div.rp3-page main.rp3-main .rp3-card .rp3-form .rp3-passwords-row {
     display: grid;

@@ -77,7 +77,9 @@
                     <label class="register-page__label bulma-label">Fecha de Nacimiento</label>
                     <div class="register-page__control bulma-control bulma-has-icons-left">
                         <input class="register-page__input bulma-input @(mostrarErrores && !EsFechaValida(RegState.BirthDate) ? "bulma-is-danger" : "")" 
-                               type="date" 
+                               type="date"
+                               min="@MinimumBirthDateText"
+                               max="@MaximumBirthDateText"
                                @bind="RegState.BirthDate" />
                         <span class="register-page__icon bulma-icon bulma-is-left">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -106,16 +108,57 @@
 @code {
     private string mensajeError = string.Empty;
     private bool mostrarErrores = false;
+    private static readonly DateTime MinimumBirthDate = DateTime.Today.AddYears(-120);
+    private static readonly DateTime MaximumBirthDate = DateTime.Today.AddYears(-18);
+
+    private string MinimumBirthDateText => MinimumBirthDate.ToString("yyyy-MM-dd");
+    private string MaximumBirthDateText => MaximumBirthDate.ToString("yyyy-MM-dd");
 
     private bool EsDuiValido(string? dui) => !string.IsNullOrWhiteSpace(dui) && dui.Length >= 10;
-    private bool EsFechaValida(DateTime? d) => d.HasValue;
+    private bool EsFechaValida(DateTime? d)
+    {
+        if (!d.HasValue)
+        {
+            return false;
+        }
+
+        var birthDate = d.Value.Date;
+        return birthDate >= MinimumBirthDate && birthDate <= MaximumBirthDate;
+    }
+
+    private string GetBirthDateErrorMessage()
+    {
+        if (!RegState.BirthDate.HasValue)
+        {
+            return "Por favor, ingresa una fecha de nacimiento.";
+        }
+
+        if (RegState.BirthDate.Value.Date > DateTime.Today)
+        {
+            return "La fecha de nacimiento no puede estar en el futuro.";
+        }
+
+        if (RegState.BirthDate.Value.Date > MaximumBirthDate)
+        {
+            return "Debes ser mayor de 18 años para registrarte.";
+        }
+
+        if (RegState.BirthDate.Value.Date < MinimumBirthDate)
+        {
+            return "Ingresa una fecha de nacimiento valida.";
+        }
+
+        return "Ingresa una fecha de nacimiento valida.";
+    }
 
     private void GoToStep3()
     {
         mostrarErrores = true;
         if (!EsDuiValido(RegState.DuiNumber) || !EsFechaValida(RegState.BirthDate))
         {
-            mensajeError = "Por favor completa los datos requeridos.";
+            mensajeError = !EsDuiValido(RegState.DuiNumber)
+                ? "Por favor completa los datos requeridos."
+                : GetBirthDateErrorMessage();
             return;
         }
 
