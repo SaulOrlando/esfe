@@ -107,6 +107,20 @@
                             <ValidationMessage For="@(() => FormModel.ProgramType)" class="bulma-help bulma-is-danger" />
                         </div>
 
+                        <div class="bulma-field ep-field ep-field--narrow">
+                            <label class="bulma-label ep-label" for="program-status">Estado del programa</label>
+                            <div class="bulma-control ep-control">
+                                <div class="bulma-select bulma-is-fullwidth ep-select-wrap">
+                                    <InputSelect id="program-status" class="ep-select" @bind-Value="FormModel.Status">
+                                        <option value="Activo">Activo</option>
+                                        <option value="Inactivo">Inactivo</option>
+                                    </InputSelect>
+                                </div>
+                            </div>
+                            <ValidationMessage For="@(() => FormModel.Status)" class="bulma-help bulma-is-danger" />
+                            <p class="ep-field-note">El administrador puede activar o inactivar manualmente cualquier programa.</p>
+                        </div>
+
                         <div class="bulma-field ep-field ep-field--full">
                             <label class="bulma-label ep-label" for="description">Descripción detallada</label>
                             <div class="bulma-control ep-control">
@@ -295,6 +309,7 @@
                 CategoryId = CurrentProgram.IdCategoria,
                 Description = CurrentProgram.Descripcion,
                 ProgramType = CurrentProgram.TipoPrograma,
+                Status = CurrentProgram.Estado,
                 RequiredAmount = CurrentProgram.MetaFinanciera,
                 VolunteerGoal = CurrentProgram.MetaVoluntarios
             };
@@ -330,6 +345,7 @@
             CurrentProgram.Descripcion = FormModel.Description.Trim();
             CurrentProgram.IdCategoria = FormModel.CategoryId ?? CurrentProgram.IdCategoria;
             CurrentProgram.TipoPrograma = FormModel.ProgramType;
+            CurrentProgram.Estado = FormModel.Status;
             CurrentProgram.MetaFinanciera = SupportsFinancialGoal(FormModel.ProgramType) ? FormModel.RequiredAmount ?? 0m : 0m;
             CurrentProgram.MetaVoluntarios = SupportsVolunteerGoal(FormModel.ProgramType) ? FormModel.VolunteerGoal ?? 0 : 0;
 
@@ -380,6 +396,9 @@
 
         [Required(ErrorMessage = "Seleccione el tipo de programa.")]
         public string ProgramType { get; set; } = "Financiero";
+
+        [Required(ErrorMessage = "Seleccione el estado del programa.")]
+        public string Status { get; set; } = "Activo";
 
         public decimal? RequiredAmount { get; set; }
 
