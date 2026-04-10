@@ -419,8 +419,8 @@ FodyWeavers.xsd
 .aider*
 
 # User uploads
-ProyectoSocioEconomico.WebUI/wwwroot/uploads/casos/
+ProyectoSocioEconomico.WebUI/wwwroot/uploads/cases/*
 ProyectoSocioEconomico.WebUI/wwwroot/uploads/documents/
-ProyectoSocioEconomico.WebUI/wwwroot/uploads/programas/
+ProyectoSocioEconomico.WebUI/wwwroot/uploads/programs/
 ProyectoSocioEconomico.WebUI/wwwroot/uploads/profiles/*
 !ProyectoSocioEconomico.WebUI/wwwroot/uploads/profiles/DefaultProfile.png
