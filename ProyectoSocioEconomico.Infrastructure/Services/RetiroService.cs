@@ -25,6 +25,15 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        public async Task<List<Retiro>> ObtenerTodosConDetallesAsync()
+        {
+            return await _context.Retiros
+                .Include(r => r.IdBeneficiadoNavigation)
+                .Include(r => r.IdCasoNavigation)
+                .OrderByDescending(r => r.FechaSolicitud)
+                .ToListAsync();
+        }
+
         public async Task<decimal> ObtenerTotalRetiradoPorCasoAsync(int casoId)
         {
             return await _context.Retiros
@@ -46,6 +55,20 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
         public async Task Crear(Retiro retiro)
         {
             _context.Retiros.Add(retiro);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ActualizarEstadoAsync(int retiroId, string estado)
+        {
+            var retiro = await _context.Retiros.FirstOrDefaultAsync(r => r.Id == retiroId);
+            if (retiro == null)
+            {
+                throw new InvalidOperationException("No se encontro la solicitud de retiro.");
+            }
+
+            retiro.Estado = estado;
+            retiro.FechaProcesado = DateTime.Now;
+
             await _context.SaveChangesAsync();
         }
     }

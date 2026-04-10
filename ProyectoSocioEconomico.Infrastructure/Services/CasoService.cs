@@ -122,6 +122,34 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        public async Task EliminarAsync(int id)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            var casoExistente = await context.Casos
+                .Include(c => c.Donaciones)
+                .Include(c => c.Retiros)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (casoExistente == null)
+            {
+                throw new InvalidOperationException("No se encontro el caso a eliminar.");
+            }
+
+            if (casoExistente.Donaciones.Any())
+            {
+                throw new InvalidOperationException("No se puede borrar el caso porque ya tiene donaciones registradas.");
+            }
+
+            if (casoExistente.Retiros.Any())
+            {
+                throw new InvalidOperationException("No se puede borrar el caso porque ya tiene solicitudes de retiro registradas.");
+            }
+
+            context.Casos.Remove(casoExistente);
+            await context.SaveChangesAsync();
+        }
+
         public async Task SincronizarEstadoPorMetaAsync(int casoId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();

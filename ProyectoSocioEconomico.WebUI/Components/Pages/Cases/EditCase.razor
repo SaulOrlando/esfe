@@ -3,8 +3,7 @@
 @page "/cases/edit/{Id:int}"
 @*
   EditCase.razor
-  Propósito: Página para editar un caso existente. Permite actualizar título, descripción,
-  categoría, meta y estado.
+  Proposito: Pagina para editar o eliminar un caso existente.
 *@
 @layout EmptyLayout
 @rendermode InteractiveServer
@@ -23,7 +22,7 @@
         <div class="ec-page-header">
             <div class="ec-page-header__left">
                 <h1 class="ec-page-header__title">Cargando caso...</h1>
-                <p class="ec-page-header__subtitle">Estamos preparando la información para edición.</p>
+                <p class="ec-page-header__subtitle">Estamos preparando la informacion para edicion.</p>
             </div>
         </div>
     }
@@ -40,7 +39,7 @@
         <div class="ec-page-header">
             <div class="ec-page-header__left">
                 <h1 class="ec-page-header__title">Editar caso</h1>
-                <p class="ec-page-header__subtitle">Actualice la información principal de su caso y guarde los cambios.</p>
+                <p class="ec-page-header__subtitle">Actualice la informacion principal de su caso y guarde los cambios.</p>
             </div>
             <div class="ec-status-badge">
                 <span class="ec-status-badge__icon"><i class="fas fa-folder-open"></i></span>
@@ -59,17 +58,22 @@
                         <div class="bulma-notification bulma-is-danger bulma-is-light">@ErrorMessage</div>
                     }
 
+                    @if (!string.IsNullOrWhiteSpace(StatusMessage))
+                    {
+                        <div class="bulma-notification bulma-is-success bulma-is-light">@StatusMessage</div>
+                    }
+
                     <section class="ec-card">
                         <h2 class="ec-card__title">
                             <span class="ec-card__title-icon ec-card__title-icon--yellow">
                                 <i class="fas fa-pen-to-square"></i>
                             </span>
-                            Información general
+                            Informacion general
                         </h2>
 
                         <div class="ec-form-grid ec-form-grid--2col">
                             <div class="bulma-field ec-field">
-                                <label class="bulma-label ec-label" for="case-title">Título del caso</label>
+                                <label class="bulma-label ec-label" for="case-title">Titulo del caso</label>
                                 <div class="bulma-control ec-control">
                                     <InputText id="case-title" class="bulma-input ec-input" @bind-Value="FormModel.CaseTitle" />
                                 </div>
@@ -77,11 +81,11 @@
                             </div>
 
                             <div class="bulma-field ec-field">
-                                <label class="bulma-label ec-label" for="category">Categoría</label>
+                                <label class="bulma-label ec-label" for="category">Categoria</label>
                                 <div class="bulma-control ec-control">
                                     <div class="bulma-select bulma-is-fullwidth ec-select-wrap">
                                         <InputSelect id="category" class="ec-select" @bind-Value="FormModel.CategoryId">
-                                            <option value="">Seleccione una categoría</option>
+                                            <option value="">Seleccione una categoria</option>
                                             @foreach (var category in Categories)
                                             {
                                                 <option value="@category.Id">@category.Nombre</option>
@@ -94,7 +98,7 @@
                         </div>
 
                         <div class="bulma-field ec-field ec-field--full">
-                            <label class="bulma-label ec-label" for="description">Descripción detallada</label>
+                            <label class="bulma-label ec-label" for="description">Descripcion detallada</label>
                             <div class="bulma-control ec-control">
                                 <InputTextArea id="description"
                                                class="bulma-textarea ec-textarea"
@@ -111,7 +115,7 @@
                             <span class="ec-card__title-icon ec-card__title-icon--yellow">
                                 <i class="fas fa-hand-holding-dollar"></i>
                             </span>
-                            Meta de recaudación
+                            Meta de recaudacion
                         </h2>
 
                         <div class="bulma-field ec-field ec-field--narrow">
@@ -134,16 +138,16 @@
                             <span class="ec-card__title-icon ec-card__title-icon--yellow">
                                 <i class="fas fa-circle-info"></i>
                             </span>
-                            Información adicional
+                            Informacion adicional
                         </h2>
 
                         <div class="ec-summary-grid">
                             <article class="ec-summary-item">
-                                <span class="ec-summary-item__label">Fecha de creación</span>
+                                <span class="ec-summary-item__label">Fecha de creacion</span>
                                 <strong class="ec-summary-item__value">@CurrentCase?.FechaCreacion.ToString("dd/MM/yyyy")</strong>
                             </article>
                             <article class="ec-summary-item">
-                                <span class="ec-summary-item__label">Categoría actual</span>
+                                <span class="ec-summary-item__label">Categoria actual</span>
                                 <strong class="ec-summary-item__value">@CurrentCase?.IdCategoriaNavigation?.Nombre</strong>
                             </article>
                             <article class="ec-summary-item">
@@ -151,6 +155,31 @@
                                 <strong class="ec-summary-item__value">@CurrentCase?.Estado</strong>
                             </article>
                         </div>
+                    </section>
+
+                    <section class="ec-card">
+                        <h2 class="ec-card__title">
+                            <span class="ec-card__title-icon ec-card__title-icon--yellow">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                            Borrar caso
+                        </h2>
+
+                        <p class="ec-field-note">Esta accion elimina el caso de forma permanente. Si el caso ya tiene donaciones o retiros registrados, el borrado sera bloqueado.</p>
+
+                        @if (ShowDeleteConfirmation)
+                        {
+                            <div class="bulma-notification bulma-is-danger bulma-is-light">
+                                <p>Confirme si desea borrar este caso.</p>
+                                <div class="ec-action-bar" style="margin-top: 1rem;">
+                                    <button type="button" class="ec-action-bar__cancel" @onclick="CancelDelete" disabled="@IsDeleting">Cancelar</button>
+                                    <button type="button" class="bulma-button bulma-is-danger" @onclick="HandleDeleteAsync" disabled="@IsDeleting">
+                                        <span class="bulma-icon bulma-is-small"><i class="fas fa-trash"></i></span>
+                                        <strong>@(IsDeleting ? "Borrando..." : "Confirmar borrado")</strong>
+                                    </button>
+                                </div>
+                            </div>
+                        }
                     </section>
                 </div>
 
@@ -165,7 +194,7 @@
                                 <span class="ec-tips-list__num">1</span>
                                 <div>
                                     <strong>Sea claro:</strong>
-                                    <p>Explique con precisión en qué se utilizará la ayuda para generar más confianza.</p>
+                                    <p>Explique con precision en que se utilizara la ayuda para generar mas confianza.</p>
                                 </div>
                             </li>
                             <li class="ec-tips-list__item">
@@ -178,8 +207,8 @@
                             <li class="ec-tips-list__item">
                                 <span class="ec-tips-list__num">3</span>
                                 <div>
-                                    <strong>Revise redacción:</strong>
-                                    <p>Un texto bien escrito facilita la comprensión para donantes y administradores.</p>
+                                    <strong>Revise redaccion:</strong>
+                                    <p>Un texto bien escrito facilita la comprension para donantes y administradores.</p>
                                 </div>
                             </li>
                         </ol>
@@ -188,8 +217,12 @@
             </div>
 
             <div class="ec-action-bar">
-                <button type="button" class="ec-action-bar__cancel" @onclick="HandleCancel">Cancelar</button>
-                <button type="submit" class="bulma-button bulma-is-warning ec-btn-update" disabled="@IsSaving">
+                <button type="button" class="ec-action-bar__cancel" @onclick="HandleCancel" disabled="@IsSaving || IsDeleting">Cancelar</button>
+                <button type="button" class="bulma-button bulma-is-danger bulma-is-light" @onclick="StartDelete" disabled="@IsSaving || IsDeleting">
+                    <span class="bulma-icon bulma-is-small"><i class="fas fa-trash"></i></span>
+                    <strong>Borrar caso</strong>
+                </button>
+                <button type="submit" class="bulma-button bulma-is-warning ec-btn-update" disabled="@IsSaving || IsDeleting">
                     <span class="bulma-icon bulma-is-small"><i class="fas fa-floppy-disk"></i></span>
                     <strong>@(IsSaving ? "Actualizando..." : "Actualizar caso")</strong>
                 </button>
@@ -208,7 +241,10 @@
     private List<Categoria> Categories { get; set; } = new();
     private bool IsLoading { get; set; } = true;
     private bool IsSaving { get; set; }
+    private bool IsDeleting { get; set; }
+    private bool ShowDeleteConfirmation { get; set; }
     private string? ErrorMessage { get; set; }
+    private string? StatusMessage { get; set; }
 
     private int WordCount => string.IsNullOrWhiteSpace(FormModel?.Description)
         ? 0
@@ -244,7 +280,7 @@
 
             if (CurrentCase is null || CurrentCase.IdBeneficiado != userId)
             {
-                ErrorMessage = "No se encontró el caso solicitado o no tiene permisos para editarlo.";
+                ErrorMessage = "No se encontro el caso solicitado o no tiene permisos para editarlo.";
                 return;
             }
 
@@ -258,7 +294,7 @@
         }
         catch (Exception ex)
         {
-            ErrorMessage = "Ocurrió un error al cargar el caso: " + ex.Message;
+            ErrorMessage = "Ocurrio un error al cargar el caso: " + ex.Message;
         }
         finally
         {
@@ -271,6 +307,18 @@
         Navigation.NavigateTo("/beneficiary/dashboard");
     }
 
+    private void StartDelete()
+    {
+        ErrorMessage = null;
+        StatusMessage = null;
+        ShowDeleteConfirmation = true;
+    }
+
+    private void CancelDelete()
+    {
+        ShowDeleteConfirmation = false;
+    }
+
     private async Task HandleUpdateAsync()
     {
         if (FormModel is null || CurrentCase is null)
@@ -279,6 +327,7 @@
         }
 
         ErrorMessage = null;
+        StatusMessage = null;
         IsSaving = true;
 
         try
@@ -300,20 +349,46 @@
         }
     }
 
+    private async Task HandleDeleteAsync()
+    {
+        if (CurrentCase is null)
+        {
+            return;
+        }
+
+        ErrorMessage = null;
+        StatusMessage = null;
+        IsDeleting = true;
+
+        try
+        {
+            await CasoService.EliminarAsync(CurrentCase.Id);
+            Navigation.NavigateTo("/beneficiary/dashboard");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "No se pudo borrar el caso: " + ex.Message;
+        }
+        finally
+        {
+            IsDeleting = false;
+            ShowDeleteConfirmation = false;
+        }
+    }
+
     private sealed class EditCaseModel
     {
-        [Required(ErrorMessage = "El título es obligatorio.")]
-        [StringLength(120, ErrorMessage = "El título no puede exceder 120 caracteres.")]
+        [Required(ErrorMessage = "El titulo es obligatorio.")]
+        [StringLength(120, ErrorMessage = "El titulo no puede exceder 120 caracteres.")]
         public string CaseTitle { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Seleccione una categoría.")]
+        [Required(ErrorMessage = "Seleccione una categoria.")]
         public int? CategoryId { get; set; }
 
-        [Required(ErrorMessage = "La descripción es obligatoria.")]
-        [StringLength(3000, ErrorMessage = "La descripción no puede exceder 3000 caracteres.")]
+        [Required(ErrorMessage = "La descripcion es obligatoria.")]
+        [StringLength(3000, ErrorMessage = "La descripcion no puede exceder 3000 caracteres.")]
         public string Description { get; set; } = string.Empty;
 
         public decimal RequiredAmount { get; set; }
     }
 }
-*** End Patch

@@ -14,6 +14,7 @@ namespace ProyectoSocioEconomico.Application.Interfaces
         Task<bool> UsuarioYaTieneCasoAsync(int usuarioId);
         Task Crear(Caso caso);
         Task Actualizar(Caso caso);
+        Task EliminarAsync(int id);
         Task SincronizarEstadoPorMetaAsync(int casoId);
         Task<List<Categoria>> ObtenerCategorias();
     }
