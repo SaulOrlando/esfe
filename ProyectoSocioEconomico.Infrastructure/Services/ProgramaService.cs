@@ -74,6 +74,36 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        public async Task SincronizarEstadoPorMetaAsync(int programaId)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            var programaExistente = await context.Programas.FirstOrDefaultAsync(p => p.Id == programaId);
+            if (programaExistente is null)
+            {
+                return;
+            }
+
+            var aceptaMetaFinanciera =
+                string.Equals(programaExistente.TipoPrograma, "Financiero", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(programaExistente.TipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
+
+            if (!aceptaMetaFinanciera || programaExistente.MetaFinanciera <= 0)
+            {
+                return;
+            }
+
+            var totalRecaudado = await context.Donaciones
+                .Where(d => d.IdPrograma == programaId && d.Estado == "Completado")
+                .SumAsync(d => d.Monto);
+
+            if (totalRecaudado >= programaExistente.MetaFinanciera)
+            {
+                programaExistente.Estado = "Inactivo";
+                await context.SaveChangesAsync();
+            }
+        }
+
         public async Task EliminarAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();

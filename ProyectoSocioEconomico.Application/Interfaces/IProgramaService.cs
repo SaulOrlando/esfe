@@ -10,6 +10,7 @@ namespace ProyectoSocioEconomico.Application.Interfaces
         Task<Programa?> ObtenerPorIdConDetallesAsync(int id);
         Task CrearAsync(Programa programa);
         Task ActualizarAsync(Programa programa);
+        Task SincronizarEstadoPorMetaAsync(int programaId);
         Task EliminarAsync(int id);
     }
 }

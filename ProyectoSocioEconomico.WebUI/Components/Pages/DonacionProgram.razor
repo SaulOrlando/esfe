@@ -438,6 +438,7 @@
 
             DbContext.Donaciones.Add(donation);
             await DbContext.SaveChangesAsync();
+            await ProgramaService.SincronizarEstadoPorMetaAsync(Program.Id);
 
             IsSuccess = true;
             FeedbackMessage = "La donación se registró correctamente.";
