@@ -125,13 +125,15 @@
                     var dbDonations = await DbContext.Donaciones
                         .Include(d => d.IdCasoNavigation)
                         .ThenInclude(c => c.IdCategoriaNavigation)
+                        .Include(d => d.IdProgramaNavigation)
+                        .ThenInclude(p => p.IdCategoriaNavigation)
                         .Where(d => d.IdDonador == userId)
                         .OrderByDescending(d => d.FechaDonacion)
                         .ToListAsync();
 
                     Donations = dbDonations.Select(d => new DonationRecord(
-                        d.IdCasoNavigation.Titulo,
-                        d.IdCasoNavigation.IdCategoriaNavigation.Nombre,
+                        GetDonationTargetName(d),
+                        GetDonationTargetType(d),
                         d.Monto
                     )).ToList();
 
@@ -148,5 +150,37 @@
             return "/uploads/profiles/DefaultProfile.png";
 
         return CurrentUser.ImagenPerfil.StartsWith("/") ? CurrentUser.ImagenPerfil : "/" + CurrentUser.ImagenPerfil;
+    }
+
+    private static string GetDonationTargetName(Donacione donation)
+    {
+        var caseTitle = donation.IdCasoNavigation?.Titulo;
+        if (!string.IsNullOrWhiteSpace(caseTitle))
+            return caseTitle;
+
+        var programName = donation.IdProgramaNavigation?.Nombre;
+        if (!string.IsNullOrWhiteSpace(programName))
+            return programName;
+
+        return "Destino no disponible";
+    }
+
+    private static string GetDonationTargetType(Donacione donation)
+    {
+        var caseCategoryName = donation.IdCasoNavigation?.IdCategoriaNavigation?.Nombre;
+        if (!string.IsNullOrWhiteSpace(caseCategoryName))
+            return caseCategoryName;
+
+        var programCategoryName = donation.IdProgramaNavigation?.IdCategoriaNavigation?.Nombre;
+        if (!string.IsNullOrWhiteSpace(programCategoryName))
+            return programCategoryName;
+
+        if (donation.IdCasoNavigation is not null)
+            return "Caso";
+
+        if (donation.IdProgramaNavigation is not null)
+            return "Programa";
+
+        return "Sin clasificar";
     }
 }
