@@ -73,10 +73,13 @@
                             <input id="password" class="bulma-input rp3-input @(mostrarErrores && !EsPasswordValido(RegState.Password) ? "bulma-is-danger" : "")"
                                    type="@(ShowPassword ? "text" : "password")" placeholder="••••••••" @bind="RegState.Password"
                                    @oninput="OnPasswordInput" />
-                            <span class="bulma-icon bulma-is-right rp3-input-icon rp3-input-icon--clickable"
-                                  @onclick="TogglePassword">
+                            <button type="button"
+                                    class="bulma-icon bulma-is-right rp3-input-icon rp3-input-icon--clickable"
+                                    @onclick="TogglePassword"
+                                    aria-label="@(ShowPassword ? "Ocultar contraseña" : "Mostrar contraseña")"
+                                    aria-pressed="@ShowPassword">
                                 <i class="@(ShowPassword ? "far fa-eye" : "far fa-eye-slash")"></i>
-                            </span>
+                            </button>
                         </div>
                         @if (mostrarErrores && !EsPasswordValido(RegState.Password))
                         {
@@ -90,10 +93,13 @@
                             <input id="confirm-password" class="bulma-input rp3-input @(mostrarErrores && RegState.Password != ConfirmPassword ? "bulma-is-danger" : "")"
                                    type="@(ShowConfirm ? "text" : "password")" placeholder="••••••••"
                                    @bind="ConfirmPassword" />
-                            <span class="bulma-icon bulma-is-right rp3-input-icon rp3-input-icon--clickable"
-                                  @onclick="ToggleConfirm">
+                            <button type="button"
+                                    class="bulma-icon bulma-is-right rp3-input-icon rp3-input-icon--clickable"
+                                    @onclick="ToggleConfirm"
+                                    aria-label="@(ShowConfirm ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña")"
+                                    aria-pressed="@ShowConfirm">
                                 <i class="@(ShowConfirm ? "far fa-eye" : "far fa-eye-slash")"></i>
-                            </span>
+                            </button>
                         </div>
                         @if (mostrarErrores && RegState.Password != ConfirmPassword)
                         {
