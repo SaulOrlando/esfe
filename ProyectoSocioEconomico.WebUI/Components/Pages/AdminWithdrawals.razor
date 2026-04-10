@@ -1,0 +1,276 @@
+@*
+  AdminWithdrawals.razor
+  Proposito: Pagina administrativa para revisar, aprobar y rechazar solicitudes de retiro.
+*@
+@page "/admin/withdrawals"
+@layout ProfileLayout
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.WebUI.Services
+@using System.Security.Claims
+@inject IRetiroService RetiroService
+@inject IUsuarioService UsuarioService
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<div class="ap-page">
+    @if (IsLoading)
+    {
+        <div class="ap-state-card">
+            <h1 class="ap-state-card__title">Cargando retiros...</h1>
+            <p class="ap-state-card__text">Estamos obteniendo las solicitudes registradas.</p>
+        </div>
+    }
+    else
+    {
+        <div class="ap-page-header">
+            <div class="ap-page-header__left">
+                <h1 class="ap-page-header__title">Solicitudes de Retiro</h1>
+                <p class="ap-page-header__subtitle">Revise retiros pendientes y procese su aprobacion o rechazo.</p>
+            </div>
+
+            <div class="ap-page-header__actions">
+                <div class="bulma-control bulma-has-icons-left ap-search-wrap">
+                    <input class="bulma-input ap-search-input"
+                           type="text"
+                           placeholder="Buscar beneficiario o caso"
+                           @bind="SearchQuery"
+                           @bind:event="oninput" />
+                    <span class="bulma-icon bulma-is-left">
+                        <i class="fas fa-magnifying-glass"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(FeedbackMessage))
+        {
+            <div class="bulma-notification @(IsSuccess ? "bulma-is-success" : "bulma-is-danger") bulma-is-light">
+                @FeedbackMessage
+            </div>
+        }
+
+        <section class="wh-stats">
+            <article class="wh-stat-card">
+                <span class="wh-stat-card__label">Pendientes</span>
+                <strong class="wh-stat-card__value">@PendingCount</strong>
+            </article>
+            <article class="wh-stat-card">
+                <span class="wh-stat-card__label">Aprobados</span>
+                <strong class="wh-stat-card__value">@ApprovedCount</strong>
+            </article>
+            <article class="wh-stat-card">
+                <span class="wh-stat-card__label">Rechazados</span>
+                <strong class="wh-stat-card__value">@RejectedCount</strong>
+            </article>
+        </section>
+
+        <div class="ap-tabs">
+            <button type="button"
+                    class="ap-tab @(ActiveTab == "pending" ? "ap-tab--active" : "")"
+                    @onclick='() => SetTab("pending")'>
+                Pendientes
+            </button>
+            <button type="button"
+                    class="ap-tab @(ActiveTab == "history" ? "ap-tab--active" : "")"
+                    @onclick='() => SetTab("history")'>
+                Historial
+            </button>
+        </div>
+
+        <div class="ap-table-card">
+            <table class="bulma-table ap-table bulma-is-fullwidth">
+                <thead>
+                    <tr>
+                        <th class="ap-table__th">BENEFICIARIO</th>
+                        <th class="ap-table__th">CASO</th>
+                        <th class="ap-table__th">MONTO</th>
+                        <th class="ap-table__th">METODO</th>
+                        <th class="ap-table__th">DATOS</th>
+                        <th class="ap-table__th">ESTADO</th>
+                        <th class="ap-table__th">FECHA</th>
+                        <th class="ap-table__th ap-table__th--actions">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (VisibleWithdrawals.Any())
+                    {
+                        @foreach (var retiro in VisibleWithdrawals)
+                        {
+                            <tr class="ap-table__row">
+                                <td class="ap-table__td">
+                                    <strong>@GetBeneficiaryName(retiro)</strong>
+                                    <div class="bulma-is-size-7 bulma-has-text-grey">@retiro.IdBeneficiadoNavigation?.Email</div>
+                                </td>
+                                <td class="ap-table__td">@retiro.IdCasoNavigation?.Titulo</td>
+                                <td class="ap-table__td">@retiro.Monto.ToString("C")</td>
+                                <td class="ap-table__td">@retiro.MetodoPago</td>
+                                <td class="ap-table__td">@(string.IsNullOrWhiteSpace(retiro.DatosPago) ? "Sin detalle" : retiro.DatosPago)</td>
+                                <td class="ap-table__td">
+                                    <span class="wh-status @GetStatusClass(retiro.Estado)">@retiro.Estado</span>
+                                </td>
+                                <td class="ap-table__td">@retiro.FechaSolicitud.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                <td class="ap-table__td ap-table__td--actions">
+                                    @if (string.Equals(retiro.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <div class="bulma-buttons">
+                                            <button type="button"
+                                                    class="bulma-button bulma-is-small bulma-is-success"
+                                                    @onclick='() => UpdateWithdrawalStatusAsync(retiro.Id, "Aprobado")'>
+                                                Aprobar
+                                            </button>
+                                            <button type="button"
+                                                    class="bulma-button bulma-is-small bulma-is-danger bulma-is-light"
+                                                    @onclick='() => UpdateWithdrawalStatusAsync(retiro.Id, "Rechazado")'>
+                                                Rechazar
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="bulma-has-text-grey">Procesado</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="ap-table__empty">
+                                No hay solicitudes para mostrar en esta vista.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private Usuario? CurrentUser { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private bool IsSuccess { get; set; }
+    private string ActiveTab { get; set; } = "pending";
+    private string SearchQuery { get; set; } = string.Empty;
+    private string? FeedbackMessage { get; set; }
+    private List<Retiro> Withdrawals { get; set; } = new();
+
+    private int PendingCount => Withdrawals.Count(retiro => string.Equals(retiro.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase));
+    private int ApprovedCount => Withdrawals.Count(retiro => string.Equals(retiro.Estado, "Aprobado", StringComparison.OrdinalIgnoreCase));
+    private int RejectedCount => Withdrawals.Count(retiro => string.Equals(retiro.Estado, "Rechazado", StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Retiro> VisibleWithdrawals =>
+        FilterWithdrawals()
+            .Where(retiro => ActiveTab == "pending"
+                ? string.Equals(retiro.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase)
+                : !string.Equals(retiro.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(retiro => retiro.FechaSolicitud);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var userIdStr = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdStr, out var userId))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        CurrentUser = await UsuarioService.ObtenerPorId(userId);
+        if (!IsAdmin(CurrentUser))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        await LoadWithdrawalsAsync();
+    }
+
+    private async Task LoadWithdrawalsAsync()
+    {
+        try
+        {
+            Withdrawals = await RetiroService.ObtenerTodosConDetallesAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private IEnumerable<Retiro> FilterWithdrawals()
+    {
+        if (string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            return Withdrawals;
+        }
+
+        return Withdrawals.Where(retiro =>
+            GetBeneficiaryName(retiro).Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+            (retiro.IdBeneficiadoNavigation?.Email?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (retiro.IdCasoNavigation?.Titulo?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            retiro.MetodoPago.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void SetTab(string tab)
+    {
+        ActiveTab = tab;
+    }
+
+    private async Task UpdateWithdrawalStatusAsync(int retiroId, string estado)
+    {
+        try
+        {
+            await RetiroService.ActualizarEstadoAsync(retiroId, estado);
+            FeedbackMessage = estado == "Aprobado"
+                ? "Solicitud aprobada correctamente."
+                : "Solicitud rechazada correctamente.";
+            IsSuccess = true;
+            Withdrawals = await RetiroService.ObtenerTodosConDetallesAsync();
+        }
+        catch (Exception ex)
+        {
+            FeedbackMessage = "No se pudo actualizar la solicitud: " + ex.Message;
+            IsSuccess = false;
+        }
+    }
+
+    private static bool IsAdmin(Usuario? usuario)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetBeneficiaryName(Retiro retiro)
+    {
+        var nombre = retiro.IdBeneficiadoNavigation?.Nombre ?? string.Empty;
+        var apellido = retiro.IdBeneficiadoNavigation?.Apellido ?? string.Empty;
+        return $"{nombre} {apellido}".Trim();
+    }
+
+    private static string GetStatusClass(string? estado)
+    {
+        if (string.Equals(estado, "Aprobado", StringComparison.OrdinalIgnoreCase))
+        {
+            return "wh-status--success";
+        }
+
+        if (string.Equals(estado, "Rechazado", StringComparison.OrdinalIgnoreCase))
+        {
+            return "wh-status--danger";
+        }
+
+        return "wh-status--warning";
+    }
+}

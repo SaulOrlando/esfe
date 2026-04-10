@@ -1,14 +1,16 @@
 @namespace ProyectoSocioEconomico.WebUI.Components.Pages
 @*
   BeneficiaryCaseDashboard.razor
-  Propósito: Dashboard del beneficiario con diseño "Portfolio" actualizado (bw- classes).
+  Proposito: Dashboard del beneficiario con gestion de caso y solicitudes de retiro.
 *@
 @page "/beneficiary/dashboard"
 @layout ProfileLayout
 @using ProyectoSocioEconomico.Domain.Entities
 @using ProyectoSocioEconomico.Application.Interfaces
+@using System.ComponentModel.DataAnnotations
 @using System.Globalization
 @inject ICasoService CasoService
+@inject IRetiroService RetiroService
 @inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthStateProvider
@@ -18,7 +20,7 @@
         <div class="bw-main__header">
             <div>
                 <h1 class="bw-main__title">Mi Panel de Beneficiario</h1>
-                <p class="bw-main__subtitle">Monitorea el progreso de tus campañas y gestiona tus fondos.</p>
+                <p class="bw-main__subtitle">Monitorea el progreso de tus campanas y gestiona tus fondos.</p>
             </div>
         </div>
 
@@ -34,13 +36,12 @@
                 <div style="font-size: 4rem; color: var(--bw-text-muted); margin-bottom: 1.5rem;">
                     <i class="fas fa-folder-open"></i>
                 </div>
-                <h2 class="bw-main__title" style="font-size: 1.5rem;">Aún no tienes campañas</h2>
+                <h2 class="bw-main__title" style="font-size: 1.5rem;">Aun no tienes campanas</h2>
                 <p class="bw-main__subtitle">Comienza hoy mismo a recaudar fondos para tu causa.</p>
             </div>
         }
         else
         {
-            @* STATS GRID (Calculado sobre el caso activo principal) *@
             <div class="bw-stats-grid">
                 <div class="bw-stat-card">
                     <div class="bw-stat-card__icon" style="color: var(--bw-green);"><i class="fas fa-hand-holding-dollar"></i></div>
@@ -64,10 +65,9 @@
                 </div>
             </div>
 
-            @* LISTA DE CAMPAÑAS *@
             <div class="bw-card">
-                <h2 class="bw-section-title"><i class="fas fa-list-check"></i> Gestión de Campañas</h2>
-                
+                <h2 class="bw-section-title"><i class="fas fa-list-check"></i> Gestion de Campanas</h2>
+
                 <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem;">
                     @foreach (var c in Cases)
                     {
@@ -90,14 +90,18 @@
                                     <span style="font-size: 0.85rem; font-weight: 700; color: var(--bw-text-mid);">@pct%</span>
                                 </div>
                             </div>
-                            
+
                             <div style="display: flex; gap: 0.75rem;">
                                 <a href="/cases/@c.Id" class="bw-btn-edit">
                                     <i class="fas fa-eye"></i> Ver
                                 </a>
                                 @if (c.Estado == "Activo")
                                 {
-                                    <button class="bw-btn-edit" style="background: white; border-color: var(--bw-border);">
+                                    <button type="button"
+                                            class="bw-btn-edit"
+                                            style="background: white; border-color: var(--bw-border);"
+                                            @onclick="@(() => NavigateToEditCase(c.Id))"
+                                            aria-label="Editar caso">
                                         <i class="fas fa-pen"></i>
                                     </button>
                                 }
@@ -107,20 +111,94 @@
                 </div>
             </div>
 
-            @* ACCESO RÁPIDO A RETIRO (Solo visual para este dashboard) *@
             <div class="bw-card" style="border-left: 5px solid var(--bw-green);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                @if (!string.IsNullOrWhiteSpace(withdrawalErrorMessage))
+                {
+                    <div class="bulma-notification bulma-is-danger bulma-is-light" style="margin-bottom: 1rem;">
+                        @withdrawalErrorMessage
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(withdrawalStatusMessage))
+                {
+                    <div class="bulma-notification bulma-is-success bulma-is-light" style="margin-bottom: 1rem;">
+                        @withdrawalStatusMessage
+                    </div>
+                }
+
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 2rem; flex-wrap: wrap;">
                     <div>
                         <h2 class="bw-section-title" style="margin-bottom: 0.5rem;"><i class="fas fa-wallet"></i> Fondos Disponibles</h2>
-                        <p class="bw-main__subtitle">Puedes solicitar el desembolso una vez alcances el 100% o la fecha límite.</p>
+                        <p class="bw-main__subtitle">@withdrawalHelperText</p>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-size: 2rem; font-weight: 900; color: var(--bw-green);">@totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</div>
-                        <button class="bw-btn-withdraw" style="margin-top: 0.5rem; height: 2.8rem; font-size: 0.95rem; padding: 0 1.5rem;">
+                        <div style="font-size: 2rem; font-weight: 900; color: var(--bw-green);">@availableBalance.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</div>
+                        <button type="button"
+                                class="bw-btn-withdraw"
+                                style="margin-top: 0.5rem; height: 2.8rem; font-size: 0.95rem; padding: 0 1.5rem;"
+                                @onclick="StartWithdrawalRequest"
+                                disabled="@(!canRequestWithdrawal || isSubmittingWithdrawal)">
                             Solicitar Retiro
                         </button>
                     </div>
                 </div>
+
+                @if (showWithdrawalForm)
+                {
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--bw-border);">
+                        <EditForm Model="WithdrawalForm" OnValidSubmit="HandleRequestWithdrawalAsync" FormName="WithdrawalRequestForm">
+                            <DataAnnotationsValidator />
+
+                            <div class="bulma-columns bulma-is-variable bulma-is-4">
+                                <div class="bulma-column bulma-is-4">
+                                    <div class="bulma-field">
+                                        <label class="bulma-label">Monto a retirar</label>
+                                        <div class="bulma-control">
+                                            <InputNumber class="bulma-input" @bind-Value="WithdrawalForm.Amount" />
+                                        </div>
+                                        <ValidationMessage For="@(() => WithdrawalForm.Amount)" class="bulma-help bulma-is-danger" />
+                                        <p class="bulma-help">Disponible: @availableBalance.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</p>
+                                    </div>
+                                </div>
+
+                                <div class="bulma-column bulma-is-4">
+                                    <div class="bulma-field">
+                                        <label class="bulma-label">Metodo de retiro</label>
+                                        <div class="bulma-control">
+                                            <div class="bulma-select bulma-is-fullwidth">
+                                                <InputSelect class="bulma-select" @bind-Value="WithdrawalForm.PaymentMethod">
+                                                    <option value="">Seleccione un metodo</option>
+                                                    <option value="PayPal">PayPal</option>
+                                                    <option value="Transferencia">Transferencia</option>
+                                                </InputSelect>
+                                            </div>
+                                        </div>
+                                        <ValidationMessage For="@(() => WithdrawalForm.PaymentMethod)" class="bulma-help bulma-is-danger" />
+                                    </div>
+                                </div>
+
+                                <div class="bulma-column">
+                                    <div class="bulma-field">
+                                        <label class="bulma-label">@PaymentDetailsLabel</label>
+                                        <div class="bulma-control">
+                                            <InputText class="bulma-input" @bind-Value="WithdrawalForm.PaymentDetails" />
+                                        </div>
+                                        <ValidationMessage For="@(() => WithdrawalForm.PaymentDetails)" class="bulma-help bulma-is-danger" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+                                <button type="button" class="bulma-button bulma-is-light" @onclick="CancelWithdrawalRequest" disabled="@isSubmittingWithdrawal">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="bulma-button bulma-is-success" disabled="@isSubmittingWithdrawal">
+                                    <strong>@(isSubmittingWithdrawal ? "Enviando..." : "Enviar solicitud")</strong>
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                }
             </div>
         }
     </main>
@@ -129,32 +207,196 @@
 @code {
     private List<Caso>? Cases;
     private Caso? activeCase;
-    private decimal totalRecaudado = 0;
-    private decimal metaTotal = 0;
-    private decimal restante = 0;
-    private int totalDonantes = 0;
+    private decimal totalRecaudado;
+    private decimal metaTotal;
+    private decimal restante;
+    private decimal availableBalance;
+    private int totalDonantes;
+    private int currentUserId;
+    private bool canRequestWithdrawal;
+    private bool hasPendingWithdrawalRequest;
+    private bool isSubmittingWithdrawal;
+    private bool showWithdrawalForm;
+    private string? withdrawalErrorMessage;
+    private string? withdrawalStatusMessage;
+    private string withdrawalHelperText = "Puedes solicitar el desembolso de cualquier saldo disponible en tu caso.";
+    private WithdrawalRequestModel WithdrawalForm { get; set; } = new();
+
+    private string PaymentDetailsLabel =>
+        string.Equals(WithdrawalForm.PaymentMethod, "PayPal", StringComparison.OrdinalIgnoreCase)
+            ? "Correo de PayPal"
+            : "Datos de transferencia";
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var idStr = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (int.TryParse(idStr, out var userId))
         {
+            currentUserId = userId;
             Cases = new List<Caso>();
             activeCase = await CasoService.ObtenerPorBeneficiadoIdAsync(userId);
-            
+
             if (activeCase != null)
             {
                 Cases.Add(activeCase);
-                
-                // Cálculos de estadísticas
+
                 totalRecaudado = activeCase.Donaciones?.Where(d => d.Estado == "Completado").Sum(d => d.Monto) ?? 0;
                 metaTotal = activeCase.Meta;
                 restante = Math.Max(0, metaTotal - totalRecaudado);
                 totalDonantes = activeCase.Donaciones?.Count(d => d.Estado == "Completado") ?? 0;
+
+                await LoadWithdrawalStateAsync();
             }
         }
+    }
+
+    private void NavigateToEditCase(int caseId)
+    {
+        Navigation.NavigateTo($"/cases/{caseId}/edit");
+    }
+
+    private void StartWithdrawalRequest()
+    {
+        withdrawalErrorMessage = null;
+        withdrawalStatusMessage = null;
+
+        if (!canRequestWithdrawal)
+        {
+            withdrawalErrorMessage = withdrawalHelperText;
+            return;
+        }
+
+        WithdrawalForm = new WithdrawalRequestModel
+        {
+            Amount = availableBalance
+        };
+
+        showWithdrawalForm = true;
+    }
+
+    private void CancelWithdrawalRequest()
+    {
+        showWithdrawalForm = false;
+        withdrawalErrorMessage = null;
+    }
+
+    private async Task HandleRequestWithdrawalAsync()
+    {
+        withdrawalErrorMessage = null;
+        withdrawalStatusMessage = null;
+
+        if (activeCase is null || currentUserId <= 0)
+        {
+            withdrawalErrorMessage = "No se pudo identificar el caso para solicitar el retiro.";
+            return;
+        }
+
+        if (!canRequestWithdrawal)
+        {
+            withdrawalErrorMessage = withdrawalHelperText;
+            return;
+        }
+
+        isSubmittingWithdrawal = true;
+
+        try
+        {
+            await LoadWithdrawalStateAsync();
+
+            if (!canRequestWithdrawal)
+            {
+                withdrawalErrorMessage = withdrawalHelperText;
+                return;
+            }
+
+            if (WithdrawalForm.Amount <= 0)
+            {
+                withdrawalErrorMessage = "Debes ingresar un monto mayor que cero.";
+                return;
+            }
+
+            if (WithdrawalForm.Amount > availableBalance)
+            {
+                withdrawalErrorMessage = "El monto solicitado no puede ser mayor al saldo disponible.";
+                return;
+            }
+
+            await RetiroService.Crear(new Retiro
+            {
+                IdBeneficiado = currentUserId,
+                IdCaso = activeCase.Id,
+                Monto = WithdrawalForm.Amount,
+                MetodoPago = WithdrawalForm.PaymentMethod,
+                DatosPago = WithdrawalForm.PaymentDetails.Trim(),
+                Estado = "Pendiente",
+                FechaSolicitud = DateTime.Now
+            });
+
+            showWithdrawalForm = false;
+            withdrawalStatusMessage = "La solicitud de retiro fue enviada y quedo pendiente de revision.";
+            await LoadWithdrawalStateAsync();
+            Navigation.NavigateTo("/beneficiary/withdrawals");
+        }
+        catch (Exception ex)
+        {
+            withdrawalErrorMessage = $"No se pudo registrar la solicitud de retiro: {ex.Message}";
+        }
+        finally
+        {
+            isSubmittingWithdrawal = false;
+        }
+    }
+
+    private async Task LoadWithdrawalStateAsync()
+    {
+        if (activeCase is null || currentUserId <= 0)
+        {
+            availableBalance = 0;
+            canRequestWithdrawal = false;
+            withdrawalHelperText = "No se encontro informacion suficiente para procesar retiros.";
+            return;
+        }
+
+        availableBalance = await RetiroService.ObtenerBalanceDisponibleAsync(activeCase.Id);
+
+        var withdrawals = await RetiroService.ObtenerPorBeneficiadoIdAsync(currentUserId);
+        hasPendingWithdrawalRequest = withdrawals.Any(r =>
+            r.IdCaso == activeCase.Id &&
+            string.Equals(r.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase));
+
+        canRequestWithdrawal = availableBalance > 0 && !hasPendingWithdrawalRequest;
+        withdrawalHelperText = BuildWithdrawalHelperText();
+    }
+
+    private string BuildWithdrawalHelperText()
+    {
+        if (hasPendingWithdrawalRequest)
+        {
+            return "Ya existe una solicitud de retiro pendiente para este caso.";
+        }
+
+        if (availableBalance <= 0)
+        {
+            return "Aun no tienes fondos disponibles para retirar.";
+        }
+
+        return "Elige el monto y el metodo de retiro para enviar tu solicitud.";
+    }
+
+    private sealed class WithdrawalRequestModel
+    {
+        [Required(ErrorMessage = "El monto es obligatorio.")]
+        [Range(typeof(decimal), "0.01", "999999999", ErrorMessage = "Ingresa un monto valido.")]
+        public decimal Amount { get; set; }
+
+        [Required(ErrorMessage = "Selecciona un metodo de retiro.")]
+        public string PaymentMethod { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Completa los datos del metodo de pago.")]
+        [StringLength(255, ErrorMessage = "Los datos de pago no pueden exceder 255 caracteres.")]
+        public string PaymentDetails { get; set; } = string.Empty;
     }
 }
