@@ -100,6 +100,14 @@ div.bw-page .bw-card {
     box-shadow: var(--bw-shadow-card);
 }
 
+div.bw-page .bw-withdrawal-card,
+div.bw-page .bw-withdrawal-card .bw-section-title,
+div.bw-page .bw-withdrawal-card .bw-main__subtitle,
+div.bw-page .bw-withdrawal-card .bulma-notification,
+div.bw-page .bw-withdrawal-card .bulma-notification strong {
+    color: var(--bw-text-dark);
+}
+
 div.bw-page .bw-section-title {
     font-size: 1.25rem;
     font-weight: 800;
@@ -312,6 +320,42 @@ div.bw-page .bw-transfer-details__input.bulma-input {
 div.bw-page .bw-transfer-details__input.bulma-input:focus {
     border-color: var(--bw-green);
     box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+div.bw-page .bw-withdrawal-form {
+    color: var(--bw-text-dark);
+}
+
+div.bw-page .bw-withdrawal-form :deep(.bulma-label),
+div.bw-page .bw-withdrawal-form :deep(.bulma-help),
+div.bw-page .bw-withdrawal-form :deep(.validation-message),
+div.bw-page .bw-withdrawal-form :deep(.validation-errors) {
+    color: var(--bw-text-dark);
+}
+
+div.bw-page .bw-withdrawal-form :deep(.bulma-help.bulma-is-danger),
+div.bw-page .bw-withdrawal-form :deep(.validation-message),
+div.bw-page .bw-withdrawal-form :deep(.validation-errors) {
+    color: #b42318;
+}
+
+div.bw-page .bw-withdrawal-form__summary {
+    margin-bottom: 1rem;
+}
+
+div.bw-page .bw-withdrawal-form__input.bulma-input,
+div.bw-page .bw-withdrawal-form__select {
+    color: var(--bw-text-dark);
+    background-color: #fff;
+}
+
+div.bw-page .bw-withdrawal-form__input.bulma-input::placeholder {
+    color: var(--bw-text-muted);
+    opacity: 1;
+}
+
+div.bw-page .bw-withdrawal-form__select option {
+    color: var(--bw-text-dark);
 }
 
 .bw-modal {

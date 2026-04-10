@@ -111,25 +111,25 @@
                 </div>
             </div>
 
-            <div class="bw-card" style="border-left: 5px solid var(--bw-green);">
+            <div class="bw-card bw-withdrawal-card" style="border-left: 5px solid var(--bw-green); color: #1a1a1a;">
                 @if (!string.IsNullOrWhiteSpace(withdrawalErrorMessage))
                 {
-                    <div class="bulma-notification bulma-is-danger bulma-is-light" style="margin-bottom: 1rem;">
+                    <div class="bulma-notification bulma-is-danger bulma-is-light" style="margin-bottom: 1rem; color: #1a1a1a;">
                         @withdrawalErrorMessage
                     </div>
                 }
 
                 @if (!string.IsNullOrWhiteSpace(withdrawalStatusMessage))
                 {
-                    <div class="bulma-notification bulma-is-success bulma-is-light" style="margin-bottom: 1rem;">
+                    <div class="bulma-notification bulma-is-success bulma-is-light" style="margin-bottom: 1rem; color: #1a1a1a;">
                         @withdrawalStatusMessage
                     </div>
                 }
 
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 2rem; flex-wrap: wrap;">
                     <div>
-                        <h2 class="bw-section-title" style="margin-bottom: 0.5rem;"><i class="fas fa-wallet"></i> Fondos Disponibles</h2>
-                        <p class="bw-main__subtitle">@withdrawalHelperText</p>
+                        <h2 class="bw-section-title" style="margin-bottom: 0.5rem; color: #1a1a1a;"><i class="fas fa-wallet"></i> Fondos Disponibles</h2>
+                        <p class="bw-main__subtitle" style="color: #1a1a1a;">@withdrawalHelperText</p>
                     </div>
                     <div style="text-align: right;">
                         <div style="font-size: 2rem; font-weight: 900; color: var(--bw-green);">@availableBalance.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</div>
@@ -145,28 +145,29 @@
 
                 @if (showWithdrawalForm)
                 {
-                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--bw-border);">
+                    <div class="bw-withdrawal-form" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--bw-border); color: #1a1a1a;">
                         <EditForm Model="WithdrawalForm" OnValidSubmit="HandleRequestWithdrawalAsync" FormName="WithdrawalRequestForm">
                             <DataAnnotationsValidator />
+                            <ValidationSummary class="bulma-help bulma-is-danger bw-withdrawal-form__summary" style="color: #b42318;" />
 
                             <div class="bulma-columns bulma-is-variable bulma-is-4">
                                 <div class="bulma-column bulma-is-6-tablet bulma-is-4-desktop">
                                     <div class="bulma-field">
-                                        <label class="bulma-label">Monto a retirar</label>
+                                        <label class="bulma-label" style="color: #1a1a1a;">Monto a retirar</label>
                                         <div class="bulma-control">
-                                            <InputNumber class="bulma-input" @bind-Value="WithdrawalForm.Amount" />
+                                            <InputNumber class="bulma-input bw-withdrawal-form__input" style="color: #1a1a1a; background-color: #ffffff;" @bind-Value="WithdrawalForm.Amount" />
                                         </div>
                                         <ValidationMessage For="@(() => WithdrawalForm.Amount)" class="bulma-help bulma-is-danger" />
-                                        <p class="bulma-help">Disponible: @availableBalance.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</p>
+                                        <p class="bulma-help" style="color: #1a1a1a;">Disponible: @availableBalance.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</p>
                                     </div>
                                 </div>
 
                                 <div class="bulma-column bulma-is-6-tablet bulma-is-4-desktop">
                                     <div class="bulma-field">
-                                        <label class="bulma-label">Metodo de retiro</label>
+                                        <label class="bulma-label" style="color: #1a1a1a;">Metodo de retiro</label>
                                         <div class="bulma-control">
                                             <div class="bulma-select bulma-is-fullwidth">
-                                                <InputSelect class="bulma-select" @bind-Value="WithdrawalForm.PaymentMethod">
+                                                <InputSelect class="bw-withdrawal-form__select" style="color: #1a1a1a; background-color: #ffffff;" @bind-Value="WithdrawalForm.PaymentMethod">
                                                     <option value="">Seleccione un metodo</option>
                                                     <option value="PayPal">PayPal</option>
                                                     <option value="Transferencia">Transferencia</option>
@@ -182,16 +183,16 @@
                             {
                                 <section class="bw-transfer-details">
                                     <div class="bw-transfer-details__header">
-                                        <h3 class="bw-transfer-details__title">Datos bancarios para la transferencia</h3>
-                                        <p class="bw-transfer-details__text">Completa la cuenta donde se depositara el retiro.</p>
+                                        <h3 class="bw-transfer-details__title" style="color: #1a1a1a;">Datos bancarios para la transferencia</h3>
+                                        <p class="bw-transfer-details__text" style="color: #1a1a1a;">Completa la cuenta donde se depositara el retiro.</p>
                                     </div>
 
                                     <div class="bulma-columns bulma-is-variable bulma-is-4">
                                         <div class="bulma-column bulma-is-4-desktop bulma-is-6-tablet">
                                             <div class="bulma-field">
-                                                <label class="bulma-label">Nombre del titular</label>
+                                                <label class="bulma-label" style="color: #1a1a1a;">Nombre del titular</label>
                                                 <div class="bulma-control">
-                                                    <InputText class="bulma-input bw-transfer-details__input" @bind-Value="WithdrawalForm.AccountHolderName" placeholder="Ej. Maria Lopez" />
+                                                    <InputText class="bulma-input bw-transfer-details__input" style="color: #1a1a1a; background-color: #ffffff;" @bind-Value="WithdrawalForm.AccountHolderName" placeholder="Ej. Maria Lopez" />
                                                 </div>
                                                 <ValidationMessage For="@(() => WithdrawalForm.AccountHolderName)" class="bulma-help bulma-is-danger" />
                                             </div>
@@ -199,9 +200,9 @@
 
                                         <div class="bulma-column bulma-is-4-desktop bulma-is-6-tablet">
                                             <div class="bulma-field">
-                                                <label class="bulma-label">Numero de Cuenta</label>
+                                                <label class="bulma-label" style="color: #1a1a1a;">Numero de Cuenta</label>
                                                 <div class="bulma-control">
-                                                    <InputText class="bulma-input bw-transfer-details__input" @bind-Value="WithdrawalForm.AccountNumber" placeholder="Ej. 1234567890" />
+                                                    <InputText class="bulma-input bw-transfer-details__input" style="color: #1a1a1a; background-color: #ffffff;" @bind-Value="WithdrawalForm.AccountNumber" placeholder="Ej. 1234567890" />
                                                 </div>
                                                 <ValidationMessage For="@(() => WithdrawalForm.AccountNumber)" class="bulma-help bulma-is-danger" />
                                             </div>
@@ -209,9 +210,9 @@
 
                                         <div class="bulma-column bulma-is-4-desktop bulma-is-12-tablet">
                                             <div class="bulma-field">
-                                                <label class="bulma-label">Banco</label>
+                                                <label class="bulma-label" style="color: #1a1a1a;">Banco</label>
                                                 <div class="bulma-control">
-                                                    <InputText class="bulma-input bw-transfer-details__input" @bind-Value="WithdrawalForm.BankName" placeholder="Ej. Banco Agricola" />
+                                                    <InputText class="bulma-input bw-transfer-details__input" style="color: #1a1a1a; background-color: #ffffff;" @bind-Value="WithdrawalForm.BankName" placeholder="Ej. Banco Agricola" />
                                                 </div>
                                                 <ValidationMessage For="@(() => WithdrawalForm.BankName)" class="bulma-help bulma-is-danger" />
                                             </div>
@@ -223,16 +224,16 @@
                             {
                                 <section class="bw-transfer-details bw-transfer-details--paypal">
                                     <div class="bw-transfer-details__header">
-                                        <h3 class="bw-transfer-details__title">Cuenta de PayPal</h3>
-                                        <p class="bw-transfer-details__text">Ingresa el correo asociado a tu cuenta para recibir el retiro.</p>
+                                        <h3 class="bw-transfer-details__title" style="color: #1a1a1a;">Cuenta de PayPal</h3>
+                                        <p class="bw-transfer-details__text" style="color: #1a1a1a;">Ingresa el correo asociado a tu cuenta para recibir el retiro.</p>
                                     </div>
 
                                     <div class="bulma-columns">
                                         <div class="bulma-column bulma-is-8-desktop bulma-is-10-tablet">
                                             <div class="bulma-field">
-                                                <label class="bulma-label">Correo de PayPal</label>
+                                                <label class="bulma-label" style="color: #1a1a1a;">Correo de PayPal</label>
                                                 <div class="bulma-control">
-                                                    <InputText class="bulma-input bw-transfer-details__input" @bind-Value="WithdrawalForm.PayPalEmail" placeholder="correo@paypal.com" />
+                                                    <InputText class="bulma-input bw-transfer-details__input" style="color: #1a1a1a; background-color: #ffffff;" @bind-Value="WithdrawalForm.PayPalEmail" placeholder="correo@paypal.com" />
                                                 </div>
                                                 <ValidationMessage For="@(() => WithdrawalForm.PayPalEmail)" class="bulma-help bulma-is-danger" />
                                             </div>
@@ -270,6 +271,7 @@
     private bool hasPendingWithdrawalRequest;
     private bool isSubmittingWithdrawal;
     private bool showWithdrawalForm;
+    private const int MaxPaymentDetailsLength = 255;
     private string? withdrawalErrorMessage;
     private string? withdrawalStatusMessage;
     private string withdrawalHelperText = "Puedes solicitar el desembolso de cualquier saldo disponible en tu caso.";
@@ -378,13 +380,20 @@
                 return;
             }
 
+            var paymentDetails = BuildPaymentDetails();
+            if (paymentDetails.Length > MaxPaymentDetailsLength)
+            {
+                withdrawalErrorMessage = "Los datos del metodo de retiro son demasiado largos. Reduce el nombre del titular o el nombre del banco.";
+                return;
+            }
+
             await RetiroService.Crear(new Retiro
             {
                 IdBeneficiado = currentUserId,
                 IdCaso = activeCase.Id,
                 Monto = WithdrawalForm.Amount,
-                MetodoPago = WithdrawalForm.PaymentMethod,
-                DatosPago = BuildPaymentDetails(),
+                MetodoPago = WithdrawalForm.PaymentMethod.Trim(),
+                DatosPago = paymentDetails,
                 Estado = "Pendiente",
                 FechaSolicitud = DateTime.Now
             });
@@ -444,10 +453,19 @@
     {
         if (IsTransferPaymentMethod)
         {
-            return $"Titular: {WithdrawalForm.AccountHolderName.Trim()} | Cuenta: {WithdrawalForm.AccountNumber.Trim()} | Banco: {WithdrawalForm.BankName.Trim()}";
+            return string.Create(
+                CultureInfo.InvariantCulture,
+                $"Titular={NormalizePaymentValue(WithdrawalForm.AccountHolderName)};Cuenta={NormalizePaymentValue(WithdrawalForm.AccountNumber)};Banco={NormalizePaymentValue(WithdrawalForm.BankName)}");
         }
 
-        return WithdrawalForm.PayPalEmail.Trim();
+        return NormalizePaymentValue(WithdrawalForm.PayPalEmail);
+    }
+
+    private static string NormalizePaymentValue(string? value)
+    {
+        return string.Join(" ", (value ?? string.Empty)
+            .Trim()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries));
     }
 
     private sealed class WithdrawalRequestModel : IValidatableObject
@@ -468,7 +486,6 @@
         [StringLength(100, ErrorMessage = "El nombre del banco no puede exceder 100 caracteres.")]
         public string BankName { get; set; } = string.Empty;
 
-        [EmailAddress(ErrorMessage = "Ingresa un correo de PayPal valido.")]
         [StringLength(255, ErrorMessage = "El correo de PayPal no puede exceder 255 caracteres.")]
         public string PayPalEmail { get; set; } = string.Empty;
 
@@ -490,11 +507,27 @@
                 {
                     yield return new ValidationResult("El banco es obligatorio.", new[] { nameof(BankName) });
                 }
+
+                var transferDetailsLength =
+                    $"Titular={NormalizePaymentValue(AccountHolderName)};Cuenta={NormalizePaymentValue(AccountNumber)};Banco={NormalizePaymentValue(BankName)}".Length;
+
+                if (transferDetailsLength > MaxPaymentDetailsLength)
+                {
+                    yield return new ValidationResult(
+                        "Los datos bancarios son demasiado largos para registrarse. Acorta el nombre del titular o el nombre del banco.",
+                        new[] { nameof(AccountHolderName), nameof(BankName) });
+                }
             }
-            else if (string.Equals(PaymentMethod, "PayPal", StringComparison.OrdinalIgnoreCase) &&
-                     string.IsNullOrWhiteSpace(PayPalEmail))
+            else if (string.Equals(PaymentMethod, "PayPal", StringComparison.OrdinalIgnoreCase))
             {
-                yield return new ValidationResult("El correo de PayPal es obligatorio.", new[] { nameof(PayPalEmail) });
+                if (string.IsNullOrWhiteSpace(PayPalEmail))
+                {
+                    yield return new ValidationResult("El correo de PayPal es obligatorio.", new[] { nameof(PayPalEmail) });
+                }
+                else if (!new EmailAddressAttribute().IsValid(PayPalEmail))
+                {
+                    yield return new ValidationResult("Ingresa un correo de PayPal valido.", new[] { nameof(PayPalEmail) });
+                }
             }
         }
     }
