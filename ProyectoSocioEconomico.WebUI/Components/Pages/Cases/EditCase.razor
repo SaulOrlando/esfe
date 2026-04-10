@@ -13,6 +13,7 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Security.Claims
 @inject ICasoService CasoService
+@inject IUsuarioService UsuarioService
 @inject CustomAuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
 
@@ -48,11 +49,13 @@
             </div>
         </div>
 
-        <EditForm Model="FormModel" OnValidSubmit="HandleUpdateAsync" FormName="EditCaseForm">
+        <EditForm Model="FormModel" OnValidSubmit="HandleUpdateAsync" OnInvalidSubmit="HandleInvalidSubmit" FormName="EditCaseForm">
             <DataAnnotationsValidator />
 
             <div class="ec-body">
                 <div class="ec-main">
+                    <ValidationSummary class="bulma-help bulma-is-danger" />
+
                     @if (!string.IsNullOrWhiteSpace(ErrorMessage))
                     {
                         <div class="bulma-notification bulma-is-danger bulma-is-light">@ErrorMessage</div>
@@ -165,21 +168,7 @@
                             Borrar caso
                         </h2>
 
-                        <p class="ec-field-note">Esta accion elimina el caso de forma permanente. Si el caso ya tiene donaciones o retiros registrados, el borrado sera bloqueado.</p>
-
-                        @if (ShowDeleteConfirmation)
-                        {
-                            <div class="bulma-notification bulma-is-danger bulma-is-light">
-                                <p>Confirme si desea borrar este caso.</p>
-                                <div class="ec-action-bar" style="margin-top: 1rem;">
-                                    <button type="button" class="ec-action-bar__cancel" @onclick="CancelDelete" disabled="@IsDeleting">Cancelar</button>
-                                    <button type="button" class="bulma-button bulma-is-danger" @onclick="HandleDeleteAsync" disabled="@IsDeleting">
-                                        <span class="bulma-icon bulma-is-small"><i class="fas fa-trash"></i></span>
-                                        <strong>@(IsDeleting ? "Borrando..." : "Confirmar borrado")</strong>
-                                    </button>
-                                </div>
-                            </div>
-                        }
+                        <p class="ec-field-note">Esta accion elimina el caso de forma permanente. Si el caso tiene donaciones o retiros, se perdera la vinculacion y el historial asociado, incluyendo solicitudes pendientes o aprobadas.</p>
                     </section>
                 </div>
 
@@ -217,17 +206,46 @@
             </div>
 
             <div class="ec-action-bar">
-                <button type="button" class="ec-action-bar__cancel" @onclick="HandleCancel" disabled="@IsSaving || IsDeleting">Cancelar</button>
-                <button type="button" class="bulma-button bulma-is-danger bulma-is-light" @onclick="StartDelete" disabled="@IsSaving || IsDeleting">
+                <button type="button" class="ec-action-bar__cancel" @onclick="HandleCancel" disabled="@(IsSaving || IsDeleting)">Cancelar</button>
+                <button type="button" class="bulma-button bulma-is-danger bulma-is-light" @onclick="StartDelete" disabled="@(IsSaving || IsDeleting)">
                     <span class="bulma-icon bulma-is-small"><i class="fas fa-trash"></i></span>
                     <strong>Borrar caso</strong>
                 </button>
-                <button type="submit" class="bulma-button bulma-is-warning ec-btn-update" disabled="@IsSaving || IsDeleting">
+                <button type="submit" class="bulma-button bulma-is-warning ec-btn-update" disabled="@(IsSaving || IsDeleting)">
                     <span class="bulma-icon bulma-is-small"><i class="fas fa-floppy-disk"></i></span>
                     <strong>@(IsSaving ? "Actualizando..." : "Actualizar caso")</strong>
                 </button>
             </div>
         </EditForm>
+    }
+
+    @if (ShowDeleteConfirmation)
+    {
+        <div class="ec-modal" role="dialog" aria-modal="true" aria-labelledby="ec-delete-title">
+            <div class="ec-modal__card">
+                <div class="ec-modal__icon" aria-hidden="true">
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <h2 id="ec-delete-title" class="ec-modal__title">Confirmar borrado del caso</h2>
+                <p class="ec-modal__text">
+                    Va a borrar este caso de forma permanente.
+                </p>
+                <div class="ec-modal__warning">
+                    <strong>Advertencia:</strong> se perdera la vinculacion del dinero y tambien se borraran todas las solicitudes de retiro de este caso, incluyendo pendientes, aprobadas o rechazadas.
+                </div>
+                <p class="ec-modal__text ec-modal__text--secondary">
+                    Esta acción no se puede deshacer.
+                </p>
+                <div class="ec-modal__actions">
+                    <button type="button" class="ec-modal__btn ec-modal__btn--ghost" @onclick="CancelDelete" disabled="@IsDeleting">
+                        Cancelar
+                    </button>
+                    <button type="button" class="ec-modal__btn ec-modal__btn--danger" @onclick="HandleDeleteAsync" disabled="@IsDeleting">
+                        @(IsDeleting ? "Borrando..." : "Sí, borrar caso")
+                    </button>
+                </div>
+            </div>
+        </div>
     }
 </div>
 
@@ -319,6 +337,12 @@
         ShowDeleteConfirmation = false;
     }
 
+    private void HandleInvalidSubmit()
+    {
+        ErrorMessage = "No se pudo actualizar el caso. Revisa los campos marcados en rojo.";
+        StatusMessage = null;
+    }
+
     private async Task HandleUpdateAsync()
     {
         if (FormModel is null || CurrentCase is null)
@@ -362,8 +386,16 @@
 
         try
         {
+            var beneficiarioId = CurrentCase.IdBeneficiado;
             await CasoService.EliminarAsync(CurrentCase.Id);
-            Navigation.NavigateTo("/beneficiary/dashboard");
+
+            var usuarioActualizado = await UsuarioService.ObtenerPorId(beneficiarioId);
+            if (usuarioActualizado is not null)
+            {
+                await AuthProvider.NotifyUserLogin(usuarioActualizado);
+            }
+
+            Navigation.NavigateTo("/");
         }
         catch (Exception ex)
         {

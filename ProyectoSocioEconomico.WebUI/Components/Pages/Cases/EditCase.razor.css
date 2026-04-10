@@ -450,6 +450,108 @@ div.ec-page ::deep(.bulma-help.bulma-is-danger) {
     font-size: 0.76rem;
 }
 
+div.ec-page .ec-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(17, 17, 17, 0.55);
+    backdrop-filter: blur(4px);
+}
+
+div.ec-page .ec-modal__card {
+    width: 100%;
+    max-width: 32rem;
+    background: var(--ec-white);
+    border-radius: 20px;
+    border: 1px solid rgba(217, 38, 38, 0.14);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+div.ec-page .ec-modal__icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff4e5;
+    color: #c2410c;
+    font-size: 1.35rem;
+}
+
+div.ec-page .ec-modal__title {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--ec-text-dark);
+}
+
+div.ec-page .ec-modal__text {
+    margin: 0;
+    color: var(--ec-text-mid);
+    line-height: 1.6;
+}
+
+div.ec-page .ec-modal__text.ec-modal__text--secondary {
+    font-size: 0.9rem;
+    color: var(--ec-text-muted);
+}
+
+div.ec-page .ec-modal__warning {
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #9a3412;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    line-height: 1.6;
+    font-size: 0.92rem;
+}
+
+div.ec-page .ec-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+div.ec-page .ec-modal__btn {
+    min-height: 2.9rem;
+    border-radius: 10px;
+    border: none;
+    padding: 0 1.25rem;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.18s ease, filter 0.18s ease, opacity 0.18s ease;
+}
+
+div.ec-page .ec-modal__btn:hover:not([disabled]) {
+    transform: translateY(-1px);
+    filter: brightness(0.98);
+}
+
+div.ec-page .ec-modal__btn[disabled] {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+div.ec-page .ec-modal__btn.ec-modal__btn--ghost {
+    background: #f3f4f6;
+    color: var(--ec-text-mid);
+}
+
+div.ec-page .ec-modal__btn.ec-modal__btn--danger {
+    background: #dc2626;
+    color: var(--ec-white);
+}
+
 @media (max-width: 860px) {
     div.ec-page .ec-body {
         grid-template-columns: 1fr;
@@ -487,6 +589,14 @@ div.ec-page ::deep(.bulma-help.bulma-is-danger) {
 
     div.ec-page .ec-action-bar {
         flex-direction: column;
+    }
+
+    div.ec-page .ec-modal__actions {
+        flex-direction: column-reverse;
+    }
+
+    div.ec-page .ec-modal__btn {
+        width: 100%;
     }
 
     div.ec-page .ec-btn-back,

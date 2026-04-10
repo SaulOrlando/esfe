@@ -136,14 +136,28 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 throw new InvalidOperationException("No se encontro el caso a eliminar.");
             }
 
-            if (casoExistente.Donaciones.Any())
+            foreach (var donacion in casoExistente.Donaciones)
             {
-                throw new InvalidOperationException("No se puede borrar el caso porque ya tiene donaciones registradas.");
+                donacion.IdCaso = null;
             }
 
             if (casoExistente.Retiros.Any())
             {
-                throw new InvalidOperationException("No se puede borrar el caso porque ya tiene solicitudes de retiro registradas.");
+                context.Retiros.RemoveRange(casoExistente.Retiros);
+            }
+
+            var rolDonante = await context.Roles
+                .FirstOrDefaultAsync(r => r.Nombre.ToLower() == "donante");
+
+            if (rolDonante == null)
+            {
+                throw new InvalidOperationException("No se encontro el rol Donante en la base de datos.");
+            }
+
+            var usuario = await context.Usuarios.FindAsync(casoExistente.IdBeneficiado);
+            if (usuario != null && usuario.IdRol != rolDonante.Id)
+            {
+                usuario.IdRol = rolDonante.Id;
             }
 
             context.Casos.Remove(casoExistente);
