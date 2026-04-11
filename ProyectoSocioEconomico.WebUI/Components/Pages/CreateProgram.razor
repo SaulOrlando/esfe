@@ -76,22 +76,6 @@
                             </div>
                         </div>
 
-                        <div class="bulma-column bulma-is-4-desktop">
-                            <div class="bulma-field">
-                                <label class="bulma-label cp-label">Estado</label>
-                                <div class="bulma-control">
-                                    <div class="bulma-select bulma-is-fullwidth cp-select-wrap">
-                                        <InputSelect class="cp-select" @bind-Value="FormModel.Estado">
-                                            <option value="Activo">Activo</option>
-                                            <option value="Completado">Completado</option>
-                                            <option value="Inactivo">Inactivo</option>
-                                        </InputSelect>
-                                    </div>
-                                </div>
-                                <ValidationMessage For="@(() => FormModel.Estado)" class="bulma-help bulma-is-danger" />
-                            </div>
-                        </div>
-
                         <div class="bulma-column bulma-is-12">
                             <div class="bulma-field">
                                 <label class="bulma-label cp-label">Tipo de programa</label>
@@ -303,7 +287,7 @@
             {
                 Nombre = FormModel.Nombre.Trim(),
                 Descripcion = FormModel.Descripcion.Trim(),
-                Estado = FormModel.Estado,
+                Estado = "Activo",
                 FechaCreacion = DateTime.Now,
                 TipoPrograma = FormModel.TipoPrograma,
                 MetaFinanciera = SupportsFinancialGoal(FormModel.TipoPrograma) ? FormModel.MetaFinanciera ?? 0m : 0m,
@@ -414,9 +398,6 @@
 
         [Required(ErrorMessage = "Ingrese la descripción del programa.")]
         public string Descripcion { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Seleccione el estado del programa.")]
-        public string Estado { get; set; } = "Activo";
 
         [Required(ErrorMessage = "Seleccione el tipo de programa.")]
         public string TipoPrograma { get; set; } = "Financiero";
