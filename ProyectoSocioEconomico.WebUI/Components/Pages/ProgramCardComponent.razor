@@ -13,7 +13,7 @@
         }
         else
         {
-            <img class="cap-card__image" src="https://bulma.io/assets/images/placeholders/1280x960.png" alt="Placeholder" />
+            <img class="cap-card__image" src="https://bulma.io/assets/images/placeholders/1280x960.png" alt="Imagen de relleno" />
         }
         
         <span class="cap-card__tag @GetCategoryClass(Category)">
@@ -37,7 +37,7 @@
         </div>
 
         <a href="/programs/@Id" class="bulma-button bulma-is-warning bulma-is-fullwidth cap-card__btn">
-            <strong>View Program Details</strong>
+            <strong>Ver detalles del programa</strong>
         </a>
     </div>
 </article>
@@ -47,7 +47,7 @@
     [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string Description { get; set; } = string.Empty;
     [Parameter] public string Category { get; set; } = string.Empty;
-    [Parameter] public string ProgressLabel { get; set; } = "Progress";
+    [Parameter] public string ProgressLabel { get; set; } = "Progreso";
     [Parameter] public int Progress { get; set; }
     [Parameter] public string? ImageUrl { get; set; }
     [Parameter] public bool Compact { get; set; }
