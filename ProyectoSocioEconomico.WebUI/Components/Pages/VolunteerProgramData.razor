@@ -1,0 +1,392 @@
+@page "/volunteer/program-data"
+@layout ProfileLayout
+@using Microsoft.EntityFrameworkCore
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.WebUI.Services
+@using System.ComponentModel.DataAnnotations
+@using System.Globalization
+@inject IProgramaService ProgramaService
+@inject IUsuarioService UsuarioService
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+@if (IsLoading)
+{
+    <div class="bulma-box vpd-shell">
+        <p class="bulma-has-text-grey">Cargando datos del programa...</p>
+    </div>
+}
+else if (!HasAccess)
+{
+    <div class="bulma-box vpd-shell">
+        <h1 class="bulma-title bulma-is-4">Acceso no disponible</h1>
+        <p class="bulma-content">Esta sección solo está disponible para usuarios con rol de voluntario y una inscripción activa en un programa.</p>
+        <button type="button" class="bulma-button bulma-is-warning" @onclick="GoToPrograms">Ver programas</button>
+    </div>
+}
+else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
+{
+    var totalVoluntarios = GetTotalVoluntariosActivos(VolunteerProgram);
+    var totalDonantes = GetTotalDonantes(VolunteerProgram);
+    var totalRecaudado = GetTotalRecaudado(VolunteerProgram);
+    var progresoVoluntariado = CalcularPorcentaje(VolunteerProgram.MetaVoluntarios, totalVoluntarios);
+    var progresoFinanciero = CalcularPorcentaje(VolunteerProgram.MetaFinanciera, totalRecaudado);
+
+    <div class="vpd-shell">
+        <section class="bulma-box vpd-hero">
+            <div class="vpd-hero__content">
+                <div class="vpd-hero__text">
+                    <p class="vpd-eyebrow">DATOS DEL PROGRAMA</p>
+                    <h1 class="bulma-title bulma-is-3 vpd-title">@VolunteerProgram.Nombre</h1>
+                    <p class="bulma-content vpd-description">@VolunteerProgram.Descripcion</p>
+                    <div class="vpd-tags">
+                        <span class="bulma-tag vpd-tag">@GetProgramTypeLabel(VolunteerProgram)</span>
+                        <span class="bulma-tag vpd-tag">@((VolunteerProgram.IdCategoriaNavigation?.Nombre ?? "General"))</span>
+                        <span class="bulma-tag vpd-tag">@VolunteerProgram.Estado</span>
+                    </div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(VolunteerProgram.ImagenUrl))
+                {
+                    <div class="vpd-hero__image-container">
+                        <img src="@VolunteerProgram.ImagenUrl" alt="@VolunteerProgram.Nombre" class="vpd-hero__image" />
+                    </div>
+                }
+            </div>
+        </section>
+
+        @if (!string.IsNullOrWhiteSpace(FeedbackMessage))
+        {
+            <div class="bulma-notification @(IsSuccess ? "bulma-is-success" : "bulma-is-danger") bulma-is-light">
+                @FeedbackMessage
+            </div>
+        }
+
+        <section class="bulma-columns bulma-is-multiline">
+            <div class="bulma-column bulma-is-12-tablet bulma-is-8-desktop">
+                <div class="bulma-columns bulma-is-multiline">
+                    <div class="bulma-column bulma-is-6-tablet">
+                        <article class="bulma-box vpd-stat-card">
+                            <p class="vpd-stat-card__label">Voluntarios activos</p>
+                            <p class="vpd-stat-card__value">@totalVoluntarios</p>
+                            <progress class="bulma-progress bulma-is-success" value="@progresoVoluntariado" max="100">@progresoVoluntariado%</progress>
+                            <p class="vpd-stat-card__meta">Meta: @VolunteerProgram.MetaVoluntarios voluntarios</p>
+                        </article>
+                    </div>
+
+                    <div class="bulma-column bulma-is-6-tablet">
+                        <article class="bulma-box vpd-stat-card">
+                            <p class="vpd-stat-card__label">Donantes activos</p>
+                            <p class="vpd-stat-card__value">@totalDonantes</p>
+                            <p class="vpd-stat-card__meta">Recaudado: @totalRecaudado.ToString("C", CultureInfo.GetCultureInfo("es-SV"))</p>
+                            @if (SupportsFinancialGoal(VolunteerProgram))
+                            {
+                                <progress class="bulma-progress bulma-is-warning" value="@progresoFinanciero" max="100">@progresoFinanciero%</progress>
+                            }
+                        </article>
+                    </div>
+
+                    <div class="bulma-column bulma-is-12">
+                        <article class="bulma-box vpd-detail-card">
+                            <h2 class="bulma-title bulma-is-5">Resumen del programa</h2>
+                            <div class="bulma-columns bulma-is-multiline">
+                                <div class="bulma-column bulma-is-6-tablet">
+                                    <p class="vpd-detail-card__label">Coordinador</p>
+                                    <p class="vpd-detail-card__value">@(VolunteerProgram.CreadoPorNavigation?.Nombre) @(VolunteerProgram.CreadoPorNavigation?.Apellido)</p>
+                                </div>
+                                <div class="bulma-column bulma-is-6-tablet">
+                                    <p class="vpd-detail-card__label">Fecha de creación</p>
+                                    <p class="vpd-detail-card__value">@VolunteerProgram.FechaCreacion.ToString("dd/MM/yyyy")</p>
+                                </div>
+                                <div class="bulma-column bulma-is-6-tablet">
+                                    <p class="vpd-detail-card__label">Tu estado</p>
+                                    <p class="vpd-detail-card__value">@VolunteerEnrollment.Estado</p>
+                                </div>
+                                <div class="bulma-column bulma-is-6-tablet">
+                                    <p class="vpd-detail-card__label">Te uniste el</p>
+                                    <p class="vpd-detail-card__value">@VolunteerEnrollment.FechaInscripcion.ToString("dd/MM/yyyy")</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bulma-column bulma-is-12-tablet bulma-is-4-desktop">
+                <article class="bulma-box vpd-availability-card">
+                    <h2 class="bulma-title bulma-is-5">Tu disponibilidad</h2>
+                    <p class="bulma-content">Solo puedes seleccionar días habilitados por el programa.</p>
+
+                    <EditForm Model="AvailabilityForm" OnValidSubmit="SaveAvailabilityAsync" FormName="VolunteerAvailabilityForm">
+                        <DataAnnotationsValidator />
+
+                        <div class="vpd-day-grid">
+                            @foreach (var day in AvailableProgramDays)
+                            {
+                                <label class="vpd-day-option @(AvailabilityForm.SelectedDays.Contains(day) ? "vpd-day-option--active" : string.Empty)">
+                                    <input type="checkbox"
+                                           checked="@AvailabilityForm.SelectedDays.Contains(day)"
+                                           @onchange="args => ToggleDay(day, args.Value is bool selected && selected)" />
+                                    <span>@day</span>
+                                </label>
+                            }
+                        </div>
+
+                        <ValidationMessage For="@(() => AvailabilityForm.SelectedDays)" class="bulma-help bulma-is-danger" />
+
+                        <button type="submit" class="bulma-button bulma-is-success bulma-is-fullwidth vpd-action" disabled="@IsSavingAvailability">
+                            @(IsSavingAvailability ? "Guardando..." : "Guardar disponibilidad")
+                        </button>
+                    </EditForm>
+                </article>
+            </div>
+        </section>
+
+        <section class="bulma-box vpd-exit-card">
+            <div>
+                <h2 class="bulma-title bulma-is-5">Salir del programa</h2>
+                <p class="bulma-content">Si sales del programa, se eliminará tu inscripción activa y tu rol volverá automáticamente a donante.</p>
+            </div>
+            <button type="button"
+                    class="bulma-button bulma-is-danger"
+                    @onclick="LeaveProgramAsync"
+                    disabled="@IsLeavingProgram">
+                @(IsLeavingProgram ? "Saliendo..." : "Salir del programa")
+            </button>
+        </section>
+    </div>
+}
+
+@code {
+    private Usuario? CurrentUser { get; set; }
+    private Programa? VolunteerProgram { get; set; }
+    private InscripcionesVoluntario? VolunteerEnrollment { get; set; }
+    private AvailabilityFormModel AvailabilityForm { get; set; } = new();
+    private List<string> AvailableProgramDays { get; set; } = new();
+    private bool IsLoading { get; set; } = true;
+    private bool HasAccess { get; set; }
+    private bool IsSavingAvailability { get; set; }
+    private bool IsLeavingProgram { get; set; }
+    private bool IsSuccess { get; set; }
+    private string? FeedbackMessage { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPageAsync();
+    }
+
+    private async Task LoadPageAsync()
+    {
+        IsLoading = true;
+        FeedbackMessage = null;
+
+        try
+        {
+            var authState = await AuthProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var userIdStr = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userIdStr, out var userId))
+            {
+                HasAccess = false;
+                return;
+            }
+
+            CurrentUser = await UsuarioService.ObtenerPorId(userId);
+            if (!IsVolunteer(CurrentUser))
+            {
+                HasAccess = false;
+                return;
+            }
+
+            VolunteerEnrollment = await ProgramaService.ObtenerInscripcionActivaPorUsuarioAsync(userId);
+            VolunteerProgram = VolunteerEnrollment?.IdProgramaNavigation;
+
+            if (VolunteerEnrollment is null || VolunteerProgram is null)
+            {
+                HasAccess = false;
+                return;
+            }
+
+            AvailableProgramDays = ParseDays(VolunteerProgram.DiasVoluntariado);
+            AvailabilityForm = new AvailabilityFormModel
+            {
+                SelectedDays = ParseDays(VolunteerEnrollment.DiasDisponibles)
+                    .Where(day => AvailableProgramDays.Contains(day, StringComparer.OrdinalIgnoreCase))
+                    .ToList()
+            };
+
+            HasAccess = true;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task SaveAvailabilityAsync()
+    {
+        if (CurrentUser is null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        IsSavingAvailability = true;
+        FeedbackMessage = null;
+
+        try
+        {
+            await ProgramaService.ActualizarDisponibilidadVoluntarioAsync(CurrentUser.Id, AvailabilityForm.SelectedDays);
+            await LoadPageAsync();
+            FeedbackMessage = "Tu disponibilidad fue actualizada correctamente.";
+            IsSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            FeedbackMessage = ex.Message;
+            IsSuccess = false;
+        }
+        finally
+        {
+            IsSavingAvailability = false;
+        }
+    }
+
+    private async Task LeaveProgramAsync()
+    {
+        if (CurrentUser is null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        IsLeavingProgram = true;
+        FeedbackMessage = null;
+
+        try
+        {
+            await ProgramaService.SalirDelProgramaAsync(CurrentUser.Id);
+
+            var updatedUser = await UsuarioService.ObtenerPorId(CurrentUser.Id);
+            if (updatedUser is not null)
+            {
+                CurrentUser = updatedUser;
+                await AuthProvider.NotifyUserLogin(updatedUser);
+            }
+
+            Navigation.NavigateTo("/donor/dashboard", true);
+        }
+        catch (Exception ex)
+        {
+            FeedbackMessage = ex.Message;
+            IsSuccess = false;
+            IsLeavingProgram = false;
+        }
+    }
+
+    private void ToggleDay(string day, bool isSelected)
+    {
+        if (isSelected)
+        {
+            if (!AvailabilityForm.SelectedDays.Contains(day))
+            {
+                AvailabilityForm.SelectedDays.Add(day);
+            }
+
+            return;
+        }
+
+        AvailabilityForm.SelectedDays.Remove(day);
+    }
+
+    private void GoToPrograms()
+    {
+        Navigation.NavigateTo("/programs");
+    }
+
+    private static bool IsVolunteer(Usuario? user)
+    {
+        var roleName = user?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Voluntario", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static List<string> ParseDays(string? rawDays)
+    {
+        return string.IsNullOrWhiteSpace(rawDays)
+            ? new List<string>()
+            : rawDays
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+    }
+
+    private static int GetTotalVoluntariosActivos(Programa program)
+    {
+        return program.InscripcionesVoluntarios?.Count(i =>
+            string.Equals(i.Estado, "Aprobado", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? 0;
+    }
+
+    private static int GetTotalDonantes(Programa program)
+    {
+        return program.Donaciones?.Count(d => d.Estado == "Completado") ?? 0;
+    }
+
+    private static decimal GetTotalRecaudado(Programa program)
+    {
+        return program.Donaciones?.Where(d => d.Estado == "Completado").Sum(d => d.Monto) ?? 0m;
+    }
+
+    private static int CalcularPorcentaje(int meta, int actual)
+    {
+        if (meta <= 0)
+        {
+            return 0;
+        }
+
+        return Math.Clamp((int)Math.Round((decimal)actual / meta * 100), 0, 100);
+    }
+
+    private static int CalcularPorcentaje(decimal meta, decimal actual)
+    {
+        if (meta <= 0)
+        {
+            return 0;
+        }
+
+        return Math.Clamp((int)Math.Round(actual / meta * 100), 0, 100);
+    }
+
+    private static string GetProgramTypeLabel(Programa program)
+    {
+        return program.TipoPrograma switch
+        {
+            "Hibrido" => "Híbrido",
+            "Voluntariado" => "Voluntariado",
+            _ => "Financiero"
+        };
+    }
+
+    private static bool SupportsFinancialGoal(Programa program)
+    {
+        return string.Equals(program.TipoPrograma, "Financiero", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(program.TipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private sealed class AvailabilityFormModel : IValidatableObject
+    {
+        public List<string> SelectedDays { get; set; } = new();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (SelectedDays.Count == 0)
+            {
+                yield return new ValidationResult(
+                    "Selecciona al menos un día de disponibilidad.",
+                    new[] { nameof(SelectedDays) });
+            }
+        }
+    }
+}
