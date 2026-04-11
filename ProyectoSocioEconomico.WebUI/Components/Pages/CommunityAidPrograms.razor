@@ -185,7 +185,9 @@
         if (SupportsVolunteerGoal(p) && !SupportsFinancialGoal(p))
         {
             var totalVoluntarios = p.InscripcionesVoluntarios?
-                .Count(i => string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? 0;
+                .Count(i =>
+                    string.Equals(i.Estado, "Aprobado", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? 0;
 
             if (p.MetaVoluntarios <= 0)
             {

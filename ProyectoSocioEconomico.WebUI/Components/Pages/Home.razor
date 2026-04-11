@@ -7,7 +7,13 @@
 @page "/"
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.WebUI.Services
+@using System.Security.Claims
 @inject NavigationManager Navigation
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject IUsuarioService UsuarioService
 
 <dialog class="home-duplicate-dialog" @attributes="DialogAttributes" aria-labelledby="duplicate-case-title">
     <article class="home-duplicate-dialog__card">
@@ -22,6 +28,25 @@
         <div class="home-duplicate-dialog__actions">
             <button type="button" class="bulma-button bulma-is-warning home-duplicate-dialog__button"
                     @onclick="CloseDuplicateCaseDialog">
+                Entendido
+            </button>
+        </div>
+    </article>
+</dialog>
+
+<dialog class="home-duplicate-dialog" @attributes="BlockedCaseDialogAttributes" aria-labelledby="blocked-case-title">
+    <article class="home-duplicate-dialog__card">
+        <div class="home-duplicate-dialog__icon" aria-hidden="true">
+            <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <p class="home-duplicate-dialog__eyebrow">Accion no permitida</p>
+        <h2 id="blocked-case-title" class="home-duplicate-dialog__title">No puedes crear un caso</h2>
+        <p class="home-duplicate-dialog__body">
+            @BlockedCaseMessage
+        </p>
+        <div class="home-duplicate-dialog__actions">
+            <button type="button" class="bulma-button bulma-is-warning home-duplicate-dialog__button"
+                    @onclick="CloseBlockedCaseDialog">
                 Entendido
             </button>
         </div>
@@ -76,7 +101,11 @@
                                 campaña en menos de 5 minutos.</p>
                             </div>
                             <div class="bulma-is-flex bulma-is-align-items-center">
-                                <a class="bulma-button bulma-is-success bulma-is-medium" href="/cases/new/step1">Crea tu caso ahora</a>
+                                <button type="button"
+                                        class="bulma-button bulma-is-success bulma-is-medium"
+                                        @onclick="HandleCreateCaseClick">
+                                    Crea tu caso ahora
+                                </button>
                             </div>
                         </section>
                     </section>
@@ -95,17 +124,44 @@
     private string? caseWarning { get; set; }
 
     private bool showDuplicateCaseDialog;
+    private bool showBlockedCaseDialog;
     private string searchQuery = string.Empty;
+    private string BlockedCaseMessage { get; set; } = "No tienes permisos para crear un caso.";
+    private Usuario? CurrentUser { get; set; }
 
     protected override void OnParametersSet()
     {
         showDuplicateCaseDialog = caseWarning == "duplicate";
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCurrentUserAsync();
+    }
+
     private void CloseDuplicateCaseDialog()
     {
         showDuplicateCaseDialog = false;
         Navigation.NavigateTo("/", replace: true);
+    }
+
+    private void CloseBlockedCaseDialog()
+    {
+        showBlockedCaseDialog = false;
+    }
+
+    private async Task HandleCreateCaseClick()
+    {
+        await LoadCurrentUserAsync();
+
+        if (HasBlockedCaseRole(CurrentUser, out var blockedMessage))
+        {
+            BlockedCaseMessage = blockedMessage;
+            showBlockedCaseDialog = true;
+            return;
+        }
+
+        Navigation.NavigateTo("/cases/new/step1");
     }
 
     private void NavigateToCasesSearch()
@@ -129,6 +185,63 @@
         }
     }
 
+    private async Task LoadCurrentUserAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        CurrentUser = null;
+
+        if (user.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            return;
+        }
+
+        var userIdStr = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdStr, out var userId))
+        {
+            return;
+        }
+
+        CurrentUser = await UsuarioService.ObtenerPorId(userId);
+    }
+
+    private static bool HasBlockedCaseRole(Usuario? usuario, out string blockedMessage)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+
+        if (string.IsNullOrWhiteSpace(roleName))
+        {
+            blockedMessage = "No tienes permisos para crear un caso.";
+            return false;
+        }
+
+        if (roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+        {
+            blockedMessage = "No puedes crear un caso porque ya eres administrador en la plataforma.";
+            return true;
+        }
+
+        if (roleName.Equals("Voluntario", StringComparison.OrdinalIgnoreCase))
+        {
+            blockedMessage = "No puedes crear un caso porque ya eres voluntario en la plataforma.";
+            return true;
+        }
+
+        if (roleName.Equals("Beneficiario", StringComparison.OrdinalIgnoreCase) ||
+            roleName.Equals("Beneficiado", StringComparison.OrdinalIgnoreCase))
+        {
+            blockedMessage = "No puedes crear un caso con esta cuenta porque ya tienes un rol de beneficiario.";
+            return true;
+        }
+
+        blockedMessage = "No tienes permisos para crear un caso.";
+        return false;
+    }
+
     private IReadOnlyDictionary<string, object> DialogAttributes =>
         showDuplicateCaseDialog ? new Dictionary<string, object> { ["open"] = true } : new Dictionary<string, object>();
+
+    private IReadOnlyDictionary<string, object> BlockedCaseDialogAttributes =>
+        showBlockedCaseDialog ? new Dictionary<string, object> { ["open"] = true } : new Dictionary<string, object>();
 }

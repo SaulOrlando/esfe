@@ -127,6 +127,8 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.IdUsuario, "IX_InscripcionesVoluntarios_IdUsuario");
 
+            entity.Property(e => e.CategoriaVoluntariado).HasMaxLength(100);
+            entity.Property(e => e.DiasDisponibles).HasMaxLength(150);
             entity.Property(e => e.Estado).HasMaxLength(20);
 
             entity.HasOne(d => d.IdProgramaNavigation).WithMany(p => p.InscripcionesVoluntarios)
@@ -161,6 +163,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.CreadoPor, "IX_Programas_CreadoPor");
 
+            entity.Property(e => e.DiasVoluntariado).HasMaxLength(100);
             entity.Property(e => e.Estado).HasMaxLength(20);
             entity.Property(e => e.MetaFinanciera).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TipoPrograma).HasMaxLength(30);
@@ -206,7 +209,8 @@ public partial class AppDbContext : DbContext
             entity.HasData(
                 new Role { Id = 1, Nombre = "Donante", Descripcion = "Usuario que realiza donaciones a casos y programas", Estado = "Activo" },
                 new Role { Id = 2, Nombre = "Beneficiario", Descripcion = "Usuario que crea casos y recibe ayuda", Estado = "Activo" },
-                new Role { Id = 3, Nombre = "Administrador", Descripcion = "Administrador del sistema con acceso total", Estado = "Activo" }
+                new Role { Id = 3, Nombre = "Voluntario", Descripcion = "Usuario aprobado para participar en programas de voluntariado", Estado = "Activo" },
+                new Role { Id = 4, Nombre = "Administrador", Descripcion = "Administrador del sistema con acceso total", Estado = "Activo" }
             );
         });
 

@@ -160,6 +160,7 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     TipoPrograma = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     MetaFinanciera = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     MetaVoluntarios = table.Column<int>(type: "int", nullable: false),
+                    DiasVoluntariado = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     IdCategoria = table.Column<int>(type: "int", nullable: false),
                     CreadoPor = table.Column<int>(type: "int", nullable: false)
                 },
@@ -252,6 +253,8 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     IdPrograma = table.Column<int>(type: "int", nullable: false),
                     IdUsuario = table.Column<int>(type: "int", nullable: false),
                     FechaInscripcion = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CategoriaVoluntariado = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DiasDisponibles = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Estado = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
@@ -310,7 +313,8 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                 {
                     { 1, "Usuario que realiza donaciones a casos y programas", "Activo", "Donante" },
                     { 2, "Usuario que crea casos y recibe ayuda", "Activo", "Beneficiario" },
-                    { 3, "Administrador del sistema con acceso total", "Activo", "Administrador" }
+                    { 3, "Usuario aprobado para participar en programas de voluntariado", "Activo", "Voluntario" },
+                    { 4, "Administrador del sistema con acceso total", "Activo", "Administrador" }
                 });
 
             migrationBuilder.CreateIndex(

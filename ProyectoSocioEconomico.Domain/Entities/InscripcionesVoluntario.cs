@@ -13,6 +13,10 @@ public partial class InscripcionesVoluntario
 
     public DateTime FechaInscripcion { get; set; }
 
+    public string CategoriaVoluntariado { get; set; } = null!;
+
+    public string DiasDisponibles { get; set; } = null!;
+
     public string Estado { get; set; } = null!;
 
     public virtual Programa IdProgramaNavigation { get; set; } = null!;

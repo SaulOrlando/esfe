@@ -1,0 +1,298 @@
+@*
+  AdminVolunteerApplications.razor
+  Proposito: Pagina administrativa para aprobar o rechazar solicitudes de voluntariado.
+*@
+@page "/admin/volunteers/pending"
+@layout ProfileLayout
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.WebUI.Services
+@using System.Security.Claims
+@inject IProgramaService ProgramaService
+@inject IUsuarioService UsuarioService
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<div class="av-page">
+    @if (IsLoading)
+    {
+        <div class="av-state-card">
+            <h1 class="av-state-card__title">Cargando voluntarios...</h1>
+            <p class="av-state-card__text">Estamos obteniendo las solicitudes registradas.</p>
+        </div>
+    }
+    else
+    {
+        <div class="av-page-header">
+            <div class="av-page-header__left">
+                <h1 class="av-page-header__title">Voluntarios pendientes</h1>
+                <p class="av-page-header__subtitle">Revise postulaciones, apruebe ingresos al programa o rechace solicitudes.</p>
+            </div>
+
+            <div class="av-page-header__actions">
+                <div class="bulma-control bulma-has-icons-left av-search-wrap">
+                    <input class="bulma-input av-search-input"
+                           type="text"
+                           placeholder="Buscar usuario o programa"
+                           @bind="SearchQuery"
+                           @bind:event="oninput" />
+                    <span class="bulma-icon bulma-is-left">
+                        <i class="fas fa-magnifying-glass"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(FeedbackMessage))
+        {
+            <div class="bulma-notification @(IsSuccess ? "bulma-is-success" : "bulma-is-danger") bulma-is-light">
+                @FeedbackMessage
+            </div>
+        }
+
+        <section class="av-stats">
+            <article class="av-stat-card">
+                <span class="av-stat-card__label">Pendientes</span>
+                <strong class="av-stat-card__value">@PendingCount</strong>
+            </article>
+            <article class="av-stat-card">
+                <span class="av-stat-card__label">Aprobados</span>
+                <strong class="av-stat-card__value">@ApprovedCount</strong>
+            </article>
+            <article class="av-stat-card">
+                <span class="av-stat-card__label">Rechazados</span>
+                <strong class="av-stat-card__value">@RejectedCount</strong>
+            </article>
+        </section>
+
+        <div class="av-tabs">
+            <button type="button"
+                    class="av-tab @(ActiveTab == "pending" ? "av-tab--active" : "")"
+                    @onclick='() => SetTab("pending")'>
+                Pendientes
+            </button>
+            <button type="button"
+                    class="av-tab @(ActiveTab == "history" ? "av-tab--active" : "")"
+                    @onclick='() => SetTab("history")'>
+                Historial
+            </button>
+        </div>
+
+        <div class="av-table-card">
+            <table class="bulma-table av-table bulma-is-fullwidth">
+                <thead>
+                    <tr>
+                        <th class="av-table__th">USUARIO</th>
+                        <th class="av-table__th">PROGRAMA</th>
+                        <th class="av-table__th">CATEGORÍA</th>
+                        <th class="av-table__th">DÍAS</th>
+                        <th class="av-table__th">ESTADO</th>
+                        <th class="av-table__th">FECHA</th>
+                        <th class="av-table__th av-table__th--actions">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody >
+                    @if (VisibleApplications.Any())
+                    {
+                        @foreach (var application in VisibleApplications)
+                        {
+                            <tr class="av-table__row">
+                                <td class="av-table__td">
+                                    <strong>@GetUserFullName(application.IdUsuarioNavigation)</strong>
+                                    <div class="bulma-is-size-7 bulma-has-text-grey">@application.IdUsuarioNavigation?.Email</div>
+                                </td>
+                                <td class="av-table__td">
+                                    <strong>@application.IdProgramaNavigation?.Nombre</strong>
+                                    <div class="bulma-is-size-7 bulma-has-text-grey">@application.IdProgramaNavigation?.TipoPrograma</div>
+                                </td>
+                                <td class="av-table__td">@application.CategoriaVoluntariado</td>
+                                <td class="av-table__td">@application.DiasDisponibles</td>
+                                <td class="av-table__td">
+                                    <span class="av-status @GetStatusClass(application.Estado)">@application.Estado</span>
+                                </td>
+                                <td class="av-table__td">@application.FechaInscripcion.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                <td class="av-table__td av-table__td--actions">
+                                    @if (string.Equals(application.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <div class="bulma-buttons">
+                                            <button type="button"
+                                                    class="bulma-button bulma-is-small bulma-is-success"
+                                                    disabled="@IsProcessing"
+                                                    @onclick='() => ReviewVolunteerAsync(application.Id, true)'>
+                                                Aprobar
+                                            </button>
+                                            <button type="button"
+                                                    class="bulma-button bulma-is-small bulma-is-danger bulma-is-light"
+                                                    disabled="@IsProcessing"
+                                                    @onclick='() => ReviewVolunteerAsync(application.Id, false)'>
+                                                Rechazar
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="bulma-has-text-grey">Procesado</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="av-table__empty">
+                                No hay solicitudes para mostrar en esta vista.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private Usuario? CurrentUser { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private bool IsSuccess { get; set; }
+    private bool IsProcessing { get; set; }
+    private string ActiveTab { get; set; } = "pending";
+    private string SearchQuery { get; set; } = string.Empty;
+    private string? FeedbackMessage { get; set; }
+    private List<InscripcionesVoluntario> Applications { get; set; } = new();
+
+    private int PendingCount => Applications.Count(item => string.Equals(item.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase));
+    private int ApprovedCount => Applications.Count(item => string.Equals(item.Estado, "Aprobado", StringComparison.OrdinalIgnoreCase) || string.Equals(item.Estado, "Activo", StringComparison.OrdinalIgnoreCase));
+    private int RejectedCount => Applications.Count(item => string.Equals(item.Estado, "Rechazado", StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<InscripcionesVoluntario> VisibleApplications =>
+        FilterApplications()
+            .Where(item => ActiveTab == "pending"
+                ? string.Equals(item.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase)
+                : !string.Equals(item.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(item => item.FechaInscripcion);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var userIdStr = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdStr, out var userId))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        CurrentUser = await UsuarioService.ObtenerPorId(userId);
+        if (!IsAdmin(CurrentUser))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        await LoadApplicationsAsync();
+    }
+
+    private async Task LoadApplicationsAsync()
+    {
+        try
+        {
+            Applications = await ProgramaService.ObtenerSolicitudesVoluntariadoAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private IEnumerable<InscripcionesVoluntario> FilterApplications()
+    {
+        if (string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            return Applications;
+        }
+
+        return Applications.Where(item =>
+            GetUserFullName(item.IdUsuarioNavigation).Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+            (item.IdUsuarioNavigation?.Email?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (item.IdProgramaNavigation?.Nombre?.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            item.CategoriaVoluntariado.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+            item.DiasDisponibles.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void SetTab(string tab)
+    {
+        ActiveTab = tab;
+    }
+
+    private async Task ReviewVolunteerAsync(int applicationId, bool approve)
+    {
+        IsProcessing = true;
+
+        try
+        {
+            if (approve)
+            {
+                await ProgramaService.AprobarInscripcionVoluntariadoAsync(applicationId);
+                FeedbackMessage = "Solicitud aprobada correctamente.";
+            }
+            else
+            {
+                await ProgramaService.RechazarInscripcionVoluntariadoAsync(applicationId);
+                FeedbackMessage = "Solicitud rechazada correctamente.";
+            }
+
+            IsSuccess = true;
+            Applications = await ProgramaService.ObtenerSolicitudesVoluntariadoAsync();
+        }
+        catch (Exception ex)
+        {
+            FeedbackMessage = "No se pudo actualizar la solicitud: " + ex.Message;
+            IsSuccess = false;
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    private static string GetUserFullName(Usuario? usuario)
+    {
+        if (usuario is null)
+        {
+            return "Usuario";
+        }
+
+        return $"{usuario.Nombre} {usuario.Apellido}".Trim();
+    }
+
+    private static bool IsAdmin(Usuario? usuario)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string GetStatusClass(string? estado)
+    {
+        if (string.Equals(estado, "Aprobado", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(estado, "Activo", StringComparison.OrdinalIgnoreCase))
+        {
+            return "av-status--success";
+        }
+
+        if (string.Equals(estado, "Rechazado", StringComparison.OrdinalIgnoreCase))
+        {
+            return "av-status--danger";
+        }
+
+        return "av-status--warning";
+    }
+}

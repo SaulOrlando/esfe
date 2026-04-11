@@ -225,6 +225,16 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CategoriaVoluntariado")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DiasDisponibles")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -334,6 +344,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                     b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DiasVoluntariado")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Estado")
                         .IsRequired()
@@ -464,6 +478,13 @@ namespace ProyectoSocioEconomico.Infrastructure.Migrations
                         new
                         {
                             Id = 3,
+                            Descripcion = "Usuario aprobado para participar en programas de voluntariado",
+                            Estado = "Activo",
+                            Nombre = "Voluntario"
+                        },
+                        new
+                        {
+                            Id = 4,
                             Descripcion = "Administrador del sistema con acceso total",
                             Estado = "Activo",
                             Nombre = "Administrador"

@@ -25,6 +25,8 @@ public partial class Programa
 
     public int MetaVoluntarios { get; set; }
 
+    public string? DiasVoluntariado { get; set; }
+
     public int IdCategoria { get; set; }
 
     public int CreadoPor { get; set; }

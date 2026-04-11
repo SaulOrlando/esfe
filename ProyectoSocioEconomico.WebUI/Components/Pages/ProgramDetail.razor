@@ -8,9 +8,11 @@
 @using ProyectoSocioEconomico.Domain.Entities
 @using ProyectoSocioEconomico.Infrastructure.Data
 @using ProyectoSocioEconomico.WebUI.Services
+@using System.ComponentModel.DataAnnotations
 @using System.Globalization
 @inject IProgramaService ProgramaService
 @inject IUsuarioService UsuarioService
+@inject ICasoService CasoService
 @inject CustomAuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
 @inject AppDbContext DbContext
@@ -30,8 +32,13 @@ else
     var progresoPrincipal = GetProgresoPrincipal(Program, progresoFinanciero, progresoVoluntariado);
     var puedeDonar = ProgramAcceptsDonations(Program) && IsProgramActive(Program);
     var puedeUnirse = ProgramAcceptsVolunteers(Program) &&
+                      !CurrentUserIsAdmin &&
+                      !CurrentUserIsBeneficiary &&
+                      !CurrentUserHasCaseAsBeneficiary &&
                       IsProgramActive(Program) &&
                       !UserIsAlreadyVolunteer &&
+                      !HasPendingVolunteerRequest &&
+                      !UserBelongsToAnotherVolunteerProgram &&
                       !VolunteerCapacityReached(Program, totalVoluntarios);
 
     <div class="cd-page">
@@ -86,6 +93,25 @@ else
                         <p>@Program.Descripcion</p>
                     </div>
                 </section>
+
+                @if (ProgramAcceptsVolunteers(Program) && ProgramVolunteerDays.Any())
+                {
+                    <section class="cd-story-card">
+                        <h3 class="cd-story-card__title">
+                            <i class="fas fa-calendar-days cd-story-card__title-icon"></i>
+                            Jornadas de voluntariado
+                        </h3>
+                        <div class="cd-story-card__body">
+                            <p>El programa recibirá apoyo voluntario en los siguientes días:</p>
+                            <div class="cd-tags">
+                                @foreach (var day in ProgramVolunteerDays)
+                                {
+                                    <span class="cd-tag">@day</span>
+                                }
+                            </div>
+                        </div>
+                    </section>
+                }
 
                 <section class="cd-metrics-card">
                     <div class="cd-vuln">
@@ -180,42 +206,68 @@ else
                         <span class="cd-sidebar__days-left">@GetSidebarMetaText(Program, totalVoluntarios)</span>
                     </div>
 
-                    @if (puedeDonar)
-                    {
-                        <button type="button"
-                                class="bulma-button bulma-is-warning bulma-is-fullwidth cd-sidebar__btn-support"
-                                @onclick="HandleDonateClick">
-                            <i class="fas fa-heart"></i>
-                            <strong>Contribuir al Programa</strong>
-                        </button>
-                    }
+                    <div class="cd-sidebar__actions">
+                        @if (puedeDonar)
+                        {
+                            <button type="button"
+                                    class="bulma-button bulma-is-warning bulma-is-fullwidth cd-sidebar__btn-support"
+                                    @onclick="HandleDonateClick">
+                                <i class="fas fa-heart"></i>
+                                <strong>Contribuir al Programa</strong>
+                            </button>
+                        }
 
-                    @if (puedeUnirse)
-                    {
-                        <button type="button"
-                                class="bulma-button bulma-is-success bulma-is-fullwidth cd-sidebar__btn-support"
-                                @onclick="HandleVolunteerSignupAsync"
-                                disabled="@IsJoiningVolunteer">
-                            <i class="fas fa-hands-helping"></i>
-                            <strong>@(IsJoiningVolunteer ? "Registrando..." : "Unirme como voluntario")</strong>
-                        </button>
-                    }
+                        @if (puedeUnirse)
+                        {
+                            <button type="button"
+                                    class="bulma-button bulma-is-success bulma-is-fullwidth cd-sidebar__btn-support"
+                                    @onclick="OpenVolunteerModal"
+                                    disabled="@IsJoiningVolunteer">
+                                <i class="fas fa-hands-helping"></i>
+                                <strong>@(IsJoiningVolunteer ? "Registrando..." : "Unirme como voluntario")</strong>
+                            </button>
+                        }
 
-                    @if (ProgramAcceptsVolunteers(Program) && UserIsAlreadyVolunteer)
-                    {
-                        <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
-                            <i class="fas fa-user-check"></i>
-                            <strong>Ya eres voluntario de este programa</strong>
-                        </button>
-                    }
+                        @if (ProgramAcceptsVolunteers(Program) && UserIsAlreadyVolunteer)
+                        {
+                            <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
+                                <i class="fas fa-user-check"></i>
+                                <strong>Ya eres voluntario de este programa</strong>
+                            </button>
+                        }
 
-                    @if (!puedeDonar && !puedeUnirse && !UserIsAlreadyVolunteer)
-                    {
-                        <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
-                            <i class="fas fa-lock"></i>
-                            <strong>@GetDisabledActionText(Program, totalVoluntarios)</strong>
-                        </button>
-                    }
+                        @if (ProgramAcceptsVolunteers(Program) && HasPendingVolunteerRequest)
+                        {
+                            <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
+                                <i class="fas fa-hourglass-half"></i>
+                                <strong>Tienes una solicitud pendiente</strong>
+                            </button>
+                        }
+
+                        @if (ProgramAcceptsVolunteers(Program) && UserBelongsToAnotherVolunteerProgram)
+                        {
+                            <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
+                                <i class="fas fa-user-lock"></i>
+                                <strong>Ya participas en otro programa</strong>
+                            </button>
+                        }
+
+                        @if (ProgramAcceptsVolunteers(Program) && (CurrentUserIsBeneficiary || CurrentUserHasCaseAsBeneficiary))
+                        {
+                            <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
+                                <i class="fas fa-hand-holding-heart"></i>
+                                <strong>Los beneficiarios no pueden postularse</strong>
+                            </button>
+                        }
+
+                        @if (!puedeDonar && !puedeUnirse && !UserIsAlreadyVolunteer && !HasPendingVolunteerRequest && !UserBelongsToAnotherVolunteerProgram && !CurrentUserIsBeneficiary && !CurrentUserHasCaseAsBeneficiary)
+                        {
+                            <button type="button" class="bulma-button bulma-is-fullwidth cd-sidebar__btn-support cd-sidebar__btn-support--disabled" disabled>
+                                <i class="fas fa-lock"></i>
+                                <strong>@GetDisabledActionText(Program, totalVoluntarios)</strong>
+                            </button>
+                        }
+                    </div>
                 </div>
 
                 <div class="cd-sidebar__trust">
@@ -246,6 +298,88 @@ else
                     }
                 </div>
             </aside>
+            @if (IsVolunteerModalOpen)
+            {
+                <div class="bulma-modal bulma-is-active cd-volunteer-modal" role="dialog" aria-modal="true" aria-labelledby="volunteer-modal-title">
+                    <div class="bulma-modal-background" @onclick="CloseVolunteerModal"></div>
+                    <div class="bulma-modal-card cd-volunteer-modal__card">
+                        <header class="bulma-modal-card-head cd-volunteer-modal__head">
+                            <div>
+                                <p id="volunteer-modal-title" class="bulma-modal-card-title cd-volunteer-modal__title">Formulario de voluntariado</p>
+                                <p class="cd-volunteer-modal__subtitle">Selecciona los días en los que tienes disponibilidad para apoyar este programa.</p>
+                            </div>
+                            <button type="button" class="bulma-delete" aria-label="Cerrar" @onclick="CloseVolunteerModal"></button>
+                        </header>
+
+                        <EditForm Model="VolunteerForm" OnValidSubmit="HandleVolunteerSignupAsync" FormName="VolunteerSignupForm">
+                            <DataAnnotationsValidator />
+
+                            <section class="bulma-modal-card-body cd-volunteer-modal__body">
+                                @if (!string.IsNullOrWhiteSpace(VolunteerFormFeedback))
+                                {
+                                    <div class="bulma-notification @(IsSuccess ? "bulma-is-success" : "bulma-is-danger") bulma-is-light">
+                                        @VolunteerFormFeedback
+                                    </div>
+                                }
+
+                                <div class="bulma-field">
+                                    <label class="bulma-label" for="volunteer-days">Días disponibles</label>
+                                    @if (ProgramVolunteerDays.Any())
+                                    {
+                                        <div class="cd-volunteer-modal__days">
+                                            @foreach (var day in ProgramVolunteerDays)
+                                            {
+                                                <label class="cd-volunteer-modal__day-option">
+                                                    <input type="checkbox"
+                                                           checked="@VolunteerForm.DiasSeleccionados.Contains(day)"
+                                                           @onchange="args => ToggleVolunteerDay(day, args.Value is bool selected && selected)" />
+                                                    <span>@day</span>
+                                                </label>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="bulma-help">Este programa todavía no tiene días configurados para voluntariado.</p>
+                                    }
+                                    <ValidationMessage For="@(() => VolunteerForm.DiasSeleccionados)" class="bulma-help bulma-is-danger" />
+                                </div>
+                            </section>
+
+                            <footer class="bulma-modal-card-foot cd-volunteer-modal__footer">
+                                <button type="button" class="bulma-button" @onclick="CloseVolunteerModal" disabled="@IsJoiningVolunteer">Cancelar</button>
+                                <button type="submit" class="bulma-button bulma-is-success" disabled="@IsJoiningVolunteer">
+                                    @(IsJoiningVolunteer ? "Registrando..." : "Confirmar voluntariado")
+                                </button>
+                            </footer>
+                        </EditForm>
+                    </div>
+                </div>
+            }
+
+            @if (IsAdminVolunteerBlockedModalOpen)
+            {
+                <div class="bulma-modal bulma-is-active cd-volunteer-modal" role="dialog" aria-modal="true" aria-labelledby="admin-volunteer-blocked-title">
+                    <div class="bulma-modal-background" @onclick="CloseAdminVolunteerBlockedModal"></div>
+                    <div class="bulma-modal-card cd-volunteer-modal__card">
+                        <header class="bulma-modal-card-head cd-volunteer-modal__head">
+                            <div>
+                                <p id="admin-volunteer-blocked-title" class="bulma-modal-card-title cd-volunteer-modal__title">Acción no permitida</p>
+                                <p class="cd-volunteer-modal__subtitle">Las cuentas administradoras no pueden postularse como voluntarias.</p>
+                            </div>
+                            <button type="button" class="bulma-delete" aria-label="Cerrar" @onclick="CloseAdminVolunteerBlockedModal"></button>
+                        </header>
+
+                        <section class="bulma-modal-card-body cd-volunteer-modal__body">
+                            <p>Tu usuario tiene rol de administrador, por lo que no puedes unirte a programas desde este flujo.</p>
+                        </section>
+
+                        <footer class="bulma-modal-card-foot cd-volunteer-modal__footer">
+                            <button type="button" class="bulma-button bulma-is-warning" @onclick="CloseAdminVolunteerBlockedModal">Entendido</button>
+                        </footer>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 }
@@ -255,10 +389,20 @@ else
 
     private Programa? Program { get; set; }
     private Usuario? CurrentUser { get; set; }
+    private VolunteerSignupFormModel VolunteerForm { get; set; } = new();
+    private List<string> ProgramVolunteerDays { get; set; } = new();
+    private bool IsVolunteerModalOpen { get; set; }
     private bool UserIsAlreadyVolunteer { get; set; }
+    private bool HasPendingVolunteerRequest { get; set; }
+    private bool UserBelongsToAnotherVolunteerProgram { get; set; }
+    private bool CurrentUserIsAdmin { get; set; }
+    private bool CurrentUserIsBeneficiary { get; set; }
+    private bool CurrentUserHasCaseAsBeneficiary { get; set; }
     private bool IsJoiningVolunteer { get; set; }
     private bool IsSuccess { get; set; }
+    private bool IsAdminVolunteerBlockedModalOpen { get; set; }
     private string? FeedbackMessage { get; set; }
+    private string? VolunteerFormFeedback { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -271,20 +415,57 @@ else
         if (int.TryParse(userIdStr, out var userId))
         {
             CurrentUser = await UsuarioService.ObtenerPorId(userId);
-            UpdateVolunteerState();
+            CurrentUserIsAdmin = IsAdmin(CurrentUser);
+            CurrentUserIsBeneficiary = IsBeneficiary(CurrentUser);
+            CurrentUserHasCaseAsBeneficiary = await CasoService.UsuarioYaTieneCasoAsync(userId);
+            await RefreshVolunteerStateAsync();
         }
     }
 
     private async Task LoadProgramAsync()
     {
         Program = await ProgramaService.ObtenerPorIdConDetallesAsync(Id);
+        ProgramVolunteerDays = ParseDays(Program?.DiasVoluntariado);
     }
 
-    private void UpdateVolunteerState()
+    private async Task RefreshVolunteerStateAsync()
     {
-        UserIsAlreadyVolunteer = Program?.InscripcionesVoluntarios?.Any(i =>
-            i.IdUsuario == CurrentUser?.Id &&
-            string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? false;
+        UserIsAlreadyVolunteer = false;
+        HasPendingVolunteerRequest = false;
+        UserBelongsToAnotherVolunteerProgram = false;
+
+        if (CurrentUser is null)
+        {
+            return;
+        }
+
+        var activeRequest = await DbContext.InscripcionesVoluntarios
+            .AsNoTracking()
+            .Include(i => i.IdProgramaNavigation)
+            .Where(i =>
+                i.IdUsuario == CurrentUser.Id &&
+                (i.Estado == "Pendiente" || i.Estado == "Aprobado" || i.Estado == "Activo"))
+            .OrderByDescending(i => i.FechaInscripcion)
+            .FirstOrDefaultAsync();
+
+        if (activeRequest is null)
+        {
+            return;
+        }
+
+        if (string.Equals(activeRequest.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase))
+        {
+            HasPendingVolunteerRequest = true;
+            return;
+        }
+
+        if (activeRequest.IdPrograma == Id)
+        {
+            UserIsAlreadyVolunteer = true;
+            return;
+        }
+
+        UserBelongsToAnotherVolunteerProgram = true;
     }
 
     private static decimal GetTotalRecaudado(Programa program)
@@ -295,6 +476,7 @@ else
     private static int GetTotalVoluntariosActivos(Programa program)
     {
         return program.InscripcionesVoluntarios?.Count(i =>
+            string.Equals(i.Estado, "Aprobado", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? 0;
     }
 
@@ -371,8 +553,18 @@ else
         return $"{donantes} donantes";
     }
 
-    private static string GetDisabledActionText(Programa program, int totalVoluntarios)
+    private string GetDisabledActionText(Programa program, int totalVoluntarios)
     {
+        if (CurrentUserIsAdmin)
+        {
+            return "Los administradores no pueden postularse";
+        }
+
+        if (CurrentUserIsBeneficiary || CurrentUserHasCaseAsBeneficiary)
+        {
+            return "Los beneficiarios no pueden postularse";
+        }
+
         if (!IsProgramActive(program))
         {
             return "Programa inactivo";
@@ -391,9 +583,62 @@ else
         Navigation.NavigateTo($"/donate/program/{Id}");
     }
 
+    private void OpenVolunteerModal()
+    {
+        FeedbackMessage = null;
+        VolunteerFormFeedback = null;
+
+        if (CurrentUserIsAdmin)
+        {
+            IsAdminVolunteerBlockedModalOpen = true;
+            return;
+        }
+
+        if (CurrentUser is null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (CurrentUserIsBeneficiary || CurrentUserHasCaseAsBeneficiary)
+        {
+            FeedbackMessage = "No puedes postularte como voluntario porque ya tienes un caso creado como beneficiario.";
+            IsSuccess = false;
+            return;
+        }
+
+        if (!ProgramVolunteerDays.Any())
+        {
+            FeedbackMessage = "Este programa no tiene días de voluntariado configurados todavía.";
+            IsSuccess = false;
+            return;
+        }
+
+        VolunteerForm = new VolunteerSignupFormModel();
+
+        IsVolunteerModalOpen = true;
+    }
+
+    private void CloseVolunteerModal()
+    {
+        if (IsJoiningVolunteer)
+        {
+            return;
+        }
+
+        VolunteerFormFeedback = null;
+        IsVolunteerModalOpen = false;
+    }
+
+    private void CloseAdminVolunteerBlockedModal()
+    {
+        IsAdminVolunteerBlockedModalOpen = false;
+    }
+
     private async Task HandleVolunteerSignupAsync()
     {
         FeedbackMessage = null;
+        VolunteerFormFeedback = null;
 
         if (Program is null)
         {
@@ -413,9 +658,30 @@ else
             return;
         }
 
+        if (CurrentUserIsBeneficiary || CurrentUserHasCaseAsBeneficiary)
+        {
+            FeedbackMessage = "No puedes postularte como voluntario porque ya tienes un caso creado como beneficiario.";
+            IsSuccess = false;
+            return;
+        }
+
         if (UserIsAlreadyVolunteer)
         {
             FeedbackMessage = "Ya estás inscrito como voluntario en este programa.";
+            IsSuccess = false;
+            return;
+        }
+
+        if (HasPendingVolunteerRequest)
+        {
+            FeedbackMessage = "Ya tienes una solicitud de voluntariado pendiente de revisión.";
+            IsSuccess = false;
+            return;
+        }
+
+        if (UserBelongsToAnotherVolunteerProgram)
+        {
+            FeedbackMessage = "Ya fuiste aprobado en otro programa y no puedes postularte a uno nuevo.";
             IsSuccess = false;
             return;
         }
@@ -432,14 +698,14 @@ else
         try
         {
             var exists = await DbContext.InscripcionesVoluntarios.AnyAsync(i =>
-                i.IdPrograma == Program.Id &&
                 i.IdUsuario == CurrentUser.Id &&
-                i.Estado == "Activo");
+                (i.Estado == "Pendiente" || i.Estado == "Aprobado" || i.Estado == "Activo"));
 
             if (exists)
             {
-                UserIsAlreadyVolunteer = true;
-                FeedbackMessage = "Ya estás inscrito como voluntario en este programa.";
+                await RefreshVolunteerStateAsync();
+                VolunteerFormFeedback = "Ya tienes una postulación activa o una aprobación vigente en voluntariado.";
+                FeedbackMessage = VolunteerFormFeedback;
                 IsSuccess = false;
                 return;
             }
@@ -449,24 +715,83 @@ else
                 IdPrograma = Program.Id,
                 IdUsuario = CurrentUser.Id,
                 FechaInscripcion = DateTime.Now,
-                Estado = "Activo"
+                CategoriaVoluntariado = Program.IdCategoriaNavigation?.Nombre ?? "General",
+                DiasDisponibles = string.Join(", ", VolunteerForm.DiasSeleccionados),
+                Estado = "Pendiente"
             });
 
             await DbContext.SaveChangesAsync();
             await LoadProgramAsync();
-            UpdateVolunteerState();
+            await RefreshVolunteerStateAsync();
 
-            FeedbackMessage = "Te registraste como voluntario correctamente.";
+            FeedbackMessage = "Tu solicitud fue enviada y queda pendiente de aprobación administrativa.";
+            VolunteerFormFeedback = FeedbackMessage;
             IsSuccess = true;
+            IsVolunteerModalOpen = false;
         }
         catch (Exception ex)
         {
-            FeedbackMessage = "No se pudo registrar el voluntariado: " + ex.Message;
+            VolunteerFormFeedback = "No se pudo registrar el voluntariado: " + ex.Message;
+            FeedbackMessage = VolunteerFormFeedback;
             IsSuccess = false;
         }
         finally
         {
             IsJoiningVolunteer = false;
+        }
+    }
+
+    private void ToggleVolunteerDay(string day, bool isSelected)
+    {
+        if (isSelected)
+        {
+            if (!VolunteerForm.DiasSeleccionados.Contains(day))
+            {
+                VolunteerForm.DiasSeleccionados.Add(day);
+            }
+
+            return;
+        }
+
+        VolunteerForm.DiasSeleccionados.Remove(day);
+    }
+
+    private static List<string> ParseDays(string? rawDays)
+    {
+        return string.IsNullOrWhiteSpace(rawDays)
+            ? new List<string>()
+            : rawDays
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+    }
+
+    private static bool IsAdmin(Usuario? usuario)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsBeneficiary(Usuario? usuario)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Beneficiario", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private sealed class VolunteerSignupFormModel : IValidatableObject
+    {
+        public List<string> DiasSeleccionados { get; set; } = new();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (DiasSeleccionados.Count == 0)
+            {
+                yield return new ValidationResult(
+                    "Seleccione al menos un día disponible.",
+                    new[] { nameof(DiasSeleccionados) });
+            }
         }
     }
 }

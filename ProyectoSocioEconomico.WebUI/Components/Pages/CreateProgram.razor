@@ -158,6 +158,24 @@
                                 <ValidationMessage For="@(() => FormModel.MetaVoluntarios)" class="bulma-help bulma-is-danger" />
                             </div>
                         </div>
+
+                        <div class="bulma-column bulma-is-12">
+                            <div class="bulma-field">
+                                <label class="bulma-label cp-label">Días de voluntariado</label>
+                                <div class="cp-days-grid">
+                                    @foreach (var day in VolunteerDayOptions)
+                                    {
+                                        <label class="cp-day-option">
+                                            <input type="checkbox"
+                                                   checked="@FormModel.DiasVoluntariadoSeleccionados.Contains(day)"
+                                                   @onchange="args => ToggleVolunteerDay(day, args.Value is bool selected && selected)" />
+                                            <span>@day</span>
+                                        </label>
+                                    }
+                                </div>
+                                <ValidationMessage For="@(() => FormModel.DiasVoluntariadoSeleccionados)" class="bulma-help bulma-is-danger" />
+                            </div>
+                        </div>
                         }
                     </div>
 
@@ -202,6 +220,16 @@
     private IBrowserFile? SelectedImageFile { get; set; }
     private List<Categoria> Categories { get; set; } = new();
     private CreateProgramFormModel FormModel { get; set; } = new();
+    private static readonly IReadOnlyList<string> VolunteerDayOptions = new[]
+    {
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo"
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -280,6 +308,9 @@
                 TipoPrograma = FormModel.TipoPrograma,
                 MetaFinanciera = SupportsFinancialGoal(FormModel.TipoPrograma) ? FormModel.MetaFinanciera ?? 0m : 0m,
                 MetaVoluntarios = SupportsVolunteerGoal(FormModel.TipoPrograma) ? FormModel.MetaVoluntarios ?? 0 : 0,
+                DiasVoluntariado = SupportsVolunteerGoal(FormModel.TipoPrograma)
+                    ? string.Join(", ", FormModel.DiasVoluntariadoSeleccionados)
+                    : null,
                 IdCategoria = FormModel.IdCategoria,
                 CreadoPor = CurrentUser.Id,
                 ImagenUrl = imagePath
@@ -341,6 +372,21 @@
         Navigation.NavigateTo("/admin/programs");
     }
 
+    private void ToggleVolunteerDay(string day, bool isSelected)
+    {
+        if (isSelected)
+        {
+            if (!FormModel.DiasVoluntariadoSeleccionados.Contains(day))
+            {
+                FormModel.DiasVoluntariadoSeleccionados.Add(day);
+            }
+
+            return;
+        }
+
+        FormModel.DiasVoluntariadoSeleccionados.Remove(day);
+    }
+
     private static bool SupportsFinancialGoal(string? tipoPrograma)
     {
         return string.Equals(tipoPrograma, "Financiero", StringComparison.OrdinalIgnoreCase) ||
@@ -382,6 +428,8 @@
 
         public int? MetaVoluntarios { get; set; }
 
+        public List<string> DiasVoluntariadoSeleccionados { get; set; } = new();
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (SupportsFinancialGoal(TipoPrograma) && (!MetaFinanciera.HasValue || MetaFinanciera <= 0))
@@ -396,6 +444,13 @@
                 yield return new ValidationResult(
                     "Ingrese una meta de voluntarios válida.",
                     new[] { nameof(MetaVoluntarios) });
+            }
+
+            if (SupportsVolunteerGoal(TipoPrograma) && DiasVoluntariadoSeleccionados.Count == 0)
+            {
+                yield return new ValidationResult(
+                    "Seleccione al menos un día de voluntariado.",
+                    new[] { nameof(DiasVoluntariadoSeleccionados) });
             }
         }
     }

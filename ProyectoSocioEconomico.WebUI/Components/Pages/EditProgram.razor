@@ -173,8 +173,87 @@
                             <ValidationMessage For="@(() => FormModel.VolunteerGoal)" class="bulma-help bulma-is-danger" />
                             <p class="ep-field-note">Define cuántos voluntarios necesita este programa.</p>
                         </div>
+
+                        <div class="bulma-field ep-field ep-field--full">
+                            <label class="bulma-label ep-label">Días de voluntariado</label>
+                            <div class="ep-days-grid">
+                                @foreach (var day in VolunteerDayOptions)
+                                {
+                                    <label class="ep-day-option">
+                                        <input type="checkbox"
+                                               checked="@FormModel.VolunteerDays.Contains(day)"
+                                               @onchange="args => ToggleVolunteerDay(day, args.Value is bool selected && selected)" />
+                                        <span>@day</span>
+                                    </label>
+                                }
+                            </div>
+                            <ValidationMessage For="@(() => FormModel.VolunteerDays)" class="bulma-help bulma-is-danger" />
+                            <p class="ep-field-note">Estos días se mostrarán en el formulario de postulación del usuario.</p>
+                        </div>
                         }
                     </section>
+
+                    @if (SupportsVolunteerGoal(FormModel.ProgramType))
+                    {
+                        <section class="ep-card">
+                            <h2 class="ep-card__title">
+                                <span class="ep-card__title-icon ep-card__title-icon--yellow">
+                                    <i class="fas fa-user-check"></i>
+                                </span>
+                                Solicitudes de voluntariado
+                            </h2>
+
+                            @if (!string.IsNullOrWhiteSpace(VolunteerReviewMessage))
+                            {
+                                <div class="bulma-notification @(VolunteerReviewSuccess ? "bulma-is-success" : "bulma-is-danger") bulma-is-light">
+                                    @VolunteerReviewMessage
+                                </div>
+                            }
+
+                            @if (VolunteerApplications.Any())
+                            {
+                                <div class="ep-application-list">
+                                    @foreach (var application in VolunteerApplications)
+                                    {
+                                        <article class="ep-application-card">
+                                            <div class="ep-application-card__top">
+                                                <div>
+                                                    <strong>@GetUserFullName(application.IdUsuarioNavigation)</strong>
+                                                    <p>@application.IdUsuarioNavigation.Email</p>
+                                                </div>
+                                                <span class="ep-application-status @GetVolunteerStatusClass(application.Estado)">@application.Estado</span>
+                                            </div>
+                                            <p><strong>Categoría:</strong> @application.CategoriaVoluntariado</p>
+                                            <p><strong>Días:</strong> @application.DiasDisponibles</p>
+                                            <p><strong>Fecha:</strong> @application.FechaInscripcion.ToString("dd/MM/yyyy hh:mm tt")</p>
+
+                                            @if (string.Equals(application.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <div class="ep-application-actions">
+                                                    <button type="button"
+                                                            class="bulma-button bulma-is-success"
+                                                            disabled="@IsReviewingVolunteerRequest"
+                                                            @onclick="() => ApproveVolunteerApplicationAsync(application.Id)">
+                                                        Aprobar
+                                                    </button>
+                                                    <button type="button"
+                                                            class="bulma-button bulma-is-danger is-light"
+                                                            disabled="@IsReviewingVolunteerRequest"
+                                                            @onclick="() => RejectVolunteerApplicationAsync(application.Id)">
+                                                        Rechazar
+                                                    </button>
+                                                </div>
+                                            }
+                                        </article>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="ep-field-note">Este programa todavía no tiene postulaciones de voluntariado.</p>
+                            }
+                        </section>
+                    }
 
                     <section class="ep-card">
                         <h2 class="ep-card__title">
@@ -254,9 +333,23 @@
     private Programa? CurrentProgram { get; set; }
     private EditProgramModel? FormModel { get; set; }
     private List<Categoria> Categories { get; set; } = new();
+    private List<InscripcionesVoluntario> VolunteerApplications { get; set; } = new();
     private bool IsLoading { get; set; } = true;
     private bool IsSaving { get; set; }
+    private bool IsReviewingVolunteerRequest { get; set; }
     private string? ErrorMessage { get; set; }
+    private string? VolunteerReviewMessage { get; set; }
+    private bool VolunteerReviewSuccess { get; set; }
+    private static readonly IReadOnlyList<string> VolunteerDayOptions = new[]
+    {
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo"
+    };
 
     private int WordCount => string.IsNullOrWhiteSpace(FormModel?.Description)
         ? 0
@@ -296,6 +389,7 @@
 
             Categories = await CasoService.ObtenerCategorias();
             CurrentProgram = await ProgramaService.ObtenerPorIdConDetallesAsync(Id);
+            VolunteerApplications = await ProgramaService.ObtenerInscripcionesVoluntariadoPorProgramaAsync(Id);
 
             if (CurrentProgram is null)
             {
@@ -311,7 +405,8 @@
                 ProgramType = CurrentProgram.TipoPrograma,
                 Status = CurrentProgram.Estado,
                 RequiredAmount = CurrentProgram.MetaFinanciera,
-                VolunteerGoal = CurrentProgram.MetaVoluntarios
+                VolunteerGoal = CurrentProgram.MetaVoluntarios,
+                VolunteerDays = ParseDays(CurrentProgram.DiasVoluntariado)
             };
         }
         catch (Exception ex)
@@ -348,6 +443,9 @@
             CurrentProgram.Estado = FormModel.Status;
             CurrentProgram.MetaFinanciera = SupportsFinancialGoal(FormModel.ProgramType) ? FormModel.RequiredAmount ?? 0m : 0m;
             CurrentProgram.MetaVoluntarios = SupportsVolunteerGoal(FormModel.ProgramType) ? FormModel.VolunteerGoal ?? 0 : 0;
+            CurrentProgram.DiasVoluntariado = SupportsVolunteerGoal(FormModel.ProgramType)
+                ? string.Join(", ", FormModel.VolunteerDays)
+                : null;
 
             await ProgramaService.ActualizarAsync(CurrentProgram);
             Navigation.NavigateTo("/admin/programs");
@@ -360,6 +458,97 @@
         {
             IsSaving = false;
         }
+    }
+
+    private async Task ApproveVolunteerApplicationAsync(int applicationId)
+    {
+        await ReviewVolunteerApplicationAsync(applicationId, isApproval: true);
+    }
+
+    private async Task RejectVolunteerApplicationAsync(int applicationId)
+    {
+        await ReviewVolunteerApplicationAsync(applicationId, isApproval: false);
+    }
+
+    private async Task ReviewVolunteerApplicationAsync(int applicationId, bool isApproval)
+    {
+        IsReviewingVolunteerRequest = true;
+        VolunteerReviewMessage = null;
+
+        try
+        {
+            if (isApproval)
+            {
+                await ProgramaService.AprobarInscripcionVoluntariadoAsync(applicationId);
+                VolunteerReviewMessage = "La solicitud fue aprobada y el usuario pasó a rol de voluntario.";
+            }
+            else
+            {
+                await ProgramaService.RechazarInscripcionVoluntariadoAsync(applicationId);
+                VolunteerReviewMessage = "La solicitud fue rechazada y el usuario puede postularse a otro programa.";
+            }
+
+            VolunteerReviewSuccess = true;
+            VolunteerApplications = await ProgramaService.ObtenerInscripcionesVoluntariadoPorProgramaAsync(Id);
+            CurrentProgram = await ProgramaService.ObtenerPorIdConDetallesAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            VolunteerReviewSuccess = false;
+            VolunteerReviewMessage = "No se pudo procesar la solicitud: " + ex.Message;
+        }
+        finally
+        {
+            IsReviewingVolunteerRequest = false;
+        }
+    }
+
+    private void ToggleVolunteerDay(string day, bool isSelected)
+    {
+        if (FormModel is null)
+        {
+            return;
+        }
+
+        if (isSelected)
+        {
+            if (!FormModel.VolunteerDays.Contains(day))
+            {
+                FormModel.VolunteerDays.Add(day);
+            }
+
+            return;
+        }
+
+        FormModel.VolunteerDays.Remove(day);
+    }
+
+    private static List<string> ParseDays(string? rawDays)
+    {
+        return string.IsNullOrWhiteSpace(rawDays)
+            ? new List<string>()
+            : rawDays
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+    }
+
+    private static string GetUserFullName(Usuario? usuario)
+    {
+        return usuario is null
+            ? "Usuario"
+            : $"{usuario.Nombre} {usuario.Apellido}".Trim();
+    }
+
+    private static string GetVolunteerStatusClass(string? status)
+    {
+        return status switch
+        {
+            "Aprobado" => "ep-application-status--approved",
+            "Pendiente" => "ep-application-status--pending",
+            "Activo" => "ep-application-status--approved",
+            _ => "ep-application-status--rejected"
+        };
     }
 
     private static bool IsAdmin(Usuario? usuario)
@@ -404,6 +593,8 @@
 
         public int? VolunteerGoal { get; set; }
 
+        public List<string> VolunteerDays { get; set; } = new();
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (SupportsFinancialGoal(ProgramType) && (!RequiredAmount.HasValue || RequiredAmount <= 0))
@@ -418,6 +609,13 @@
                 yield return new ValidationResult(
                     "Ingrese una meta de voluntarios válida.",
                     new[] { nameof(VolunteerGoal) });
+            }
+
+            if (SupportsVolunteerGoal(ProgramType) && VolunteerDays.Count == 0)
+            {
+                yield return new ValidationResult(
+                    "Seleccione al menos un día de voluntariado.",
+                    new[] { nameof(VolunteerDays) });
             }
         }
     }

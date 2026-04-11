@@ -18,7 +18,7 @@ INSERT INTO [dbo].[Roles] (Nombre, Descripcion, Estado)
 VALUES 
     ('Donante',        'Usuario que realiza donaciones a casos y programas', 'Activo'),
     ('Beneficiario',   'Usuario que crea casos y recibe ayuda',              'Activo'),
-    ('Volunario',   'Usuario que ayuda en programas',              'Activo'),
+    ('Voluntario',   'Usuario que ayuda en programas',              'Activo'),
     ('Administrador',  'Administrador del sistema con acceso total',         'Activo');
 GO
 
