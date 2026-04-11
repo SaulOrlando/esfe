@@ -67,6 +67,29 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        public async Task<InscripcionesVoluntario?> ObtenerInscripcionActivaPorUsuarioAsync(int usuarioId)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            return await context.InscripcionesVoluntarios
+                .AsSplitQuery()
+                .Include(i => i.IdUsuarioNavigation)
+                    .ThenInclude(u => u.IdRolNavigation)
+                .Include(i => i.IdProgramaNavigation)
+                    .ThenInclude(p => p.IdCategoriaNavigation)
+                .Include(i => i.IdProgramaNavigation)
+                    .ThenInclude(p => p.CreadoPorNavigation)
+                .Include(i => i.IdProgramaNavigation)
+                    .ThenInclude(p => p.Donaciones)
+                .Include(i => i.IdProgramaNavigation)
+                    .ThenInclude(p => p.InscripcionesVoluntarios)
+                .Where(i =>
+                    i.IdUsuario == usuarioId &&
+                    (i.Estado == "Aprobado" || i.Estado == "Activo"))
+                .OrderByDescending(i => i.FechaInscripcion)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task AprobarInscripcionVoluntariadoAsync(int inscripcionId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -152,6 +175,94 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             }
 
             inscripcion.Estado = "Rechazado";
+            await context.SaveChangesAsync();
+        }
+
+        public async Task ActualizarDisponibilidadVoluntarioAsync(int usuarioId, IEnumerable<string> diasDisponibles)
+        {
+            ArgumentNullException.ThrowIfNull(diasDisponibles);
+
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            var inscripcion = await context.InscripcionesVoluntarios
+                .Include(i => i.IdProgramaNavigation)
+                .FirstOrDefaultAsync(i =>
+                    i.IdUsuario == usuarioId &&
+                    (i.Estado == "Aprobado" || i.Estado == "Activo"));
+
+            if (inscripcion is null)
+            {
+                throw new InvalidOperationException("No se encontró una inscripción activa de voluntariado para este usuario.");
+            }
+
+            var diasPrograma = ParseDays(inscripcion.IdProgramaNavigation.DiasVoluntariado);
+            if (diasPrograma.Count == 0)
+            {
+                throw new InvalidOperationException("El programa no tiene días de voluntariado configurados.");
+            }
+
+            var diasSeleccionados = diasDisponibles
+                .Where(d => !string.IsNullOrWhiteSpace(d))
+                .Select(d => d.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (diasSeleccionados.Count == 0)
+            {
+                throw new InvalidOperationException("Debes seleccionar al menos un día disponible.");
+            }
+
+            var diasInvalidos = diasSeleccionados
+                .Where(d => !diasPrograma.Contains(d, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
+            if (diasInvalidos.Count > 0)
+            {
+                throw new InvalidOperationException("Seleccionaste días que no están disponibles en el programa.");
+            }
+
+            inscripcion.DiasDisponibles = string.Join(", ",
+                diasPrograma.Where(d => diasSeleccionados.Contains(d, StringComparer.OrdinalIgnoreCase)));
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task SalirDelProgramaAsync(int usuarioId)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            var inscripcion = await context.InscripcionesVoluntarios
+                .FirstOrDefaultAsync(i =>
+                    i.IdUsuario == usuarioId &&
+                    (i.Estado == "Aprobado" || i.Estado == "Activo"));
+
+            if (inscripcion is null)
+            {
+                throw new InvalidOperationException("No se encontró una inscripción activa de voluntariado para este usuario.");
+            }
+
+            var usuario = await context.Usuarios
+                .Include(u => u.IdRolNavigation)
+                .FirstOrDefaultAsync(u => u.Id == usuarioId);
+
+            if (usuario is null)
+            {
+                throw new InvalidOperationException("No se encontró el usuario asociado al programa.");
+            }
+
+            var rolDonante = await context.Roles
+                .FirstOrDefaultAsync(r =>
+                    r.Nombre.ToLower() == "donante" ||
+                    r.Nombre.ToLower() == "donador");
+
+            if (rolDonante is null)
+            {
+                throw new InvalidOperationException("No se encontró el rol de donante en la base de datos.");
+            }
+
+            context.InscripcionesVoluntarios.Remove(inscripcion);
+            usuario.IdRol = rolDonante.Id;
+
             await context.SaveChangesAsync();
         }
 
@@ -247,6 +358,16 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
 
             context.Programas.Remove(programa);
             await context.SaveChangesAsync();
+        }
+
+        private static List<string> ParseDays(string? rawDays)
+        {
+            return string.IsNullOrWhiteSpace(rawDays)
+                ? new List<string>()
+                : rawDays
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
         }
     }
 }

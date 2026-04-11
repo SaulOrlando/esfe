@@ -1,0 +1,195 @@
+.vpd-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem; /* Margen a los lados */
+    margin-bottom: 4rem; /* Margen abajo */
+}
+
+/* Fix for loading and no-access boxes */
+.bulma-box.vpd-shell {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    margin-top: 2rem;
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+}
+
+.bulma-box.vpd-shell .bulma-title {
+    color: #111827 !important;
+}
+
+.bulma-box.vpd-shell .bulma-content {
+    color: #374151 !important;
+}
+
+.vpd-hero {
+    border: 1px solid #e7edf3;
+    background:
+        radial-gradient(circle at top right, rgba(255, 214, 102, 0.22), transparent 30%),
+        linear-gradient(135deg, #f7fbff 0%, #ffffff 60%, #fdf7eb 100%) !important;
+    color: #111827 !important;
+}
+
+.vpd-hero__content {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.vpd-hero__text {
+    flex: 1 1 30rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.vpd-hero__image-container {
+    flex: 0 0 16rem;
+    height: 12rem;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid #ffffff;
+    box-shadow: 0 12px 24px rgba(16, 60, 74, 0.12);
+}
+
+.vpd-hero__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vpd-eyebrow {
+    margin-bottom: 0.75rem;
+    color: #1f6f78 !important; /* Teal oscuro */
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.vpd-title {
+    margin-bottom: 0.75rem !important;
+    color: #111827 !important; /* Texto oscuro fuera de cards */
+}
+
+.vpd-description {
+    margin-bottom: 0 !important;
+    max-width: 60rem;
+    color: #374151 !important; /* Gris oscuro fuera de cards */
+}
+
+.vpd-tags {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.vpd-tag {
+    background-color: #103c4a !important;
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.vpd-stat-card,
+.vpd-detail-card,
+.vpd-availability-card,
+.vpd-exit-card {
+    height: 100%;
+    border: 1px solid #e7edf3;
+    box-shadow: 0 16px 32px rgba(16, 60, 74, 0.08);
+    background-color: #ffffff !important; /* Fondo blanco en cards */
+    color: #111827 !important; /* Texto negro en cards */
+}
+
+/* Forzar títulos dentro de cards */
+.vpd-stat-card .bulma-title,
+.vpd-detail-card .bulma-title,
+.vpd-availability-card .bulma-title,
+.vpd-exit-card .bulma-title {
+    color: #111827 !important;
+}
+
+.vpd-stat-card__label,
+.vpd-detail-card__label {
+    margin-bottom: 0.4rem;
+    color: #6b7280 !important; /* Gris para etiquetas */
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.vpd-stat-card__value,
+.vpd-detail-card__value {
+    color: #111827 !important;
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.vpd-stat-card__meta {
+    color: #4b5563 !important;
+}
+
+.vpd-day-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0 1.25rem;
+}
+
+.vpd-day-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #d6dee6;
+    border-radius: 16px;
+    background-color: #f8fafc !important;
+    color: #111827 !important;
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.vpd-day-option:hover {
+    transform: translateY(-1px);
+    border-color: #1f6f78;
+    box-shadow: 0 12px 24px rgba(31, 111, 120, 0.12);
+}
+
+.vpd-day-option--active {
+    border-color: #1f6f78;
+    background-color: #ecfeff !important;
+}
+
+.vpd-day-option input {
+    accent-color: #1f6f78;
+}
+
+.vpd-action {
+    margin-top: 0.5rem;
+}
+
+.vpd-exit-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, #fff7f7 0%, #ffffff 100%) !important;
+}
+
+.vpd-exit-card .bulma-content {
+    color: #4b5563 !important;
+}
+
+@media screen and (max-width: 768px) {
+    .vpd-shell {
+        padding: 0 1rem;
+    }
+
+    .vpd-exit-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

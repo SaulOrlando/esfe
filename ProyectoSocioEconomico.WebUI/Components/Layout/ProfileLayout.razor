@@ -83,12 +83,16 @@
                         </a>
                     }
 
+                    @if (IsVolunteer)
+                    {
+                        <a href="/volunteer/program-data" class="@GetNavItemClass("/volunteer/program-data")">
+                            <span class="bulma-icon bulma-is-small"><i class="fa-brands fa-kaggle"></i></span>
+                            Datos del programa
+                        </a>
+                    }
+
                     @if (IsAdmin)
                     {
-                        @* <a href="" class="@GetNavItemClass("/account/settings")">
-                            Perfiles
-                        </a> *@
-
                         <a href="/admin/volunteers/pending" class="@GetNavItemClass("/admin/volunteers/pending")">
                             <span class="bulma-icon bulma-is-small"><i class="fas fa-user-check"></i></span>
                             Voluntarios pendientes
@@ -195,6 +199,7 @@
     private Usuario? CurrentUser { get; set; }
     private bool IsBeneficiario { get; set; }
     private bool IsAdmin { get; set; }
+    private bool IsVolunteer { get; set; }
     private string MyCaseUrl { get; set; } = "/cases/new/step1";
 
     protected override async Task OnParametersSetAsync()
@@ -205,6 +210,7 @@
         CurrentUser = null;
         IsBeneficiario = false;
         IsAdmin = false;
+        IsVolunteer = false;
         MyCaseUrl = "/cases/new/step1";
 
         if (user.Identity is null || !user.Identity.IsAuthenticated)
@@ -221,6 +227,7 @@
         CurrentUser = await UsuarioService.ObtenerPorId(userId);
         IsBeneficiario = HasBeneficiaryRole(CurrentUser);
         IsAdmin = HasAdminRole(CurrentUser);
+        IsVolunteer = HasVolunteerRole(CurrentUser);
 
         if (!IsBeneficiario)
         {
@@ -244,6 +251,13 @@
         var roleName = usuario?.IdRolNavigation?.Nombre;
         return !string.IsNullOrWhiteSpace(roleName) &&
                roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool HasVolunteerRole(Usuario? usuario)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Voluntario", StringComparison.OrdinalIgnoreCase);
     }
 
     private string GetProfileImage(ClaimsPrincipal user)
