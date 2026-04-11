@@ -20,13 +20,13 @@
     <main class="as-main">
 
         <div class="as-main__header">
-            <h1 class="as-main__title">Account Settings</h1>
-            <p class="as-main__subtitle">Manage your public profile, security protocols, and connectivity.</p>
+            <h1 class="as-main__title">Configuración de la Cuenta</h1>
+            <p class="as-main__subtitle">Administra tu perfil público, protocolos de seguridad y conectividad.</p>
         </div>
 
         @if (CurrentUser == null)
         {
-            <p>Loading...</p>
+            <p>Cargando...</p>
         }
         else
         {
@@ -57,8 +57,8 @@
                             </div>
                             <div class="as-profile__actions">
                                 <label class="bulma-button as-btn-change-photo" for="profile-upload"
-                                       style="cursor: pointer;">Change Photo</label>
-                                <button class="bulma-button as-btn-remove-photo" @onclick="RemovePhoto">Remove Photo</button>
+                                       style="cursor: pointer;">Cambiar Foto</label>
+                                <button class="bulma-button as-btn-remove-photo" @onclick="RemovePhoto">Eliminar Foto</button>
                             </div>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                     <span class="as-section-heading__icon">
                         <i class="fas fa-id-card-clip"></i>
                     </span>
-                    <h2 class="as-section-heading__text">Personal Information</h2>
+                    <h2 class="as-section-heading__text">Información Personal</h2>
                 </div>
 
                 <section class="as-card">
@@ -89,7 +89,7 @@
                         </div>
 
                         <div class="bulma-field as-field">
-                            <label class="bulma-label as-label" for="email">Email Address</label>
+                            <label class="bulma-label as-label" for="email">Correo Electrónico</label>
                             <div class="bulma-control as-control">
                                 <input id="email" class="bulma-input as-input" type="email" @bind="CurrentUser.Email" />
                             </div>
@@ -131,7 +131,7 @@
                     <span class="as-section-heading__icon as-section-heading__icon--yellow">
                         <i class="fas fa-shield-halved"></i>
                     </span>
-                    <h2 class="as-section-heading__text">Security</h2>
+                    <h2 class="as-section-heading__text">Seguridad</h2>
                 </div>
 
                 <section class="as-card">
@@ -151,7 +151,7 @@
                     <div class="as-form-grid as-form-grid--3col">
 
                         <div class="bulma-field as-field">
-                            <label class="bulma-label as-label" for="current-pw">Current Password</label>
+                            <label class="bulma-label as-label" for="current-pw">Contraseña Actual</label>
                             <div class="bulma-control bulma-has-icons-right as-control">
                                 <input id="current-pw" class="bulma-input as-input" type="@(ShowCurrent ? "text" : "password")"
                                        placeholder="••••••••" @bind="CurrentPassword" />
@@ -163,7 +163,7 @@
                         </div>
 
                         <div class="bulma-field as-field">
-                            <label class="bulma-label as-label" for="new-pw">New Password</label>
+                            <label class="bulma-label as-label" for="new-pw">Nueva Contraseña</label>
                             <div class="bulma-control bulma-has-icons-right as-control">
                                 <input id="new-pw" class="bulma-input as-input" type="@(ShowNew ? "text" : "password")"
                                        placeholder="••••••••" @bind="NewPassword" />
@@ -174,7 +174,7 @@
                         </div>
 
                        <div class="bulma-field as-field">
-                            <label class="bulma-label as-label" for="confirm-pw">Confirm Password</label>
+                            <label class="bulma-label as-label" for="confirm-pw">Confirmar Contraseña</label>
                             <div class="bulma-control bulma-has-icons-right as-control">
                                 <input id="confirm-pw" class="bulma-input as-input" type="@(ShowConfirm ? "text" : "password")"
                                        placeholder="••••••••" @bind="ConfirmPassword" />
@@ -201,7 +201,7 @@
                 <div class="as-save-row">
                     <button class="bulma-button bulma-is-success as-btn-save" @onclick="HandleSave">
                         <span class="bulma-icon bulma-is-small"><i class="fas fa-floppy-disk"></i></span>
-                        <strong>Save Changes</strong>
+                        <strong>Guardar Cambios</strong>
                     </button>
                 </div>
             }

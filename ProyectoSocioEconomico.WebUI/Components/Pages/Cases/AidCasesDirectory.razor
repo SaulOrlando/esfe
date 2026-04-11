@@ -14,10 +14,10 @@
 <div class="cap-page">
 
     <div class="cap-header">
-        <h1 class="cap-header__title">Direct Aid Cases</h1>
+        <h1 class="cap-header__title">Casos de Ayuda Directa</h1>
         <p class="cap-header__subtitle">
-            Support individual cases and families in need. Your direct contribution makes a tangible difference
-            in someone's life today.
+            Apoya casos individuales y familias necesitadas. Tu contribución directa hace una diferencia tangible
+            en la vida de alguien hoy.
         </p>
     </div>
 
@@ -25,7 +25,7 @@
         <div class="bulma-control bulma-has-icons-left cap-toolbar__search-wrap">
             <input class="bulma-input cap-toolbar__search"
                    type="text"
-                   placeholder="Search for cases (e.g., 'Medical emergency')"
+                   placeholder="Buscar casos (ej. 'Emergencia médica')"
                    @bind="SearchQuery"
                    @oninput="OnSearch" />
             <span class="bulma-icon bulma-is-left cap-toolbar__search-icon">
@@ -92,7 +92,7 @@
         <button class="cap-pagination__btn"
                 disabled="@(CurrentPage == 1)"
                 @onclick="() => GoToPage(CurrentPage - 1)">
-            Previous
+            Anterior
         </button>
 
         @for (int p = 1; p <= TotalPages; p++)
@@ -107,7 +107,7 @@
         <button class="cap-pagination__btn"
                 disabled="@(CurrentPage == TotalPages)"
                 @onclick="() => GoToPage(CurrentPage + 1)">
-            Next
+            Siguiente
         </button>
     </nav>
 

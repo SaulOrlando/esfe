@@ -12,10 +12,10 @@
 <div class="cap-page">
 
     <div class="cap-header">
-        <h1 class="cap-header__title">Community Aid Programs</h1>
+        <h1 class="cap-header__title">Programas de Ayuda Comunitaria</h1>
         <p class="cap-header__subtitle">
-            Discover and track socioeconomic development initiatives. We focus on transparency and
-            measurable community impact.
+            Descubre y sigue iniciativas de desarrollo socioeconómico. Nos enfocamos en la transparencia y
+            el impacto comunitario medible.
         </p>
     </div>
 
@@ -23,7 +23,7 @@
         <div class="bulma-control bulma-has-icons-left cap-toolbar__search-wrap">
             <input class="bulma-input cap-toolbar__search"
                    type="text"
-                   placeholder="Search for programs (e.g., 'Well Construction')"
+                   placeholder="Buscar programas (ej. 'Construcción de Pozos')"
                    @bind="SearchQuery"
                    @oninput="OnSearch" />
             <span class="bulma-icon bulma-is-left cap-toolbar__search-icon">
@@ -66,7 +66,7 @@
         <button class="cap-pagination__btn"
                 disabled="@(CurrentPage == 1)"
                 @onclick="() => GoToPage(CurrentPage - 1)">
-            Previous
+            Anterior
         </button>
 
         @for (int p = 1; p <= TotalPages; p++)
@@ -81,7 +81,7 @@
         <button class="cap-pagination__btn"
                 disabled="@(CurrentPage == TotalPages)"
                 @onclick="() => GoToPage(CurrentPage + 1)">
-            Next
+            Siguiente
         </button>
     </nav>
 
