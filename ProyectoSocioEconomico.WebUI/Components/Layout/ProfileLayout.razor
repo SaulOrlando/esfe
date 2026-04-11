@@ -90,6 +90,11 @@
                             Perfiles
                         </a> *@
 
+                        <a href="/admin/donations" class="@GetNavItemClass("/admin/donations")">
+                            <span class="bulma-icon bulma-is-small"><i class="fas fa-chart-line"></i></span>
+                            Analitica de donaciones
+                        </a>
+
                         <a href="/admin/programs" class="@GetNavItemClass("/admin/programs")">
                             <span class="bulma-icon bulma-is-small"><i class="fa-brands fa-42-group"></i></span>
                             Programas
@@ -254,7 +259,8 @@
         var currentPath = "/" + Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].Trim('/');
         var normalizedHref = string.IsNullOrWhiteSpace(href) ? "/" : href;
 
-        if (string.Equals(currentPath, normalizedHref, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(currentPath, normalizedHref, StringComparison.OrdinalIgnoreCase) ||
+            currentPath.StartsWith(normalizedHref + "/", StringComparison.OrdinalIgnoreCase))
         {
             return "pl-sidebar__nav-item pl-sidebar__nav-item--active";
         }

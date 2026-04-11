@@ -1,0 +1,332 @@
+@*
+  AdminDonationActivities.razor
+  Proposito: Vista administrativa con el listado completo de donadores destacados y detalle de actividad.
+*@
+@page "/admin/donations/activities"
+@layout ProfileLayout
+@using Microsoft.EntityFrameworkCore
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.Infrastructure.Data
+@using ProyectoSocioEconomico.WebUI.Services
+@using System.Globalization
+@using System.Security.Claims
+@inject AppDbContext DbContext
+@inject IUsuarioService UsuarioService
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<div class="daa-page">
+    @if (IsLoading)
+    {
+        <div class="daa-state-card">
+            <h1 class="daa-state-card__title">Cargando actividades...</h1>
+            <p class="daa-state-card__text">Estamos consolidando el detalle de donadores.</p>
+        </div>
+    }
+    else
+    {
+        <section class="daa-hero bulma-box">
+            <div>
+                <a href="/admin/donations" class="daa-hero__back">Volver al panel</a>
+                <h1 class="daa-hero__title">Todas las actividades de donadores</h1>
+                <p class="daa-hero__subtitle">Listado completo con mas detalle de las personas que mas han donado.</p>
+            </div>
+
+            <div class="bulma-control bulma-has-icons-left daa-search-wrap">
+                <input class="bulma-input daa-search-input"
+                       type="text"
+                       placeholder="Buscar por nombre, correo o categoria"
+                       @bind="SearchQuery"
+                       @bind:event="oninput" />
+                <span class="bulma-icon bulma-is-left">
+                    <i class="fas fa-magnifying-glass"></i>
+                </span>
+            </div>
+        </section>
+
+        <section class="daa-summary">
+            <article class="daa-summary-card bulma-box">
+                <span class="daa-summary-card__label">Donadores listados</span>
+                <strong class="daa-summary-card__value">@FilteredDonors.Count</strong>
+            </article>
+            <article class="daa-summary-card bulma-box">
+                <span class="daa-summary-card__label">Mayor aporte acumulado</span>
+                <strong class="daa-summary-card__value">@FormatCurrency(FilteredDonors.FirstOrDefault()?.TotalAmount ?? 0m)</strong>
+            </article>
+            <article class="daa-summary-card bulma-box">
+                <span class="daa-summary-card__label">Promedio por donador</span>
+                <strong class="daa-summary-card__value">@FormatCurrency(FilteredDonors.Count == 0 ? 0m : FilteredDonors.Average(item => item.TotalAmount))</strong>
+            </article>
+        </section>
+
+        <section class="daa-table-card bulma-box">
+            <div class="daa-table-wrap">
+                <table class="bulma-table daa-table bulma-is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Categoria</th>
+                            <th>Cantidad (Total Donado)</th>
+                            <th>Voluntario</th>
+                            <th>Donaciones</th>
+                            <th>Ultima actividad</th>
+                            <th>Metodo frecuente</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (PagedDonors.Any())
+                        {
+                            @foreach (var donor in PagedDonors)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@donor.Name</strong>
+                                        <div class="daa-table__detail">@donor.Email</div>
+                                    </td>
+                                    <td>@donor.TopCategory</td>
+                                    <td>@FormatCurrency(donor.TotalAmount)</td>
+                                    <td>
+                                        <span class="daa-pill @(donor.IsVolunteer ? "daa-pill--success" : "daa-pill--muted")">
+                                            @(donor.IsVolunteer ? "Si" : "No")
+                                        </span>
+                                    </td>
+                                    <td>@donor.DonationCount</td>
+                                    <td>@donor.LastDonationDate.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                    <td>@donor.FrequentPaymentMethod</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="daa-table__empty">No hay resultados para esta busqueda.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (TotalPages > 1)
+            {
+                <div class="daa-pagination">
+                    <button type="button"
+                            class="bulma-button daa-pagination__btn"
+                            disabled="@(CurrentPage == 1)"
+                            @onclick="PreviousPage">
+                        Anterior
+                    </button>
+                    <span class="daa-pagination__text">Pagina @CurrentPage de @TotalPages</span>
+                    <button type="button"
+                            class="bulma-button daa-pagination__btn"
+                            disabled="@(CurrentPage == TotalPages)"
+                            @onclick="NextPage">
+                        Siguiente
+                    </button>
+                </div>
+            }
+        </section>
+    }
+</div>
+
+@code {
+    private static readonly CultureInfo CurrencyCulture = CultureInfo.GetCultureInfo("es-SV");
+
+    private Usuario? CurrentUser { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private string searchQuery = string.Empty;
+    private int CurrentPage { get; set; } = 1;
+    private const int PageSize = 10;
+    private List<DonorActivityItem> AllDonors { get; set; } = new();
+
+    private string SearchQuery
+    {
+        get => searchQuery;
+        set
+        {
+            if (string.Equals(searchQuery, value, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            searchQuery = value;
+            CurrentPage = 1;
+        }
+    }
+
+    private List<DonorActivityItem> FilteredDonors => ApplyFilter().ToList();
+    private IEnumerable<DonorActivityItem> PagedDonors => FilteredDonors
+        .Skip((CurrentPage - 1) * PageSize)
+        .Take(PageSize);
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling(FilteredDonors.Count / (double)PageSize));
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var userIdStr = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdStr, out var userId))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        CurrentUser = await UsuarioService.ObtenerPorId(userId);
+        if (!IsAdmin(CurrentUser))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        await LoadActivitiesAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (CurrentPage > TotalPages)
+        {
+            CurrentPage = TotalPages;
+        }
+    }
+
+    private async Task LoadActivitiesAsync()
+    {
+        try
+        {
+            var completedDonations = await DbContext.Donaciones
+                .AsNoTracking()
+                .Include(d => d.IdDonadorNavigation)
+                .Include(d => d.IdCasoNavigation)
+                    .ThenInclude(c => c.IdCategoriaNavigation)
+                .Include(d => d.IdProgramaNavigation)
+                    .ThenInclude(p => p.IdCategoriaNavigation)
+                .Where(d => d.Estado == "Completado")
+                .ToListAsync();
+
+            var volunteerUserIds = await DbContext.InscripcionesVoluntarios
+                .AsNoTracking()
+                .Select(v => v.IdUsuario)
+                .Distinct()
+                .ToListAsync();
+
+            AllDonors = completedDonations
+                .GroupBy(donation => new
+                {
+                    donation.IdDonador,
+                    Name = GetDonorName(donation.IdDonadorNavigation),
+                    donation.IdDonadorNavigation.Email
+                })
+                .Select(group =>
+                {
+                    var topCategory = group
+                        .GroupBy(GetCategoryName)
+                        .OrderByDescending(categoryGroup => categoryGroup.Sum(item => item.Monto))
+                        .ThenBy(categoryGroup => categoryGroup.Key)
+                        .Select(categoryGroup => categoryGroup.Key)
+                        .FirstOrDefault() ?? "Sin categoria";
+
+                    var frequentMethod = group
+                        .GroupBy(item => item.MetodoPago)
+                        .OrderByDescending(methodGroup => methodGroup.Count())
+                        .ThenBy(methodGroup => methodGroup.Key)
+                        .Select(methodGroup => methodGroup.Key)
+                        .FirstOrDefault() ?? "Sin metodo";
+
+                    return new DonorActivityItem(
+                        group.Key.IdDonador,
+                        group.Key.Name,
+                        group.Key.Email ?? "Sin correo",
+                        topCategory,
+                        group.Sum(item => item.Monto),
+                        volunteerUserIds.Contains(group.Key.IdDonador),
+                        group.Count(),
+                        group.Max(item => item.FechaDonacion),
+                        frequentMethod);
+                })
+                .OrderByDescending(item => item.TotalAmount)
+                .ThenBy(item => item.Name)
+                .ToList();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private IEnumerable<DonorActivityItem> ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            return AllDonors;
+        }
+
+        return AllDonors.Where(item =>
+            item.Name.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+            item.Email.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+            item.TopCategory.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+            item.FrequentPaymentMethod.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+        }
+    }
+
+    private void NextPage()
+    {
+        if (CurrentPage < TotalPages)
+        {
+            CurrentPage++;
+        }
+    }
+
+    private static string GetCategoryName(Donacione donation)
+    {
+        return donation.IdCasoNavigation?.IdCategoriaNavigation?.Nombre
+            ?? donation.IdProgramaNavigation?.IdCategoriaNavigation?.Nombre
+            ?? "Sin categoria";
+    }
+
+    private static string GetDonorName(Usuario? user)
+    {
+        if (user is null)
+        {
+            return "Donador no disponible";
+        }
+
+        return $"{user.Nombre} {user.Apellido}".Trim();
+    }
+
+    private static bool IsAdmin(Usuario? usuario)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string FormatCurrency(decimal amount)
+    {
+        return amount.ToString("C", CurrencyCulture);
+    }
+
+    private sealed record DonorActivityItem(
+        int DonorId,
+        string Name,
+        string Email,
+        string TopCategory,
+        decimal TotalAmount,
+        bool IsVolunteer,
+        int DonationCount,
+        DateTime LastDonationDate,
+        string FrequentPaymentMethod);
+}

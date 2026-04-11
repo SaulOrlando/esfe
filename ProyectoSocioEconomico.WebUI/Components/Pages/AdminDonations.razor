@@ -1,0 +1,445 @@
+@*
+  AdminDonations.razor
+  Proposito: Vista administrativa de analitica para ingresos, donadores y categorias de donacion.
+*@
+@page "/admin/donations"
+@layout ProfileLayout
+@using Microsoft.EntityFrameworkCore
+@using ProyectoSocioEconomico.Application.Interfaces
+@using ProyectoSocioEconomico.Domain.Entities
+@using ProyectoSocioEconomico.Infrastructure.Data
+@using ProyectoSocioEconomico.WebUI.Services
+@using System.Globalization
+@using System.Security.Claims
+@inject AppDbContext DbContext
+@inject IUsuarioService UsuarioService
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<div class="da-page">
+    @if (IsLoading)
+    {
+        <div class="da-state-card">
+            <h1 class="da-state-card__title">Cargando analitica...</h1>
+            <p class="da-state-card__text">Estamos procesando el resumen de ingresos y donadores.</p>
+        </div>
+    }
+    else
+    {
+        <section class="da-hero bulma-box">
+            <div>
+                <p class="da-hero__eyebrow">ADMINISTRACION FINANCIERA</p>
+                <h1 class="da-hero__title">Panel de donaciones</h1>
+                <p class="da-hero__subtitle">Supervise ingresos, comportamiento de donadores y rendimiento por categoria desde un solo lugar.</p>
+            </div>
+
+            <a href="/admin/donations/activities" class="bulma-button bulma-is-warning da-hero__action">
+                <strong>Ver todas las actividades</strong>
+            </a>
+        </section>
+
+        <section class="da-metrics">
+            <article class="da-metric-card bulma-box">
+                <span class="da-metric-card__icon da-metric-card__icon--gold">
+                    <i class="fas fa-sack-dollar"></i>
+                </span>
+                <div>
+                    <p class="da-metric-card__label">Ingresos totales</p>
+                    <strong class="da-metric-card__value">@FormatCurrency(TotalIncome)</strong>
+                    <p class="da-metric-card__sub">Suma de todas las donaciones completadas.</p>
+                </div>
+            </article>
+
+            <article class="da-metric-card bulma-box">
+                <span class="da-metric-card__icon da-metric-card__icon--blue">
+                    <i class="fas fa-coins"></i>
+                </span>
+                <div>
+                    <p class="da-metric-card__label">Promedio por donacion</p>
+                    <strong class="da-metric-card__value">@FormatCurrency(AverageDonationAmount)</strong>
+                    <p class="da-metric-card__sub">Monto promedio que se aporta por transaccion.</p>
+                </div>
+            </article>
+
+            <article class="da-metric-card bulma-box">
+                <span class="da-metric-card__icon da-metric-card__icon--green">
+                    <i class="fas fa-user-group"></i>
+                </span>
+                <div>
+                    <p class="da-metric-card__label">Donadores activos</p>
+                    <strong class="da-metric-card__value">@DonorCount</strong>
+                    <p class="da-metric-card__sub">Usuarios unicos que ya han donado.</p>
+                </div>
+            </article>
+        </section>
+
+        <section class="da-grid">
+            <article class="da-panel da-panel--chart bulma-box">
+                <div class="da-panel__header">
+                    <div>
+                        <h2 class="da-panel__title">Ingresos por mes</h2>
+                        <p class="da-panel__subtitle">Grafica de linea con el comportamiento reciente de ingresos.</p>
+                    </div>
+                    <span class="da-panel__badge">Ultimos @MonthlyIncomePoints.Count meses</span>
+                </div>
+
+                @if (MonthlyIncomePoints.Any(point => point.Amount > 0))
+                {
+                    <div class="da-chart">
+                        <svg viewBox="0 0 680 280" class="da-chart__svg" role="img" aria-label="Grafica de linea de ingresos por donaciones">
+                            @foreach (var line in GridLines)
+                            {
+                                <line x1="56" y1="@line.Y" x2="648" y2="@line.Y" class="da-chart__grid-line" />
+                                <svg:text x="12" y="@(line.Y + 5)" class="da-chart__axis-text">@line.Label</svg:text>
+                            }
+
+                            <polyline points="@LinePoints" class="da-chart__line" />
+
+                            @foreach (var point in ChartPoints)
+                            {
+                                <circle cx="@point.X" cy="@point.Y" r="5" class="da-chart__point" />
+                            }
+                        </svg>
+
+                        <div class="da-chart__labels">
+                            @foreach (var point in MonthlyIncomePoints)
+                            {
+                                <div class="da-chart__label-item">
+                                    <span class="da-chart__label-month">@point.Label</span>
+                                    <strong class="da-chart__label-value">@FormatCurrency(point.Amount)</strong>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="da-empty-state">
+                        Aun no hay ingresos suficientes para construir la grafica.
+                    </div>
+                }
+            </article>
+
+            <article class="da-panel bulma-box">
+                <div class="da-panel__header">
+                    <div>
+                        <h2 class="da-panel__title">Donaciones por categoria</h2>
+                        <p class="da-panel__subtitle">Distribucion porcentual de ingresos segun la categoria donada.</p>
+                    </div>
+                </div>
+
+                @if (CategoryBreakdown.Any())
+                {
+                    <div class="da-category-list">
+                        @foreach (var item in CategoryBreakdown)
+                        {
+                            <article class="da-category-item">
+                                <div class="da-category-item__top">
+                                    <strong>@item.CategoryName</strong>
+                                    <span>@item.Percentage.ToString("0.0", CultureInfo.InvariantCulture)%</span>
+                                </div>
+                                <div class="da-category-item__bar">
+                                    <span class="da-category-item__fill" style="width:@item.Percentage.ToString("0.##", CultureInfo.InvariantCulture)%"></span>
+                                </div>
+                                <p class="da-category-item__meta">@FormatCurrency(item.Amount) recaudados</p>
+                            </article>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="da-empty-state">
+                        No hay categorias con donaciones registradas todavia.
+                    </div>
+                }
+            </article>
+        </section>
+
+        <section class="da-panel bulma-box">
+            <div class="da-panel__header">
+                <div>
+                    <h2 class="da-panel__title">Donadores con mayor aporte</h2>
+                    <p class="da-panel__subtitle">Resumen de las personas que mas han aportado a casos y programas con donaciones.</p>
+                </div>
+                <a href="/admin/donations/activities" class="da-link-action">
+                    Ver todas las actividades
+                </a>
+            </div>
+
+            <div class="da-table-wrap">
+                <table class="bulma-table da-table bulma-is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Categoria</th>
+                            <th>Cantidad (Total Donado)</th>
+                            <th>Voluntario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (TopDonors.Any())
+                        {
+                            @foreach (var donor in TopDonors)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@donor.Name</strong>
+                                        <div class="da-table__detail">@donor.Email</div>
+                                    </td>
+                                    <td>@donor.TopCategory</td>
+                                    <td>@FormatCurrency(donor.TotalAmount)</td>
+                                    <td>
+                                        <span class="da-pill @(donor.IsVolunteer ? "da-pill--success" : "da-pill--muted")">
+                                            @(donor.IsVolunteer ? "Si" : "No")
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="da-table__empty">No hay donadores para mostrar.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+</div>
+
+@code {
+    private static readonly CultureInfo CurrencyCulture = CultureInfo.GetCultureInfo("es-SV");
+
+    private Usuario? CurrentUser { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private decimal TotalIncome { get; set; }
+    private decimal AverageDonationAmount { get; set; }
+    private int DonorCount { get; set; }
+    private List<MonthlyIncomePoint> MonthlyIncomePoints { get; set; } = new();
+    private List<CategoryBreakdownItem> CategoryBreakdown { get; set; } = new();
+    private List<TopDonorItem> TopDonors { get; set; } = new();
+
+    private List<ChartGridLine> GridLines => BuildGridLines();
+    private List<ChartPoint> ChartPoints => BuildChartPoints();
+    private string LinePoints => string.Join(" ", ChartPoints.Select(point => $"{point.X.ToString("0.##", CultureInfo.InvariantCulture)},{point.Y.ToString("0.##", CultureInfo.InvariantCulture)}"));
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is null || !user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var userIdStr = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdStr, out var userId))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        CurrentUser = await UsuarioService.ObtenerPorId(userId);
+        if (!IsAdmin(CurrentUser))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        await LoadAnalyticsAsync();
+    }
+
+    private async Task LoadAnalyticsAsync()
+    {
+        try
+        {
+            var completedDonations = await DbContext.Donaciones
+                .AsNoTracking()
+                .Include(d => d.IdDonadorNavigation)
+                .Include(d => d.IdCasoNavigation)
+                    .ThenInclude(c => c.IdCategoriaNavigation)
+                .Include(d => d.IdProgramaNavigation)
+                    .ThenInclude(p => p.IdCategoriaNavigation)
+                .Where(d => d.Estado == "Completado")
+                .ToListAsync();
+
+            var volunteerUserIds = await DbContext.InscripcionesVoluntarios
+                .AsNoTracking()
+                .Select(v => v.IdUsuario)
+                .Distinct()
+                .ToListAsync();
+
+            TotalIncome = completedDonations.Sum(donation => donation.Monto);
+            AverageDonationAmount = completedDonations.Count == 0
+                ? 0m
+                : completedDonations.Average(donation => donation.Monto);
+            DonorCount = completedDonations
+                .Select(donation => donation.IdDonador)
+                .Distinct()
+                .Count();
+
+            MonthlyIncomePoints = BuildMonthlyIncome(completedDonations);
+            CategoryBreakdown = BuildCategoryBreakdown(completedDonations);
+            TopDonors = BuildTopDonors(completedDonations, volunteerUserIds, 5);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private static List<MonthlyIncomePoint> BuildMonthlyIncome(List<Donacione> donations)
+    {
+        var now = DateTime.Now;
+        var startMonth = new DateTime(now.Year, now.Month, 1).AddMonths(-5);
+
+        return Enumerable.Range(0, 6)
+            .Select(offset =>
+            {
+                var month = startMonth.AddMonths(offset);
+                var amount = donations
+                    .Where(donation => donation.FechaDonacion.Year == month.Year && donation.FechaDonacion.Month == month.Month)
+                    .Sum(donation => donation.Monto);
+
+                return new MonthlyIncomePoint(
+                    month.ToString("MMM yyyy", CultureInfo.GetCultureInfo("es-SV")),
+                    amount);
+            })
+            .ToList();
+    }
+
+    private static List<CategoryBreakdownItem> BuildCategoryBreakdown(List<Donacione> donations)
+    {
+        var total = donations.Sum(donation => donation.Monto);
+        if (total <= 0)
+        {
+            return new List<CategoryBreakdownItem>();
+        }
+
+        return donations
+            .GroupBy(GetCategoryName)
+            .Select(group => new CategoryBreakdownItem(
+                group.Key,
+                group.Sum(item => item.Monto),
+                group.Sum(item => item.Monto) / total * 100m))
+            .OrderByDescending(item => item.Amount)
+            .ToList();
+    }
+
+    private static List<TopDonorItem> BuildTopDonors(List<Donacione> donations, List<int> volunteerUserIds, int take)
+    {
+        return donations
+            .GroupBy(donation => new
+            {
+                donation.IdDonador,
+                Name = GetDonorName(donation.IdDonadorNavigation),
+                donation.IdDonadorNavigation.Email
+            })
+            .Select(group =>
+            {
+                var category = group
+                    .GroupBy(GetCategoryName)
+                    .OrderByDescending(categoryGroup => categoryGroup.Sum(item => item.Monto))
+                    .ThenBy(categoryGroup => categoryGroup.Key)
+                    .Select(categoryGroup => categoryGroup.Key)
+                    .FirstOrDefault() ?? "Sin categoria";
+
+                return new TopDonorItem(
+                    group.Key.IdDonador,
+                    group.Key.Name,
+                    group.Key.Email ?? "Sin correo",
+                    group.Sum(item => item.Monto),
+                    category,
+                    volunteerUserIds.Contains(group.Key.IdDonador));
+            })
+            .OrderByDescending(item => item.TotalAmount)
+            .ThenBy(item => item.Name)
+            .Take(take)
+            .ToList();
+    }
+
+    private List<ChartGridLine> BuildGridLines()
+    {
+        const decimal fallbackMax = 100m;
+        const int totalLines = 4;
+        var maxAmount = MonthlyIncomePoints.Count == 0 ? fallbackMax : Math.Max(MonthlyIncomePoints.Max(point => point.Amount), fallbackMax);
+
+        return Enumerable.Range(0, totalLines)
+            .Select(index =>
+            {
+                var ratio = index / (decimal)(totalLines - 1);
+                var y = 28 + (1 - ratio) * 192;
+                var amount = maxAmount * ratio;
+
+                return new ChartGridLine(
+                    (double)y,
+                    FormatCurrency(amount));
+            })
+            .OrderByDescending(item => item.Y)
+            .ToList();
+    }
+
+    private List<ChartPoint> BuildChartPoints()
+    {
+        if (MonthlyIncomePoints.Count == 0)
+        {
+            return new List<ChartPoint>();
+        }
+
+        const double startX = 56;
+        const double width = 592;
+        const double baseY = 220;
+        const double chartHeight = 192;
+        var maxAmount = Math.Max(MonthlyIncomePoints.Max(point => point.Amount), 100m);
+
+        return MonthlyIncomePoints
+            .Select((point, index) =>
+            {
+                var x = MonthlyIncomePoints.Count == 1
+                    ? startX + width / 2
+                    : startX + width * index / (MonthlyIncomePoints.Count - 1d);
+                var y = baseY - (double)(point.Amount / maxAmount) * chartHeight;
+                return new ChartPoint(x, y);
+            })
+            .ToList();
+    }
+
+    private static string GetCategoryName(Donacione donation)
+    {
+        return donation.IdCasoNavigation?.IdCategoriaNavigation?.Nombre
+            ?? donation.IdProgramaNavigation?.IdCategoriaNavigation?.Nombre
+            ?? "Sin categoria";
+    }
+
+    private static string GetDonorName(Usuario? user)
+    {
+        if (user is null)
+        {
+            return "Donador no disponible";
+        }
+
+        return $"{user.Nombre} {user.Apellido}".Trim();
+    }
+
+    private static bool IsAdmin(Usuario? usuario)
+    {
+        var roleName = usuario?.IdRolNavigation?.Nombre;
+        return !string.IsNullOrWhiteSpace(roleName) &&
+               roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string FormatCurrency(decimal amount)
+    {
+        return amount.ToString("C", CurrencyCulture);
+    }
+
+    private sealed record MonthlyIncomePoint(string Label, decimal Amount);
+    private sealed record CategoryBreakdownItem(string CategoryName, decimal Amount, decimal Percentage);
+    private sealed record TopDonorItem(int DonorId, string Name, string Email, decimal TotalAmount, string TopCategory, bool IsVolunteer);
+    private sealed record ChartGridLine(double Y, string Label);
+    private sealed record ChartPoint(double X, double Y);
+}
