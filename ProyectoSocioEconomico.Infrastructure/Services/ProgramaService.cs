@@ -334,7 +334,7 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             var inscripcion = await context.InscripcionesVoluntarios
                 .FirstOrDefaultAsync(i =>
                     i.IdUsuario == usuarioId &&
-                    VolunteerApprovedStates.Contains(i.Estado, StringComparer.OrdinalIgnoreCase));
+                    (i.Estado == "Aprobado" || i.Estado == "Activo"));
 
             if (inscripcion is null)
             {
@@ -527,8 +527,8 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
 
             var donorRole = await context.Roles
                 .FirstOrDefaultAsync(r =>
-                    string.Equals(r.Nombre, "Donante", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(r.Nombre, "Donador", StringComparison.OrdinalIgnoreCase));
+                    r.Nombre == "Donante" ||
+                    r.Nombre == "Donador");
 
             if (volunteerRole is null || donorRole is null)
             {
