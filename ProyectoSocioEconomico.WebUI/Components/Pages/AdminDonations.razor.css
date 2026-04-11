@@ -2,6 +2,9 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    margin: 0 auto;
+    max-width: 1440px;
+    padding: 2rem 1.75rem 2rem;
 }
 
 .da-state-card,
@@ -128,6 +131,77 @@
     padding: 1.5rem;
 }
 
+.da-bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.da-bar-chart__svg {
+    background: linear-gradient(180deg, #f8fcf8 0%, #ffffff 100%);
+    border: 1px solid #edf1f7;
+    border-radius: 22px;
+    width: 100%;
+}
+
+.da-bar-chart__grid-line {
+    stroke: #dbe4db;
+    stroke-dasharray: 5 7;
+}
+
+.da-bar-chart__axis-line {
+    stroke: #9ca3af;
+    stroke-width: 1.5;
+}
+
+.da-bar-chart__axis-text {
+    fill: #6b7280;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.da-bar-chart__bar {
+    stroke-width: 1.5;
+}
+
+.da-bar-chart__value-text {
+    font-size: 12px;
+    font-weight: 800;
+    text-anchor: middle;
+}
+
+.da-bar-chart__label-text {
+    fill: #111827;
+    font-size: 12px;
+    font-weight: 800;
+    text-anchor: middle;
+}
+
+.da-bar-chart__legend {
+    display: grid;
+    gap: 0.9rem;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.da-bar-chart__legend-item {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.9rem 1rem;
+}
+
+.da-bar-chart__legend-item strong {
+    color: #111827;
+}
+
+.da-bar-chart__legend-item span {
+    color: #4b5563;
+    font-weight: 700;
+}
+
 .da-panel__header {
     align-items: flex-start;
     display: flex;
@@ -250,11 +324,24 @@
 }
 
 .da-table-wrap {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
     overflow-x: auto;
 }
 
 .da-table {
+    background: #ffffff !important;
     min-width: 100%;
+}
+
+.da-table,
+.da-table thead,
+.da-table tbody,
+.da-table tr,
+.da-table th,
+.da-table td {
+    background: #ffffff !important;
 }
 
 .da-table thead th {
@@ -262,12 +349,26 @@
     font-size: 0.78rem;
     font-weight: 800;
     letter-spacing: 0.08em;
+    border-bottom: 1px solid #e5e7eb;
     text-transform: uppercase;
 }
 
 .da-table tbody td {
     color: #111827;
+    border-bottom: 1px solid #eef2f7;
     vertical-align: middle;
+}
+
+.da-table tbody tr:hover td {
+    background: #f8fafc !important;
+}
+
+.da-table strong {
+    color: #111827;
+}
+
+.da-table__detail {
+    color: #6b7280;
 }
 
 .da-pill {
@@ -315,6 +416,7 @@
 @media screen and (max-width: 768px) {
     .da-page {
         gap: 1rem;
+        padding: 0 1rem 1.5rem;
     }
 
     .da-hero,
@@ -327,5 +429,11 @@
 
     .da-chart__labels {
         grid-template-columns: 1fr;
+    }
+
+    .da-bar-chart__axis-text,
+    .da-bar-chart__value-text,
+    .da-bar-chart__label-text {
+        font-size: 11px;
     }
 }

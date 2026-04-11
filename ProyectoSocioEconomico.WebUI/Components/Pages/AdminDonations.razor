@@ -77,73 +77,51 @@
             <article class="da-panel da-panel--chart bulma-box">
                 <div class="da-panel__header">
                     <div>
-                        <h2 class="da-panel__title">Ingresos por mes</h2>
-                        <p class="da-panel__subtitle">Grafica de linea con el comportamiento reciente de ingresos.</p>
+                        <h2 class="da-panel__title">Donaciones por categoria</h2>
+                        <p class="da-panel__subtitle">Cada barra representa el monto acumulado por categoria, sin importar si la donacion fue a un caso o a un programa.</p>
                     </div>
-                    <span class="da-panel__badge">Ultimos @MonthlyIncomePoints.Count meses</span>
+                    <span class="da-panel__badge">@CategoryBreakdown.Count categorias</span>
                 </div>
 
-                @if (MonthlyIncomePoints.Any(point => point.Amount > 0))
+                @if (CategoryBreakdown.Any(item => item.Amount > 0))
                 {
-                    <div class="da-chart">
-                        <svg viewBox="0 0 680 280" class="da-chart__svg" role="img" aria-label="Grafica de linea de ingresos por donaciones">
-                            @foreach (var line in GridLines)
+                    <div class="da-bar-chart">
+                        <svg viewBox="0 0 760 360" class="da-bar-chart__svg" role="img" aria-label="Grafica de barras de donaciones por categoria">
+                            @foreach (var line in CategoryChartGridLines)
                             {
-                                <line x1="56" y1="@line.Y" x2="648" y2="@line.Y" class="da-chart__grid-line" />
-                                <svg:text x="12" y="@(line.Y + 5)" class="da-chart__axis-text">@line.Label</svg:text>
+                                <line x1="68" y1="@line.Y" x2="724" y2="@line.Y" class="da-bar-chart__grid-line" />
+                                <svg:text x="10" y="@(line.Y + 5)" class="da-bar-chart__axis-text">@line.Label</svg:text>
                             }
 
-                            <polyline points="@LinePoints" class="da-chart__line" />
+                            <line x1="68" y1="300" x2="724" y2="300" class="da-bar-chart__axis-line" />
 
-                            @foreach (var point in ChartPoints)
+                            @foreach (var bar in CategoryChartBars)
                             {
-                                <circle cx="@point.X" cy="@point.Y" r="5" class="da-chart__point" />
+                                <rect x="@bar.X"
+                                      y="@bar.Y"
+                                      width="@bar.Width"
+                                      height="@bar.Height"
+                                      rx="10"
+                                      class="da-bar-chart__bar"
+                                      style="fill:@bar.ColorHex;stroke:@bar.ColorStrokeHex;" />
+                                <svg:text x="@(bar.X + bar.Width / 2)" y="@(bar.Y - 10)" class="da-bar-chart__value-text" style="fill:@bar.ColorStrokeHex;">
+                                    @FormatCompactCurrency(bar.Amount)
+                                </svg:text>
+                                <svg:text x="@(bar.X + bar.Width / 2)" y="324" class="da-bar-chart__label-text">
+                                    @bar.Label
+                                </svg:text>
                             }
                         </svg>
 
-                        <div class="da-chart__labels">
-                            @foreach (var point in MonthlyIncomePoints)
+                        <div class="da-bar-chart__legend">
+                            @foreach (var item in CategoryBreakdown)
                             {
-                                <div class="da-chart__label-item">
-                                    <span class="da-chart__label-month">@point.Label</span>
-                                    <strong class="da-chart__label-value">@FormatCurrency(point.Amount)</strong>
-                                </div>
+                                <article class="da-bar-chart__legend-item" style="border-top:4px solid @item.ColorHex;">
+                                    <strong>@item.CategoryName</strong>
+                                    <span>@FormatCurrency(item.Amount)</span>
+                                </article>
                             }
                         </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="da-empty-state">
-                        Aun no hay ingresos suficientes para construir la grafica.
-                    </div>
-                }
-            </article>
-
-            <article class="da-panel bulma-box">
-                <div class="da-panel__header">
-                    <div>
-                        <h2 class="da-panel__title">Donaciones por categoria</h2>
-                        <p class="da-panel__subtitle">Distribucion porcentual de ingresos segun la categoria donada.</p>
-                    </div>
-                </div>
-
-                @if (CategoryBreakdown.Any())
-                {
-                    <div class="da-category-list">
-                        @foreach (var item in CategoryBreakdown)
-                        {
-                            <article class="da-category-item">
-                                <div class="da-category-item__top">
-                                    <strong>@item.CategoryName</strong>
-                                    <span>@item.Percentage.ToString("0.0", CultureInfo.InvariantCulture)%</span>
-                                </div>
-                                <div class="da-category-item__bar">
-                                    <span class="da-category-item__fill" style="width:@item.Percentage.ToString("0.##", CultureInfo.InvariantCulture)%"></span>
-                                </div>
-                                <p class="da-category-item__meta">@FormatCurrency(item.Amount) recaudados</p>
-                            </article>
-                        }
                     </div>
                 }
                 else
@@ -217,13 +195,11 @@
     private decimal TotalIncome { get; set; }
     private decimal AverageDonationAmount { get; set; }
     private int DonorCount { get; set; }
-    private List<MonthlyIncomePoint> MonthlyIncomePoints { get; set; } = new();
     private List<CategoryBreakdownItem> CategoryBreakdown { get; set; } = new();
     private List<TopDonorItem> TopDonors { get; set; } = new();
 
-    private List<ChartGridLine> GridLines => BuildGridLines();
-    private List<ChartPoint> ChartPoints => BuildChartPoints();
-    private string LinePoints => string.Join(" ", ChartPoints.Select(point => $"{point.X.ToString("0.##", CultureInfo.InvariantCulture)},{point.Y.ToString("0.##", CultureInfo.InvariantCulture)}"));
+    private List<ChartGridLine> CategoryChartGridLines => BuildCategoryChartGridLines();
+    private List<CategoryChartBar> CategoryChartBars => BuildCategoryChartBars();
 
     protected override async Task OnInitializedAsync()
     {
@@ -283,7 +259,6 @@
                 .Distinct()
                 .Count();
 
-            MonthlyIncomePoints = BuildMonthlyIncome(completedDonations);
             CategoryBreakdown = BuildCategoryBreakdown(completedDonations);
             TopDonors = BuildTopDonors(completedDonations, volunteerUserIds, 5);
         }
@@ -291,26 +266,6 @@
         {
             IsLoading = false;
         }
-    }
-
-    private static List<MonthlyIncomePoint> BuildMonthlyIncome(List<Donacione> donations)
-    {
-        var now = DateTime.Now;
-        var startMonth = new DateTime(now.Year, now.Month, 1).AddMonths(-5);
-
-        return Enumerable.Range(0, 6)
-            .Select(offset =>
-            {
-                var month = startMonth.AddMonths(offset);
-                var amount = donations
-                    .Where(donation => donation.FechaDonacion.Year == month.Year && donation.FechaDonacion.Month == month.Month)
-                    .Sum(donation => donation.Monto);
-
-                return new MonthlyIncomePoint(
-                    month.ToString("MMM yyyy", CultureInfo.GetCultureInfo("es-SV")),
-                    amount);
-            })
-            .ToList();
     }
 
     private static List<CategoryBreakdownItem> BuildCategoryBreakdown(List<Donacione> donations)
@@ -326,7 +281,9 @@
             .Select(group => new CategoryBreakdownItem(
                 group.Key,
                 group.Sum(item => item.Monto),
-                group.Sum(item => item.Monto) / total * 100m))
+                group.Sum(item => item.Monto) / total * 100m,
+                GetCategoryColor(group.Key),
+                GetCategoryStrokeColor(group.Key)))
             .OrderByDescending(item => item.Amount)
             .ToList();
     }
@@ -363,17 +320,17 @@
             .ToList();
     }
 
-    private List<ChartGridLine> BuildGridLines()
+    private List<ChartGridLine> BuildCategoryChartGridLines()
     {
         const decimal fallbackMax = 100m;
         const int totalLines = 4;
-        var maxAmount = MonthlyIncomePoints.Count == 0 ? fallbackMax : Math.Max(MonthlyIncomePoints.Max(point => point.Amount), fallbackMax);
+        var maxAmount = CategoryBreakdown.Count == 0 ? fallbackMax : Math.Max(CategoryBreakdown.Max(point => point.Amount), fallbackMax);
 
         return Enumerable.Range(0, totalLines)
             .Select(index =>
             {
                 var ratio = index / (decimal)(totalLines - 1);
-                var y = 28 + (1 - ratio) * 192;
+                var y = 52 + (1 - ratio) * 220;
                 var amount = maxAmount * ratio;
 
                 return new ChartGridLine(
@@ -384,27 +341,38 @@
             .ToList();
     }
 
-    private List<ChartPoint> BuildChartPoints()
+    private List<CategoryChartBar> BuildCategoryChartBars()
     {
-        if (MonthlyIncomePoints.Count == 0)
+        if (CategoryBreakdown.Count == 0)
         {
-            return new List<ChartPoint>();
+            return new List<CategoryChartBar>();
         }
 
-        const double startX = 56;
-        const double width = 592;
-        const double baseY = 220;
-        const double chartHeight = 192;
-        var maxAmount = Math.Max(MonthlyIncomePoints.Max(point => point.Amount), 100m);
+        const double startX = 96;
+        const double totalWidth = 580;
+        const double baseY = 300;
+        const double chartHeight = 220;
+        const double gap = 22;
+        var maxAmount = Math.Max(CategoryBreakdown.Max(point => point.Amount), 100m);
+        var barCount = CategoryBreakdown.Count;
+        var barWidth = barCount == 0 ? 0 : Math.Max(36, (totalWidth - gap * (barCount - 1)) / barCount);
 
-        return MonthlyIncomePoints
+        return CategoryBreakdown
             .Select((point, index) =>
             {
-                var x = MonthlyIncomePoints.Count == 1
-                    ? startX + width / 2
-                    : startX + width * index / (MonthlyIncomePoints.Count - 1d);
-                var y = baseY - (double)(point.Amount / maxAmount) * chartHeight;
-                return new ChartPoint(x, y);
+                var height = (double)(point.Amount / maxAmount) * chartHeight;
+                var x = startX + index * (barWidth + gap);
+                var y = baseY - height;
+
+                return new CategoryChartBar(
+                    x,
+                    y,
+                    barWidth,
+                    height,
+                    point.CategoryName,
+                    point.Amount,
+                    point.ColorHex,
+                    point.ColorStrokeHex);
             })
             .ToList();
     }
@@ -433,14 +401,59 @@
                roleName.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static string GetCategoryColor(string categoryName)
+    {
+        return NormalizeCategoryName(categoryName) switch
+        {
+            "salud" => "#ef4444",
+            "educacion" => "#3b82f6",
+            "infraestructura" => "#8b5cf6",
+            "desastres naturales" => "#f59e0b",
+            "naturaleza" => "#22c55e",
+            _ => "#14b8a6"
+        };
+    }
+
+    private static string GetCategoryStrokeColor(string categoryName)
+    {
+        return NormalizeCategoryName(categoryName) switch
+        {
+            "salud" => "#b91c1c",
+            "educacion" => "#1d4ed8",
+            "infraestructura" => "#6d28d9",
+            "desastres naturales" => "#b45309",
+            "naturaleza" => "#15803d",
+            _ => "#0f766e"
+        };
+    }
+
+    private static string NormalizeCategoryName(string categoryName)
+    {
+        return categoryName.Trim().ToLowerInvariant();
+    }
+
     private static string FormatCurrency(decimal amount)
     {
         return amount.ToString("C", CurrencyCulture);
     }
 
-    private sealed record MonthlyIncomePoint(string Label, decimal Amount);
-    private sealed record CategoryBreakdownItem(string CategoryName, decimal Amount, decimal Percentage);
+    private static string FormatCompactCurrency(decimal amount)
+    {
+        if (amount >= 1000000m)
+        {
+            return $"{amount / 1000000m:0.#}M";
+        }
+
+        if (amount >= 1000m)
+        {
+            return $"{amount / 1000m:0.#}K";
+        }
+
+        return amount.ToString("0", CultureInfo.InvariantCulture);
+    }
+
+    private sealed record CategoryBreakdownItem(string CategoryName, decimal Amount, decimal Percentage, string ColorHex, string ColorStrokeHex);
     private sealed record TopDonorItem(int DonorId, string Name, string Email, decimal TotalAmount, string TopCategory, bool IsVolunteer);
     private sealed record ChartGridLine(double Y, string Label);
-    private sealed record ChartPoint(double X, double Y);
+    private sealed record CategoryChartBar(double X, double Y, double Width, double Height, string Label, decimal Amount, string ColorHex, string ColorStrokeHex);
 }

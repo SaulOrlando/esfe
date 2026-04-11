@@ -2,6 +2,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    margin-top: 2rem;
 }
 
 .daa-state-card,
@@ -104,7 +105,17 @@
 }
 
 .daa-table {
+    background: #ffffff !important;
     min-width: 100%;
+}
+
+.daa-table,
+.daa-table thead,
+.daa-table tbody,
+.daa-table tr,
+.daa-table th,
+.daa-table td {
+    background: #ffffff !important;
 }
 
 .daa-table thead th {
@@ -118,6 +129,10 @@
 .daa-table tbody td {
     color: #111827;
     vertical-align: middle;
+}
+
+.daa-table tbody tr:hover td {
+    background: #f8fafc !important;
 }
 
 .daa-pill {

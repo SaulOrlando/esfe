@@ -60,18 +60,18 @@
             </article>
         </section>
 
-        <section class="daa-table-card bulma-box">
+        <section class="daa-table-card bulma-box" style="background-color: #ffffff !important;">
             <div class="daa-table-wrap">
-                <table class="bulma-table daa-table bulma-is-fullwidth">
+                <table class="bulma-table daa-table bulma-is-fullwidth" style="background-color: #ffffff !important; color: #111827 !important;">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Categoria</th>
-                            <th>Cantidad (Total Donado)</th>
-                            <th>Voluntario</th>
-                            <th>Donaciones</th>
-                            <th>Ultima actividad</th>
-                            <th>Metodo frecuente</th>
+                            <th style="background-color: #ffffff !important; color: #6b7280 !important;">Nombre</th>
+                            <th style="background-color: #ffffff !important; color: #6b7280 !important;">Categoria</th>
+                            <th style="background-color: #ffffff !important; color: #6b7280 !important;">Cantidad (Total Donado)</th>
+                            <th style="background-color: #ffffff !important; color: #6b7280 !important;">Voluntario</th>
+                            <th style="background-color: #ffffff !important; color: #6b7280 !important;">Donaciones</th>
+                            <th style="background-color: #ffffff !important; color: #6b7280 !important;">Ultima actividad</th>
+                            <th style="background-color: #ffffff !important; color: #6b7280 !important;">Metodo frecuente</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,27 +79,27 @@
                         {
                             @foreach (var donor in PagedDonors)
                             {
-                                <tr>
-                                    <td>
-                                        <strong>@donor.Name</strong>
+                                <tr style="background-color: #ffffff !important;">
+                                    <td style="color: #111827 !important;">
+                                        <strong style="color: #111827 !important;">@donor.Name</strong>
                                         <div class="daa-table__detail">@donor.Email</div>
                                     </td>
-                                    <td>@donor.TopCategory</td>
-                                    <td>@FormatCurrency(donor.TotalAmount)</td>
+                                    <td style="color: #111827 !important;">@donor.TopCategory</td>
+                                    <td style="color: #111827 !important;">@FormatCurrency(donor.TotalAmount)</td>
                                     <td>
                                         <span class="daa-pill @(donor.IsVolunteer ? "daa-pill--success" : "daa-pill--muted")">
                                             @(donor.IsVolunteer ? "Si" : "No")
                                         </span>
                                     </td>
-                                    <td>@donor.DonationCount</td>
-                                    <td>@donor.LastDonationDate.ToString("dd/MM/yyyy hh:mm tt")</td>
-                                    <td>@donor.FrequentPaymentMethod</td>
+                                    <td style="color: #111827 !important;">@donor.DonationCount</td>
+                                    <td style="color: #111827 !important;">@donor.LastDonationDate.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                    <td style="color: #111827 !important;">@donor.FrequentPaymentMethod</td>
                                 </tr>
                             }
                         }
                         else
                         {
-                            <tr>
+                            <tr style="background-color: #ffffff !important;">
                                 <td colspan="7" class="daa-table__empty">No hay resultados para esta busqueda.</td>
                             </tr>
                         }

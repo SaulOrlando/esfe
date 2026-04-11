@@ -31,6 +31,11 @@
   --duplicate-dialog-surface: #fffdf7;
   --duplicate-dialog-border: #f3d37a;
   --duplicate-dialog-text: #33250a;
+  --admin-donations-bar: #22c55e;
+  --admin-donations-bar-dark: #15803d;
+  --admin-donations-grid: #d9e2d9;
+  --admin-donations-axis: #4b5563;
+  --admin-donations-surface: #f7fbf7;
 }
 
 .color-primary {
@@ -788,5 +793,92 @@ div.register-page .register-page__help-text .register-page__help-link:hover {
 
   div.register-page .register-page__heading-block .register-page__title {
     font-size: 1.5rem;
+  }
+}
+
+section.da-grid .da-panel--chart {
+  background: linear-gradient(180deg, var(--admin-donations-surface) 0%, #ffffff 100%);
+}
+
+section.da-grid .da-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__grid-line {
+  stroke: var(--admin-donations-grid);
+  stroke-width: 1;
+  stroke-dasharray: 4 8;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__axis-line {
+  stroke: var(--admin-donations-axis);
+  stroke-width: 1.5;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__axis-text {
+  fill: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__bar {
+  fill: var(--admin-donations-bar);
+  stroke: var(--admin-donations-bar-dark);
+  stroke-width: 1.5;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__value-text {
+  fill: #166534;
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__label-text {
+  fill: #1f2937;
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.9rem;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__legend-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(21, 128, 61, 0.14);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__legend-item strong {
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+section.da-grid .da-bar-chart .da-bar-chart__legend-item span {
+  color: #166534;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  section.da-grid .da-bar-chart .da-bar-chart__axis-text,
+  section.da-grid .da-bar-chart .da-bar-chart__value-text,
+  section.da-grid .da-bar-chart .da-bar-chart__label-text {
+    font-size: 11px;
   }
 }
