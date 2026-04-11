@@ -12,7 +12,7 @@ using ProyectoSocioEconomico.Infrastructure.Data;
 namespace ProyectoSocioEconomico.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260411025049_InitialCreate")]
+    [Migration("20260411062304_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
