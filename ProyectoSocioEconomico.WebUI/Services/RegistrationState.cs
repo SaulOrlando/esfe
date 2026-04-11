@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace ProyectoSocioEconomico.WebUI.Services;
 
+/// <summary>
+/// Estado temporal del flujo de registro multi-paso.
+/// Guarda información personal, documentos y credenciales antes de crear el usuario.
+/// </summary>
 public class RegistrationState
 {
     // Progress Control
@@ -29,6 +33,10 @@ public class RegistrationState
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Reinicia los datos capturados del proceso de registro.
+    /// Se usa al completar el alta o al descartar el flujo actual.
+    /// </summary>
     public void Reset()
     {
         Step1Completed = false;

@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace ProyectoSocioEconomico.Infrastructure.Services
 {
+    /// <summary>
+    /// Servicio encargado de las solicitudes de retiro y cálculos
+    /// de balance disponible por caso.
+    /// </summary>
     public class RetiroService : IRetiroService
     {
         private readonly AppDbContext _context;
@@ -17,6 +21,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             _context = context;
         }
 
+        /// <summary>
+        /// Lista los retiros de un beneficiario ordenados por fecha descendente.
+        /// </summary>
         public async Task<List<Retiro>> ObtenerPorBeneficiadoIdAsync(int beneficiadoId)
         {
             return await _context.Retiros
@@ -25,6 +32,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Devuelve todos los retiros con beneficiario y caso cargados
+        /// para revisión administrativa.
+        /// </summary>
         public async Task<List<Retiro>> ObtenerTodosConDetallesAsync()
         {
             return await _context.Retiros
@@ -34,6 +45,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Calcula el total retirado de un caso excluyendo retiros rechazados.
+        /// </summary>
         public async Task<decimal> ObtenerTotalRetiradoPorCasoAsync(int casoId)
         {
             return await _context.Retiros
@@ -41,6 +55,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .SumAsync(r => r.Monto);
         }
 
+        /// <summary>
+        /// Calcula el saldo disponible del caso restando lo retirado
+        /// del total de donaciones completadas.
+        /// </summary>
         public async Task<decimal> ObtenerBalanceDisponibleAsync(int casoId)
         {
             var totalDonado = await _context.Donaciones
@@ -52,12 +70,18 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             return totalDonado - totalRetirado;
         }
 
+        /// <summary>
+        /// Registra una nueva solicitud de retiro.
+        /// </summary>
         public async Task Crear(Retiro retiro)
         {
             _context.Retiros.Add(retiro);
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Actualiza el estado del retiro y registra la fecha de procesamiento.
+        /// </summary>
         public async Task ActualizarEstadoAsync(int retiroId, string estado)
         {
             var retiro = await _context.Retiros.FirstOrDefaultAsync(r => r.Id == retiroId);

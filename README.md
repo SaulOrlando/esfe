@@ -21,6 +21,7 @@ La solución está separada por capas para mantener responsabilidades claras:
 ## 2. Estructura principal del repositorio
 
 ### `ProyectoSocioEconomico.WebUI`
+
 Proyecto web principal. Contiene la aplicación Blazor Server, páginas Razor, layouts, archivos estáticos y servicios de UI.
 
 Subcarpetas relevantes:
@@ -40,6 +41,7 @@ Archivos importantes:
 - `ProyectoSocioEconomico.WebUI.csproj`: proyecto web en `net10.0`.
 
 ### `ProyectoSocioEconomico.Infrastructure`
+
 Capa de infraestructura. Implementa persistencia con EF Core y las reglas de negocio que interactúan directamente con la base de datos.
 
 Subcarpetas relevantes:
@@ -55,6 +57,7 @@ Archivos importantes:
 - `Migrations/20260411062304_InitialCreate.cs`: migración inicial existente en el repositorio.
 
 ### `ProyectoSocioEconomico.Application`
+
 Capa de contratos. No contiene lógica de persistencia; define las interfaces que consume la UI y que implementa Infrastructure.
 
 Subcarpetas relevantes:
@@ -69,6 +72,7 @@ Archivos importantes:
 - `IRetiroService.cs`
 
 ### `ProyectoSocioEconomico.Domain`
+
 Capa de dominio. Contiene las entidades del sistema y sus relaciones.
 
 Subcarpetas relevantes:
@@ -104,6 +108,7 @@ Esto permite que la WebUI no conozca detalles de SQL Server ni del mapeo EF, y q
 ### 4.1 `ProyectoSocioEconomico.WebUI`
 
 #### `Components/`
+
 Contiene el armazón de la aplicación Blazor.
 
 - `App.razor`: documento raíz HTML. Carga CSS, scripts, `Routes` y `ReconnectModal`.
@@ -111,6 +116,7 @@ Contiene el armazón de la aplicación Blazor.
 - `_Imports.razor`: imports globales para componentes Razor.
 
 #### `Components/Layout/`
+
 Define la estructura visual compartida entre páginas.
 
 - `MainLayout.razor`: navbar pública, footer y renderizado del `Body`. También muestra el perfil del usuario autenticado leyendo claims.
@@ -124,6 +130,7 @@ Define la estructura visual compartida entre páginas.
 - `ReconnectModal.razor` y `.js`: experiencia de reconexión en Blazor Server.
 
 #### `Components/Pages/`
+
 Contiene las páginas funcionales. Se puede agrupar así:
 
 - públicas:
@@ -169,9 +176,11 @@ También hay componentes reutilizables como:
 - `CardsComponent.razor`
 
 #### `Services/`
+
 Esta carpeta es especialmente importante porque guarda el estado de UI y la autenticación del lado Blazor.
 
 ##### `CustomAuthenticationStateProvider.cs`
+
 Es el servicio más importante de `WebUI/Services`.
 
 Responsabilidades:
@@ -199,6 +208,7 @@ Riesgo o detalle técnico relevante:
 - depende de `IUsuarioService.ObtenerPorId` para mantener la sesión sincronizada con la base
 
 ##### `RegistrationState.cs`
+
 Servicio `scoped` para el registro por pasos.
 
 Qué conserva:
@@ -214,6 +224,7 @@ Por qué existe:
 - funciona como memoria temporal del flujo de registro
 
 ##### `NewCaseState.cs`
+
 Servicio `scoped` para el wizard de creación de casos.
 
 Qué conserva:
@@ -230,6 +241,7 @@ Por qué existe:
 - permite dividir el proceso en `NewCaseStep1` y `NewCaseStep2`
 
 #### `ViewModels/`
+
 Modelos auxiliares de interfaz.
 
 - `ProfileViewModel.cs`
@@ -239,6 +251,7 @@ Modelos auxiliares de interfaz.
 Actualmente el proyecto usa más estado directo en componentes y servicios `scoped` que view models complejos.
 
 #### `wwwroot/`
+
 Activos estáticos servidos por la app.
 
 - `app.css`: estilos globales.
@@ -252,6 +265,7 @@ Activos estáticos servidos por la app.
 ### 4.2 `ProyectoSocioEconomico.Infrastructure`
 
 #### `Data/AppDbContext.cs`
+
 Es el archivo central de persistencia.
 
 Responsabilidades:
@@ -272,6 +286,7 @@ Aspectos importantes:
 - contiene toda la configuración Fluent API real del modelo
 
 #### `DependencyInjection.cs`
+
 Expone `AddInfrastructure`.
 
 Registra:
@@ -288,10 +303,12 @@ Detalle técnico relevante:
 - `AppDbContext` se registra con `ServiceLifetime.Singleton` en `AddDbContext`
 - adicionalmente existe `AddDbContextFactory`, que es lo que consumen la mayoría de servicios
 
-#### `Services/`
+#### `Services`
+
 Esta es la carpeta más importante de backend del proyecto porque concentra la lógica de negocio y reglas operativas.
 
 ##### `UsuarioService.cs`
+
 Responsabilidades:
 
 - CRUD básico de usuarios
@@ -311,6 +328,7 @@ Observaciones:
 - `VerificarCredenciales` compara email normalizado y `PasswordHash`
 
 ##### `CasoService.cs`
+
 Responsabilidades:
 
 - listar casos con relaciones
@@ -334,6 +352,7 @@ Lógica de negocio importante:
 Es uno de los servicios más importantes porque conecta identidad, campañas solidarias y flujo financiero.
 
 ##### `ProgramaService.cs`
+
 Es probablemente el archivo con más lógica de negocio del proyecto.
 
 Responsabilidades:
@@ -364,6 +383,7 @@ Reglas de negocio destacadas:
 Por complejidad, este archivo merece atención especial en cualquier mantenimiento futuro.
 
 ##### `RetiroService.cs`
+
 Responsabilidades:
 
 - listar retiros por beneficiario
@@ -379,6 +399,7 @@ Importancia:
 - usa directamente `AppDbContext` en vez de `IDbContextFactory`
 
 #### `Migrations/`
+
 Carpeta generada por EF Core.
 
 Archivos relevantes:
@@ -392,6 +413,7 @@ Su función es permitir recrear y evolucionar la base de datos de forma controla
 ### 4.3 `ProyectoSocioEconomico.Application`
 
 #### `Interfaces/`
+
 Define lo que la UI espera de la infraestructura.
 
 - `IUsuarioService`: gestión de usuarios, credenciales y contraseña.
@@ -404,9 +426,11 @@ Esta capa existe para desacoplar la UI de la implementación concreta.
 ### 4.4 `ProyectoSocioEconomico.Domain`
 
 #### `Entities/`
+
 Representa el modelo de negocio persistente.
 
 ##### `Usuario.cs`
+
 Entidad principal del sistema.
 
 Incluye:
@@ -424,6 +448,7 @@ Detalle relevante:
 - esto es importante porque `CustomAuthenticationStateProvider` serializa usuarios
 
 ##### `Caso.cs`
+
 Representa una campaña individual de ayuda.
 
 Incluye:
@@ -434,6 +459,7 @@ Incluye:
 - donaciones y retiros asociados
 
 ##### `Programa.cs`
+
 Representa programas institucionales.
 
 Incluye:
@@ -445,6 +471,7 @@ Incluye:
 - relaciones con donaciones e inscripciones
 
 ##### `InscripcionesVoluntario.cs`
+
 Modela la postulación de un usuario a un programa.
 
 Incluye:
@@ -457,6 +484,7 @@ Incluye:
 - estado (`Pendiente`, `Aprobado`, `Activo`, `Rechazado`, `Removido`, `Finalizado`)
 
 ##### `Donacione.cs`
+
 Representa una transacción de donación.
 
 Puede estar ligada a:
@@ -467,6 +495,7 @@ Puede estar ligada a:
 Incluye monto, anonimato, fecha, estado y método de pago.
 
 ##### `Retiro.cs`
+
 Representa una solicitud de retiro de fondos.
 
 Incluye:
@@ -480,6 +509,7 @@ Incluye:
 ## 5. Archivos con más lógica que conviene conocer
 
 ### `ProyectoSocioEconomico.WebUI/Program.cs`
+
 Archivo de arranque de la aplicación.
 
 Qué hace:
@@ -497,6 +527,7 @@ Qué hace:
 - configura middleware de errores, HTTPS, antiforgery y assets
 
 ### `ProyectoSocioEconomico.WebUI/Components/Layout/ProfileLayout.razor`
+
 Archivo clave de navegación privada.
 
 Lógica importante:
@@ -507,6 +538,7 @@ Lógica importante:
 - resuelve si “Mi caso” debe llevar a crear un caso o al dashboard del beneficiario
 
 ### `ProyectoSocioEconomico.WebUI/Components/Pages/Auth/Step3.razor`
+
 Cierra el flujo de registro.
 
 Lógica importante:
@@ -520,6 +552,7 @@ Lógica importante:
 - inicia sesión automáticamente
 
 ### `ProyectoSocioEconomico.WebUI/Components/Pages/Auth/Login.razor`
+
 Login manual del sistema.
 
 Lógica importante:
@@ -530,6 +563,7 @@ Lógica importante:
 - redirige al home si el login es exitoso
 
 ### `ProyectoSocioEconomico.WebUI/Components/Pages/Cases/NewCaseStep1.razor`
+
 Primer paso del wizard de caso.
 
 Lógica importante:
@@ -540,6 +574,7 @@ Lógica importante:
 - guarda datos intermedios en `NewCaseState`
 
 ### `ProyectoSocioEconomico.WebUI/Components/Pages/Cases/NewCaseStep2.razor`
+
 Segundo paso del wizard de caso y uno de los archivos más operativos de la UI.
 
 Lógica importante:
@@ -553,6 +588,7 @@ Lógica importante:
 - limpia el estado temporal y navega al dashboard del beneficiario
 
 ### `ProyectoSocioEconomico.WebUI/Components/Pages/ProgramDetail.razor`
+
 Uno de los archivos más ricos de UI y reglas.
 
 Lógica importante:
@@ -566,6 +602,7 @@ Lógica importante:
 - gestiona modales de bloqueo y confirmación
 
 ### `ProyectoSocioEconomico.WebUI/Components/Pages/EditProgram.razor`
+
 Pantalla administrativa con mucha lógica de negocio delegada en servicios.
 
 Lógica importante:
@@ -577,6 +614,7 @@ Lógica importante:
 - reconsulta programa y solicitudes tras cada operación
 
 ### `ProyectoSocioEconomico.WebUI/Components/Pages/DonationCheckout.razor`
+
 Checkout de donación a casos.
 
 Lógica importante:
@@ -589,6 +627,7 @@ Lógica importante:
 - sincroniza estado del caso después de donar
 
 ### `ProyectoSocioEconomico.WebUI/Components/Pages/AccountSettings.razor`
+
 Pantalla de autogestión de cuenta.
 
 Lógica importante:
@@ -604,6 +643,7 @@ Lógica importante:
 Estas dos carpetas cumplen papeles distintos y complementarios:
 
 ### `ProyectoSocioEconomico.WebUI/Services`
+
 Gestiona estado y comportamiento del lado de la interfaz.
 
 - no debería contener acceso intensivo a base de datos
@@ -612,6 +652,7 @@ Gestiona estado y comportamiento del lado de la interfaz.
 - sirve como “pegamento” entre componentes y autenticación
 
 ### `ProyectoSocioEconomico.Infrastructure/Services`
+
 Gestiona persistencia y reglas de negocio reales.
 
 - consulta y modifica la base de datos
@@ -624,33 +665,7 @@ En resumen:
 - `WebUI/Services` = estado de interfaz y sesión
 - `Infrastructure/Services` = lógica de negocio + acceso a datos
 
-## 7. Base de datos y modelo relacional
-
-El modelo gira alrededor de estas relaciones:
-
-- un `Usuario` tiene un `Role`
-- un `Usuario` puede crear `Casos`
-- un `Usuario` puede crear `Programas`
-- un `Usuario` puede hacer `Donaciones`
-- un `Usuario` puede tener `InscripcionesVoluntario`
-- un `Caso` pertenece a una `Categoria`
-- un `Programa` pertenece a una `Categoria`
-- una `Donacione` puede pertenecer a un `Caso` o a un `Programa`
-- un `Retiro` pertenece a un `Caso` y a un `Usuario`
-
-Datos semilla actuales:
-
-- categorías iniciales en `AppDbContext`
-- roles iniciales en `AppDbContext`
-
-## 8. Archivos auxiliares en la raíz
-
-- `AGENTS.md`: reglas para agentes y convenciones del proyecto.
-- `MigrationsCommands.txt`: comandos útiles para migraciones EF.
-- `datos.sql`, `haceradmin.sql`, `vaciarDatabase.sql`: scripts SQL de apoyo manual.
-- `ProyectoSocioEconomicoKRS.slnx` y `proyectesfe.sln`: archivos de solución.
-
-## 9. Observaciones técnicas importantes
+## 7. Observaciones técnicas importantes
 
 - La autenticación está implementada manualmente; no se usa ASP.NET Identity.
 - Parte de la lógica de archivos vive en componentes Razor, especialmente en registro y creación de casos.
@@ -658,24 +673,3 @@ Datos semilla actuales:
 - Varias páginas combinan lógica de UI y negocio; los componentes más grandes podrían dividirse más a futuro.
 - `ProgramaService.cs` y `CasoService.cs` concentran la mayor parte de reglas del negocio.
 - `CustomAuthenticationStateProvider.cs` es crítico para toda la experiencia autenticada.
-
-## 10. Recomendación para nuevos mantenimientos
-
-Si alguien nuevo entra al proyecto, el mejor orden de lectura es:
-
-1. `ProyectoSocioEconomico.WebUI/Program.cs`
-2. `ProyectoSocioEconomico.Infrastructure/DependencyInjection.cs`
-3. `ProyectoSocioEconomico.Infrastructure/Data/AppDbContext.cs`
-4. `ProyectoSocioEconomico.Domain/Entities/`
-5. `ProyectoSocioEconomico.Infrastructure/Services/ProgramaService.cs`
-6. `ProyectoSocioEconomico.Infrastructure/Services/CasoService.cs`
-7. `ProyectoSocioEconomico.WebUI/Services/CustomAuthenticationStateProvider.cs`
-8. `ProyectoSocioEconomico.WebUI/Components/Layout/ProfileLayout.razor`
-9. páginas grandes:
-   - `ProgramDetail.razor`
-   - `EditProgram.razor`
-   - `NewCaseStep2.razor`
-   - `DonationCheckout.razor`
-   - `AccountSettings.razor`
-
-Con ese recorrido se entiende primero la arquitectura, luego el modelo de datos, después la lógica de negocio y finalmente la experiencia de usuario.

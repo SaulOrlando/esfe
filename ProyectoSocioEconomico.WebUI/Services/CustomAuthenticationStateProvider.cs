@@ -11,6 +11,11 @@ using System.Text.Json;
 
 namespace ProyectoSocioEconomico.WebUI.Services
 {
+    /// <summary>
+    /// AuthenticationStateProvider personalizado para Blazor Server.
+    /// Su responsabilidad es mantener la sesión de usuario del lado cliente
+    /// y transformarla en claims utilizables por la interfaz.
+    /// </summary>
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly ProtectedLocalStorage _localStorage;
@@ -25,6 +30,10 @@ namespace ProyectoSocioEconomico.WebUI.Services
             _usuarioService = usuarioService;
         }
 
+        /// <summary>
+        /// Reconstruye el estado de autenticación leyendo la sesión persistida.
+        /// Si encuentra usuario, lo refresca desde base antes de crear los claims.
+        /// </summary>
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             try
@@ -55,6 +64,10 @@ namespace ProyectoSocioEconomico.WebUI.Services
             }
         }
 
+        /// <summary>
+        /// Persiste la sesión del usuario y notifica a Blazor que el estado
+        /// de autenticación cambió a autenticado.
+        /// </summary>
         public async Task NotifyUserLogin(Usuario usuario)
         {
             var userSession = JsonSerializer.Serialize(usuario);
@@ -64,12 +77,20 @@ namespace ProyectoSocioEconomico.WebUI.Services
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
         }
 
+        /// <summary>
+        /// Elimina la sesión local y notifica a Blazor que el usuario
+        /// pasó a estado anónimo.
+        /// </summary>
         public async Task NotifyUserLogout()
         {
             await _localStorage.DeleteAsync("UserSession");
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
         }
 
+        /// <summary>
+        /// Construye el ClaimsPrincipal que usa la aplicación para
+        /// autorización, menús, nombre visible e imagen de perfil.
+        /// </summary>
         private ClaimsPrincipal CreateClaimsPrincipalFromUser(Usuario usuario)
         {
             var claims = new List<Claim>
@@ -80,7 +101,8 @@ namespace ProyectoSocioEconomico.WebUI.Services
                 new Claim("ImagenPerfil", usuario.ImagenPerfil ?? "uploads/profiles/DefaultProfile.png")
             };
 
-            // Add role claim based on the navigation property if it's available.
+            // El rol se toma de la propiedad de navegación ya que varias pantallas
+            // dependen del nombre legible del rol para mostrar opciones específicas.
             var roleName = usuario.IdRolNavigation?.Nombre ?? "Usuario";
             claims.Add(new Claim(ClaimTypes.Role, roleName));
 

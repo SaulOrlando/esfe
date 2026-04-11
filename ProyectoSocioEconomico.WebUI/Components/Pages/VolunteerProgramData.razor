@@ -1,3 +1,8 @@
+@*
+  VolunteerProgramData.razor
+  Propósito: Panel privado del voluntario. Muestra el programa activo del usuario,
+  permite actualizar días disponibles y salir formalmente del programa.
+*@
 @page "/volunteer/program-data"
 @layout ProfileLayout
 @using Microsoft.EntityFrameworkCore
@@ -170,11 +175,15 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
     private bool IsSuccess { get; set; }
     private string? FeedbackMessage { get; set; }
 
+    // La pantalla depende de cargar simultáneamente usuario, inscripción activa,
+    // programa y días configurados. Por eso se centraliza en LoadPageAsync.
     protected override async Task OnInitializedAsync()
     {
         await LoadPageAsync();
     }
 
+    // Resuelve acceso y prepara todos los datos derivados que la vista necesita:
+    // programa, inscripción, días válidos y selección actual del voluntario.
     private async Task LoadPageAsync()
     {
         IsLoading = true;
@@ -224,6 +233,8 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
         }
     }
 
+    // Persiste la disponibilidad del voluntario usando las reglas del servicio:
+    // solo días válidos y existencia de una inscripción activa.
     private async Task SaveAvailabilityAsync()
     {
         if (CurrentUser is null)
@@ -253,6 +264,8 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
         }
     }
 
+    // Da salida voluntaria al usuario, actualiza la sesión y redirige
+    // al dashboard de donante porque el servicio puede revertir su rol.
     private async Task LeaveProgramAsync()
     {
         if (CurrentUser is null)
@@ -285,6 +298,7 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
         }
     }
 
+    // Mantiene sincronizada la selección de checkboxes con el modelo del formulario.
     private void ToggleDay(string day, bool isSelected)
     {
         if (isSelected)
@@ -300,11 +314,14 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
         AvailabilityForm.SelectedDays.Remove(day);
     }
 
+    // Redirección auxiliar para el estado "sin acceso".
     private void GoToPrograms()
     {
         Navigation.NavigateTo("/programs");
     }
 
+    // El acceso a esta vista depende del rol cargado en la entidad de usuario,
+    // no solo del claim, porque puede haber cambiado durante la sesión.
     private static bool IsVolunteer(Usuario? user)
     {
         var roleName = user?.IdRolNavigation?.Nombre;
@@ -312,6 +329,7 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
                roleName.Equals("Voluntario", StringComparison.OrdinalIgnoreCase);
     }
 
+    // Convierte cadenas como "Lunes, Miércoles" en listas limpias y sin duplicados.
     private static List<string> ParseDays(string? rawDays)
     {
         return string.IsNullOrWhiteSpace(rawDays)
@@ -322,6 +340,8 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
                 .ToList();
     }
 
+    // Cuenta únicamente voluntarios aprobados o activos, que son los que
+    // realmente consumen la capacidad del programa.
     private static int GetTotalVoluntariosActivos(Programa program)
     {
         return program.InscripcionesVoluntarios?.Count(i =>
@@ -329,16 +349,19 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
             string.Equals(i.Estado, "Activo", StringComparison.OrdinalIgnoreCase)) ?? 0;
     }
 
+    // Cuenta donaciones confirmadas para mostrar tracción del programa.
     private static int GetTotalDonantes(Programa program)
     {
         return program.Donaciones?.Count(d => d.Estado == "Completado") ?? 0;
     }
 
+    // Suma solo aportes completados para reflejar el monto realmente recaudado.
     private static decimal GetTotalRecaudado(Programa program)
     {
         return program.Donaciones?.Where(d => d.Estado == "Completado").Sum(d => d.Monto) ?? 0m;
     }
 
+    // Calcula avance porcentual para metas enteras, como cupos de voluntariado.
     private static int CalcularPorcentaje(int meta, int actual)
     {
         if (meta <= 0)
@@ -349,6 +372,7 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
         return Math.Clamp((int)Math.Round((decimal)actual / meta * 100), 0, 100);
     }
 
+    // Calcula avance porcentual para metas monetarias.
     private static int CalcularPorcentaje(decimal meta, decimal actual)
     {
         if (meta <= 0)
@@ -359,6 +383,7 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
         return Math.Clamp((int)Math.Round(actual / meta * 100), 0, 100);
     }
 
+    // Traduce el tipo interno del programa a una etiqueta visible.
     private static string GetProgramTypeLabel(Programa program)
     {
         return program.TipoPrograma switch
@@ -369,12 +394,15 @@ else if (VolunteerProgram is not null && VolunteerEnrollment is not null)
         };
     }
 
+    // Define si el programa usa también una meta financiera visible en el panel.
     private static bool SupportsFinancialGoal(Programa program)
     {
         return string.Equals(program.TipoPrograma, "Financiero", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(program.TipoPrograma, "Hibrido", StringComparison.OrdinalIgnoreCase);
     }
 
+    // Modelo del formulario de disponibilidad. Obliga a que el voluntario
+    // deje al menos un día seleccionado antes de guardar.
     private sealed class AvailabilityFormModel : IValidatableObject
     {
         public List<string> SelectedDays { get; set; } = new();

@@ -1,3 +1,8 @@
+@*
+  Step2.razor
+  Propósito: Segundo paso del registro de usuario. Captura DUI, fecha de nacimiento
+  y fotografías del documento antes de permitir avanzar a la creación de credenciales.
+*@
 @page "/registrarse/step2"
 @layout EmptyLayout
 @rendermode InteractiveServer
@@ -134,6 +139,8 @@
 </div>
 
 @code {
+    // Protege el paso 2: un usuario autenticado o un flujo sin paso 1 completado
+    // no debe permanecer en esta pantalla.
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -152,20 +159,22 @@
     private string mensajeError = string.Empty;
     private bool mostrarErrores = false;
 
+    // Valida el formato nacional esperado para el DUI.
     private bool EsDuiValido(string dui)
     {
         if (string.IsNullOrWhiteSpace(dui)) return false;
-        // Formato esperado: 00000000-0 (8 dígitos, guion, 1 dígito)
+        // Formato esperado: 00000000-0 (8 dígitos, guion, 1 dígito).
         return System.Text.RegularExpressions.Regex.IsMatch(dui, @"^\d{8}-\d{1}$");
     }
 
+    // Regla mínima de mayoría de edad para continuar con el registro.
     private bool EsFechaValida(DateTime? date)
     {
         if (!date.HasValue) return false;
-        // Validación básica: mayor de 18 años
         return date.Value <= DateTime.Today.AddYears(-18);
     }
 
+    // Guarda la imagen frontal del DUI en memoria para reutilizarla en el paso 3.
     private async Task HandleFrontChange(InputFileChangeEventArgs e)
     {
         var file = e.File;
@@ -180,6 +189,7 @@
         StateHasChanged();
     }
 
+    // Guarda la imagen reversa del DUI en memoria para reutilizarla en el paso 3.
     private async Task HandleBackChange(InputFileChangeEventArgs e)
     {
         var file = e.File;
@@ -194,11 +204,14 @@
     StateHasChanged();
 }
 
+    // Regresa al paso anterior conservando el estado ya capturado.
     private void GoBack()
     {
         Navigation.NavigateTo("/registrarse");
     }
 
+    // Ejecuta las validaciones del paso 2 y habilita el paso 3 solo cuando
+    // la documentación mínima fue capturada correctamente.
     private void GoToStep3()
     {
         mensajeError = string.Empty;

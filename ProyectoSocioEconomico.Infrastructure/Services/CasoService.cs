@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace ProyectoSocioEconomico.Infrastructure.Services
 {
+    /// <summary>
+    /// Servicio de negocio para la gestión de casos solidarios.
+    /// Encapsula lectura, escritura y sincronización de estados.
+    /// </summary>
     public class CasoService : ICasoService
     {
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
@@ -17,6 +21,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             _contextFactory = contextFactory;
         }
 
+        /// <summary>
+        /// Obtiene todos los casos con su categoría y beneficiario.
+        /// Ideal para listados generales.
+        /// </summary>
         public async Task<List<Caso>> ObtenerTodos()
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -26,6 +34,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Obtiene los casos con información ampliada, incluyendo donaciones,
+        /// para pantallas que muestran progreso financiero.
+        /// </summary>
         public async Task<List<Caso>> ObtenerTodosConDetallesAsync()
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -36,6 +48,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Devuelve una cantidad limitada de casos activos ordenados por fecha
+        /// de creación descendente para la página principal.
+        /// </summary>
         public async Task<List<Caso>> ObtenerActivosParaHome(int cantidad)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -47,6 +63,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Busca un caso por id y carga las relaciones necesarias para
+        /// vistas de detalle, incluyendo donadores.
+        /// </summary>
         public async Task<Caso?> ObtenerPorIdConDetallesAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -58,6 +78,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
+        /// <summary>
+        /// Devuelve el caso más reciente asociado a un beneficiario.
+        /// Se usa para dashboards y navegación contextual.
+        /// </summary>
         public async Task<Caso?> ObtenerPorBeneficiadoIdAsync(int usuarioId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -69,12 +93,20 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .FirstOrDefaultAsync(c => c.IdBeneficiado == usuarioId);
         }
 
+        /// <summary>
+        /// Determina si el usuario ya tiene un caso registrado.
+        /// Esta regla evita duplicar campañas por beneficiario.
+        /// </summary>
         public async Task<bool> UsuarioYaTieneCasoAsync(int usuarioId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Casos.AnyAsync(c => c.IdBeneficiado == usuarioId);
         }
 
+        /// <summary>
+        /// Crea un caso nuevo y, si es necesario, cambia el rol del usuario
+        /// al rol de beneficiario antes de persistirlo.
+        /// </summary>
         public async Task Crear(Caso caso)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -102,6 +134,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Actualiza solamente los campos editables del caso.
+        /// No reemplaza la entidad completa para evitar sobrescribir relaciones.
+        /// </summary>
         public async Task Actualizar(Caso caso)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -122,6 +158,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Elimina un caso y resuelve sus efectos colaterales:
+        /// desvincula donaciones, elimina retiros y reevalúa el rol del usuario.
+        /// </summary>
         public async Task EliminarAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -164,6 +204,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Si las donaciones completadas alcanzan la meta del caso,
+        /// marca el caso como inactivo.
+        /// </summary>
         public async Task SincronizarEstadoPorMetaAsync(int casoId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -185,6 +229,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// Devuelve solo las categorías activas ordenadas alfabéticamente.
+        /// </summary>
         public async Task<List<Categoria>> ObtenerCategorias()
         {
             using var context = await _contextFactory.CreateDbContextAsync();

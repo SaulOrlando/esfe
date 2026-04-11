@@ -5,6 +5,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ProyectoSocioEconomico.WebUI.Services;
 
+/// <summary>
+/// Estado temporal del wizard de creación de casos.
+/// Conserva los datos entre pasos antes de construir la entidad final.
+/// </summary>
 public class NewCaseState
 {
     // Progress Control
@@ -43,6 +47,10 @@ public class NewCaseState
 
     public bool IsCertified { get; set; } = false;
 
+    /// <summary>
+    /// Limpia completamente el estado del formulario una vez que
+    /// el caso fue creado o cuando el flujo debe reiniciarse.
+    /// </summary>
     public void Reset()
     {
         Step1Completed = false;

@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace ProyectoSocioEconomico.Infrastructure.Services
 {
+    /// <summary>
+    /// Servicio de negocio para programas institucionales y flujo de voluntariado.
+    /// Aquí viven las reglas más importantes sobre metas, inscripciones y roles.
+    /// </summary>
     public class ProgramaService : IProgramaService
     {
         private static readonly string[] VolunteerApprovedStates = { "Aprobado", "Activo" };
@@ -19,6 +23,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             _contextFactory = contextFactory;
         }
 
+        /// <summary>
+        /// Devuelve todos los programas con categoría, creador, donaciones
+        /// e inscripciones cargadas para vistas administrativas.
+        /// </summary>
         public async Task<List<Programa>> ObtenerTodosConCasosAsync()
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -31,6 +39,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Devuelve únicamente los programas activos visibles al público.
+        /// </summary>
         public async Task<List<Programa>> ObtenerPublicosConCasosAsync()
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -44,6 +55,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Busca un programa con todos los detalles necesarios para administración
+        /// y revisión de voluntarios.
+        /// </summary>
         public async Task<Programa?> ObtenerPorIdConDetallesAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -57,6 +72,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        /// <summary>
+        /// Busca un programa público por id, restringiendo resultados
+        /// a programas activos.
+        /// </summary>
         public async Task<Programa?> ObtenerPublicoPorIdConDetallesAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -70,6 +89,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .FirstOrDefaultAsync(p => p.Id == id && p.Estado == "Activo");
         }
 
+        /// <summary>
+        /// Obtiene todas las inscripciones de un programa ordenadas
+        /// desde la más reciente.
+        /// </summary>
         public async Task<List<InscripcionesVoluntario>> ObtenerInscripcionesVoluntariadoPorProgramaAsync(int programaId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -81,6 +104,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Devuelve las solicitudes globales de voluntariado, priorizando
+        /// las pendientes para facilitar la revisión administrativa.
+        /// </summary>
         public async Task<List<InscripcionesVoluntario>> ObtenerSolicitudesVoluntariadoAsync()
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -94,6 +121,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Obtiene la inscripción activa de voluntariado de un usuario,
+        /// junto con los detalles del programa asociado.
+        /// </summary>
         public async Task<InscripcionesVoluntario?> ObtenerInscripcionActivaPorUsuarioAsync(int usuarioId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -117,6 +148,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Aprueba una postulación si cumple reglas de negocio:
+        /// cupos disponibles, rol permitido y ausencia de conflicto con casos.
+        /// </summary>
         public async Task AprobarInscripcionVoluntariadoAsync(int inscripcionId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -189,6 +224,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Marca una postulación como rechazada.
+        /// </summary>
         public async Task RechazarInscripcionVoluntariadoAsync(int inscripcionId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -205,6 +243,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Remueve a un voluntario aprobado/activo por incumplimiento
+        /// y restablece su rol si ya no participa en otros programas activos.
+        /// </summary>
         public async Task RemoverVoluntarioPorIncumplimientoAsync(int inscripcionId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -228,6 +270,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Actualiza los días disponibles del voluntario validando
+        /// que estén permitidos por el programa.
+        /// </summary>
         public async Task ActualizarDisponibilidadVoluntarioAsync(int usuarioId, IEnumerable<string> diasDisponibles)
         {
             ArgumentNullException.ThrowIfNull(diasDisponibles);
@@ -277,6 +323,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Elimina la inscripción activa del usuario en un programa
+        /// y restituye su rol si aplica.
+        /// </summary>
         public async Task SalirDelProgramaAsync(int usuarioId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -297,6 +347,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Crea un programa nuevo.
+        /// </summary>
         public async Task CrearAsync(Programa programa)
         {
             ArgumentNullException.ThrowIfNull(programa);
@@ -306,6 +359,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Actualiza el programa. Si cambia a inactivo, también finaliza
+        /// las inscripciones activas y reevalúa los roles de usuarios afectados.
+        /// </summary>
         public async Task ActualizarAsync(Programa programa)
         {
             ArgumentNullException.ThrowIfNull(programa);
@@ -344,6 +401,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Inactiva el programa automáticamente si alcanza su meta financiera.
+        /// Además finaliza voluntarios y reevalúa sus roles cuando corresponde.
+        /// </summary>
         public async Task SincronizarEstadoPorMetaAsync(int programaId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -377,6 +438,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// Elimina un programa, limpia inscripciones y donaciones asociadas,
+        /// y corrige roles de voluntarios afectados.
+        /// </summary>
         public async Task EliminarAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -415,6 +480,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Cambia a "Finalizado" las inscripciones activas de un programa
+        /// que dejó de estar disponible.
+        /// </summary>
         private static async Task<List<int>> FinalizarVoluntariosDeProgramaInactivoAsync(AppDbContext context, int programaId)
         {
             var inscripcionesAfectadas = await context.InscripcionesVoluntarios
@@ -438,6 +507,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToList();
         }
 
+        /// <summary>
+        /// Devuelve al rol de donante a quienes ya no conservan
+        /// ninguna participación activa como voluntarios.
+        /// </summary>
         private static async Task RestablecerRolDonanteSiCorrespondeAsync(AppDbContext context, IEnumerable<int> userIds)
         {
             var userIdList = userIds
@@ -481,6 +554,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// Convierte una cadena separada por comas en una lista normalizada
+        /// de días, evitando duplicados.
+        /// </summary>
         private static List<string> ParseDays(string? rawDays)
         {
             return string.IsNullOrWhiteSpace(rawDays)
