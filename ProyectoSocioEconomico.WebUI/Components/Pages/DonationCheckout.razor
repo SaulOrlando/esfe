@@ -151,6 +151,44 @@
                                 </div>
                             </div>
                         }
+
+                        @if (FormModel.PaymentMethod == "PayPal")
+                        {
+                            <div class="dn-card-fields">
+                                <div class="bulma-field dn-field">
+                                    <div class="bulma-control bulma-has-icons-left dn-control">
+                                        <InputText class="bulma-input dn-input"
+                                                   placeholder="Correo electrónico de PayPal"
+                                                   @bind-Value="FormModel.PaypalEmail" />
+                                        <span class="bulma-icon bulma-is-left dn-input-icon">
+                                            <i class="fab fa-paypal"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="bulma-help bulma-is-info">
+                                    Será redirigido a PayPal para confirmar su cuenta.
+                                </p>
+                            </div>
+                        }
+
+                        @if (FormModel.PaymentMethod == "Transferencia")
+                        {
+                            <div class="dn-card-fields">
+                                <div class="bulma-notification bulma-is-info bulma-is-light dn-bank-info">
+                                    <p><strong>Datos para el depósito:</strong></p>
+                                    <p>Banco: Banco Solidario</p>
+                                    <p>Cuenta: 1234-5678-9012</p>
+                                    <p>A nombre de: Fundación ESFE</p>
+                                </div>
+                                <div class="bulma-field dn-field">
+                                    <div class="bulma-control dn-control">
+                                        <InputText class="bulma-input dn-input"
+                                                   placeholder="Número de referencia o comprobante"
+                                                   @bind-Value="FormModel.TransferReference" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </section>
 
                     <div class="dn-options">
@@ -449,6 +487,20 @@
             return;
         }
 
+        if (FormModel.PaymentMethod == "PayPal" && string.IsNullOrWhiteSpace(FormModel.PaypalEmail))
+        {
+            FeedbackMessage = "Ingrese su correo de PayPal para continuar.";
+            IsSuccess = false;
+            return;
+        }
+
+        if (FormModel.PaymentMethod == "Transferencia" && string.IsNullOrWhiteSpace(FormModel.TransferReference))
+        {
+            FeedbackMessage = "Ingrese el número de referencia de su transferencia.";
+            IsSuccess = false;
+            return;
+        }
+
         IsSubmitting = true;
 
         try
@@ -541,6 +593,8 @@
         public string CardNumber { get; set; } = string.Empty;
         public string CardExpiry { get; set; } = string.Empty;
         public string CardCvc { get; set; } = string.Empty;
+        public string PaypalEmail { get; set; } = string.Empty;
+        public string TransferReference { get; set; } = string.Empty;
         public bool DonateAnonymously { get; set; }
         public bool ReceiveNotification { get; set; }
     }
