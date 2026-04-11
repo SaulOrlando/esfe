@@ -7,11 +7,14 @@ namespace ProyectoSocioEconomico.Application.Interfaces
     public interface IProgramaService
     {
         Task<List<Programa>> ObtenerTodosConCasosAsync();
+        Task<List<Programa>> ObtenerPublicosConCasosAsync();
         Task<Programa?> ObtenerPorIdConDetallesAsync(int id);
+        Task<Programa?> ObtenerPublicoPorIdConDetallesAsync(int id);
         Task<List<InscripcionesVoluntario>> ObtenerInscripcionesVoluntariadoPorProgramaAsync(int programaId);
         Task<List<InscripcionesVoluntario>> ObtenerSolicitudesVoluntariadoAsync();
         Task AprobarInscripcionVoluntariadoAsync(int inscripcionId);
         Task RechazarInscripcionVoluntariadoAsync(int inscripcionId);
+        Task RemoverVoluntarioPorIncumplimientoAsync(int inscripcionId);
         Task CrearAsync(Programa programa);
         Task ActualizarAsync(Programa programa);
         Task SincronizarEstadoPorMetaAsync(int programaId);

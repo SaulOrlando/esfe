@@ -40,8 +40,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Programs = (await ProgramaService.ObtenerTodosConCasosAsync())
-            .Where(program => string.Equals(program.Estado, "Activo", StringComparison.OrdinalIgnoreCase))
+        Programs = (await ProgramaService.ObtenerPublicosConCasosAsync())
             .OrderByDescending(program => program.FechaCreacion)
             .Take(4)
             .ToList();

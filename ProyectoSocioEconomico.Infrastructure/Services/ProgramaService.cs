@@ -11,6 +11,7 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
 {
     public class ProgramaService : IProgramaService
     {
+        private static readonly string[] VolunteerApprovedStates = { "Aprobado", "Activo" };
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
 
         public ProgramaService(IDbContextFactory<AppDbContext> contextFactory)
@@ -30,6 +31,19 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .ToListAsync();
         }
 
+        public async Task<List<Programa>> ObtenerPublicosConCasosAsync()
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Programas
+                .AsSplitQuery()
+                .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.CreadoPorNavigation)
+                .Include(p => p.Donaciones)
+                .Include(p => p.InscripcionesVoluntarios)
+                .Where(p => p.Estado == "Activo")
+                .ToListAsync();
+        }
+
         public async Task<Programa?> ObtenerPorIdConDetallesAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
@@ -41,6 +55,19 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 .Include(p => p.InscripcionesVoluntarios)
                     .ThenInclude(i => i.IdUsuarioNavigation)
                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<Programa?> ObtenerPublicoPorIdConDetallesAsync(int id)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+            return await context.Programas
+                .AsSplitQuery()
+                .Include(p => p.IdCategoriaNavigation)
+                .Include(p => p.CreadoPorNavigation)
+                .Include(p => p.Donaciones)
+                .Include(p => p.InscripcionesVoluntarios)
+                    .ThenInclude(i => i.IdUsuarioNavigation)
+                .FirstOrDefaultAsync(p => p.Id == id && p.Estado == "Activo");
         }
 
         public async Task<List<InscripcionesVoluntario>> ObtenerInscripcionesVoluntariadoPorProgramaAsync(int programaId)
@@ -155,6 +182,29 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             await context.SaveChangesAsync();
         }
 
+        public async Task RemoverVoluntarioPorIncumplimientoAsync(int inscripcionId)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+
+            var inscripcion = await context.InscripcionesVoluntarios
+                .FirstOrDefaultAsync(i => i.Id == inscripcionId);
+
+            if (inscripcion is null)
+            {
+                throw new InvalidOperationException("No se encontro la inscripcion de voluntariado.");
+            }
+
+            if (!VolunteerApprovedStates.Contains(inscripcion.Estado, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Solo se puede quitar el rol a voluntarios aprobados o activos.");
+            }
+
+            inscripcion.Estado = "Removido";
+            await context.SaveChangesAsync();
+            await RestablecerRolDonanteSiCorrespondeAsync(context, new[] { inscripcion.IdUsuario });
+            await context.SaveChangesAsync();
+        }
+
         public async Task CrearAsync(Programa programa)
         {
             ArgumentNullException.ThrowIfNull(programa);
@@ -176,6 +226,10 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
                 throw new InvalidOperationException("No se encontró el programa a actualizar.");
             }
 
+            var changedToInactive =
+                !string.Equals(currentProgram.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(programa.Estado, "Inactivo", StringComparison.OrdinalIgnoreCase);
+
             currentProgram.Nombre = programa.Nombre;
             currentProgram.Descripcion = programa.Descripcion;
             currentProgram.Estado = programa.Estado;
@@ -185,6 +239,15 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             currentProgram.MetaVoluntarios = programa.MetaVoluntarios;
             currentProgram.DiasVoluntariado = programa.DiasVoluntariado;
             currentProgram.ImagenUrl = programa.ImagenUrl;
+
+            if (changedToInactive)
+            {
+                var affectedUserIds = await FinalizarVoluntariosDeProgramaInactivoAsync(context, currentProgram.Id);
+                await context.SaveChangesAsync();
+                await RestablecerRolDonanteSiCorrespondeAsync(context, affectedUserIds);
+                await context.SaveChangesAsync();
+                return;
+            }
 
             await context.SaveChangesAsync();
         }
@@ -215,6 +278,9 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
             if (totalRecaudado >= programaExistente.MetaFinanciera)
             {
                 programaExistente.Estado = "Inactivo";
+                var affectedUserIds = await FinalizarVoluntariosDeProgramaInactivoAsync(context, programaExistente.Id);
+                await context.SaveChangesAsync();
+                await RestablecerRolDonanteSiCorrespondeAsync(context, affectedUserIds);
                 await context.SaveChangesAsync();
             }
         }
@@ -234,7 +300,15 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
 
             if (programa.InscripcionesVoluntarios.Any())
             {
+                var volunteerUserIds = programa.InscripcionesVoluntarios
+                    .Where(i => VolunteerApprovedStates.Contains(i.Estado))
+                    .Select(i => i.IdUsuario)
+                    .Distinct()
+                    .ToList();
+
                 context.InscripcionesVoluntarios.RemoveRange(programa.InscripcionesVoluntarios);
+                await context.SaveChangesAsync();
+                await RestablecerRolDonanteSiCorrespondeAsync(context, volunteerUserIds);
             }
 
             if (programa.Donaciones.Any())
@@ -247,6 +321,70 @@ namespace ProyectoSocioEconomico.Infrastructure.Services
 
             context.Programas.Remove(programa);
             await context.SaveChangesAsync();
+        }
+
+        private static async Task<List<int>> FinalizarVoluntariosDeProgramaInactivoAsync(AppDbContext context, int programaId)
+        {
+            var inscripcionesAfectadas = await context.InscripcionesVoluntarios
+                .Where(i => i.IdPrograma == programaId &&
+                            VolunteerApprovedStates.Contains(i.Estado))
+                .ToListAsync();
+
+            if (inscripcionesAfectadas.Count == 0)
+            {
+                return new List<int>();
+            }
+
+            foreach (var inscripcion in inscripcionesAfectadas)
+            {
+                inscripcion.Estado = "Finalizado";
+            }
+
+            return inscripcionesAfectadas
+                .Select(i => i.IdUsuario)
+                .Distinct()
+                .ToList();
+        }
+
+        private static async Task RestablecerRolDonanteSiCorrespondeAsync(AppDbContext context, IEnumerable<int> userIds)
+        {
+            var userIdList = userIds
+                .Distinct()
+                .ToList();
+
+            if (userIdList.Count == 0)
+            {
+                return;
+            }
+
+            var volunteerRole = await context.Roles
+                .FirstOrDefaultAsync(r => r.Nombre == "Voluntario");
+
+            var donorRole = await context.Roles
+                .FirstOrDefaultAsync(r => r.Nombre == "Donante");
+
+            if (volunteerRole is null || donorRole is null)
+            {
+                throw new InvalidOperationException("No se encontraron los roles requeridos para actualizar al usuario.");
+            }
+
+            var usuarios = await context.Usuarios
+                .Where(u => userIdList.Contains(u.Id) && u.IdRol == volunteerRole.Id)
+                .ToListAsync();
+
+            foreach (var usuario in usuarios)
+            {
+                var conservaVoluntariadoActivo = await context.InscripcionesVoluntarios
+                    .AnyAsync(i =>
+                        i.IdUsuario == usuario.Id &&
+                        VolunteerApprovedStates.Contains(i.Estado) &&
+                        i.IdProgramaNavigation.Estado == "Activo");
+
+                if (!conservaVoluntariadoActivo)
+                {
+                    usuario.IdRol = donorRole.Id;
+                }
+            }
         }
     }
 }

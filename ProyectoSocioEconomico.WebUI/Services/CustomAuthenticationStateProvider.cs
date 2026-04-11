@@ -4,6 +4,7 @@
 // de estado de autenticación a la aplicación Blazor.
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using ProyectoSocioEconomico.Application.Interfaces;
 using ProyectoSocioEconomico.Domain.Entities;
 using System.Security.Claims;
 using System.Text.Json;
@@ -13,11 +14,15 @@ namespace ProyectoSocioEconomico.WebUI.Services
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly ProtectedLocalStorage _localStorage;
+        private readonly IUsuarioService _usuarioService;
         private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
 
-        public CustomAuthenticationStateProvider(ProtectedLocalStorage localStorage)
+        public CustomAuthenticationStateProvider(
+            ProtectedLocalStorage localStorage,
+            IUsuarioService usuarioService)
         {
             _localStorage = localStorage;
+            _usuarioService = usuarioService;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -33,6 +38,13 @@ namespace ProyectoSocioEconomico.WebUI.Services
                 var usuario = JsonSerializer.Deserialize<Usuario>(userSession);
                 if (usuario == null)
                     return new AuthenticationState(_anonymous);
+
+                var usuarioActualizado = await _usuarioService.ObtenerPorId(usuario.Id);
+                if (usuarioActualizado != null)
+                {
+                    usuario = usuarioActualizado;
+                    await _localStorage.SetAsync("UserSession", JsonSerializer.Serialize(usuario));
+                }
 
                 var claimsPrincipal = CreateClaimsPrincipalFromUser(usuario);
                 return new AuthenticationState(claimsPrincipal);

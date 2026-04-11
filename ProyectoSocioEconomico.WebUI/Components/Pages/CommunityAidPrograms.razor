@@ -112,7 +112,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        AllPrograms = await ProgramaService.ObtenerTodosConCasosAsync();
+        AllPrograms = await ProgramaService.ObtenerPublicosConCasosAsync();
     }
 
     protected override void OnParametersSet()

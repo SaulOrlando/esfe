@@ -244,6 +244,17 @@
                                                     </button>
                                                 </div>
                                             }
+                                            else if (CanRemoveVolunteerRole(application))
+                                            {
+                                                <div class="ep-application-actions">
+                                                    <button type="button"
+                                                            class="bulma-button bulma-is-danger bulma-is-light"
+                                                            disabled="@IsReviewingVolunteerRequest"
+                                                            @onclick="() => RemoveVolunteerRoleAsync(application.Id)">
+                                                        Quitar rol de voluntario
+                                                    </button>
+                                                </div>
+                                            }
                                         </article>
                                     }
                                 </div>
@@ -470,6 +481,30 @@
         await ReviewVolunteerApplicationAsync(applicationId, isApproval: false);
     }
 
+    private async Task RemoveVolunteerRoleAsync(int applicationId)
+    {
+        IsReviewingVolunteerRequest = true;
+        VolunteerReviewMessage = null;
+
+        try
+        {
+            await ProgramaService.RemoverVoluntarioPorIncumplimientoAsync(applicationId);
+            VolunteerReviewSuccess = true;
+            VolunteerReviewMessage = "El voluntario fue removido del programa por incumplimiento y su rol volvio a Donante.";
+            VolunteerApplications = await ProgramaService.ObtenerInscripcionesVoluntariadoPorProgramaAsync(Id);
+            CurrentProgram = await ProgramaService.ObtenerPorIdConDetallesAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            VolunteerReviewSuccess = false;
+            VolunteerReviewMessage = "No se pudo quitar el rol de voluntario: " + ex.Message;
+        }
+        finally
+        {
+            IsReviewingVolunteerRequest = false;
+        }
+    }
+
     private async Task ReviewVolunteerApplicationAsync(int applicationId, bool isApproval)
     {
         IsReviewingVolunteerRequest = true;
@@ -549,6 +584,12 @@
             "Activo" => "ep-application-status--approved",
             _ => "ep-application-status--rejected"
         };
+    }
+
+    private static bool CanRemoveVolunteerRole(InscripcionesVoluntario application)
+    {
+        return string.Equals(application.Estado, "Aprobado", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(application.Estado, "Activo", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsAdmin(Usuario? usuario)

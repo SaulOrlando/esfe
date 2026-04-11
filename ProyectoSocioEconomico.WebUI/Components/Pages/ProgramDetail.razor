@@ -17,10 +17,19 @@
 @inject NavigationManager Navigation
 @inject AppDbContext DbContext
 
-@if (Program == null)
+@if (IsLoading)
 {
     <div class="bulma-container">
         <p>Cargando detalles del programa...</p>
+    </div>
+}
+else if (Program == null)
+{
+    <div class="bulma-container">
+        <div class="bulma-notification bulma-is-light">
+            <p>Este programa no est&aacute; disponible para el p&uacute;blico.</p>
+        </div>
+        <a href="/programs" class="bulma-button bulma-is-warning">Volver a programas</a>
     </div>
 }
 else
@@ -388,6 +397,7 @@ else
     [Parameter] public int Id { get; set; }
 
     private Programa? Program { get; set; }
+    private bool IsLoading { get; set; } = true;
     private Usuario? CurrentUser { get; set; }
     private VolunteerSignupFormModel VolunteerForm { get; set; } = new();
     private List<string> ProgramVolunteerDays { get; set; } = new();
@@ -408,6 +418,12 @@ else
     {
         await LoadProgramAsync();
 
+        if (Program is null)
+        {
+            IsLoading = false;
+            return;
+        }
+
         var authState = await AuthProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var userIdStr = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -420,11 +436,13 @@ else
             CurrentUserHasCaseAsBeneficiary = await CasoService.UsuarioYaTieneCasoAsync(userId);
             await RefreshVolunteerStateAsync();
         }
+
+        IsLoading = false;
     }
 
     private async Task LoadProgramAsync()
     {
-        Program = await ProgramaService.ObtenerPorIdConDetallesAsync(Id);
+        Program = await ProgramaService.ObtenerPublicoPorIdConDetallesAsync(Id);
         ProgramVolunteerDays = ParseDays(Program?.DiasVoluntariado);
     }
 

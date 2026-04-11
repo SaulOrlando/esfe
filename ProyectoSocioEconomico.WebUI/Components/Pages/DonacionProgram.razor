@@ -355,7 +355,7 @@
     {
         try
         {
-            Program = await ProgramaService.ObtenerPorIdConDetallesAsync(ProgramId);
+            Program = await ProgramaService.ObtenerPublicoPorIdConDetallesAsync(ProgramId);
 
             var authState = await AuthProvider.GetAuthenticationStateAsync();
             var user = authState.User;
