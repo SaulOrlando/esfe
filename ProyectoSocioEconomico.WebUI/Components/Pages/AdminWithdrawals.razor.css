@@ -95,17 +95,19 @@ div.ap-page .ap-table-card {
     border-radius: 14px;
     overflow: hidden;
     box-shadow: var(--ap-shadow-card);
+    background-color: #ffffff !important;
 }
 
 div.ap-page table.ap-table.bulma-table {
     width: 100%;
     margin: 0;
     border-collapse: collapse;
-    background: transparent;
+    background: #ffffff !important;
+    color: #111111 !important;
 }
 
 div.ap-page table.ap-table.bulma-table thead tr {
-    background: var(--ap-surface);
+    background: #f9fafb !important;
 }
 
 div.ap-page table.ap-table.bulma-table th.ap-table__th {
@@ -113,21 +115,28 @@ div.ap-page table.ap-table.bulma-table th.ap-table__th {
     font-size: 0.68rem;
     font-weight: 800;
     letter-spacing: 0.1em;
-    color: var(--ap-text-muted);
+    color: #6b7280 !important;
     border-bottom: 1px solid var(--ap-border);
     text-transform: uppercase;
     vertical-align: middle;
     text-align: left;
+    background-color: #f9fafb !important;
 }
 
 div.ap-page table.ap-table.bulma-table tr.ap-table__row:hover {
-    background: var(--ap-row-hover);
+    background: #f8fafc !important;
 }
 
 div.ap-page table.ap-table.bulma-table td.ap-table__td {
     padding: 1rem 1.1rem;
     vertical-align: middle;
     border-bottom: 1px solid var(--ap-border);
+    color: #111111 !important;
+    background-color: #ffffff !important;
+}
+
+div.ap-page table.ap-table.bulma-table tr.ap-table__row strong {
+    color: #111111 !important;
 }
 
 div.ap-page table.ap-table.bulma-table tbody tr:last-child td.ap-table__td {

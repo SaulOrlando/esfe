@@ -78,18 +78,18 @@
             </button>
         </div>
 
-        <div class="ap-table-card">
-            <table class="bulma-table ap-table bulma-is-fullwidth">
+        <div class="ap-table-card" style="background-color: #ffffff !important;">
+            <table class="bulma-table ap-table bulma-is-fullwidth" style="background-color: #ffffff !important; color: #111111 !important;">
                 <thead>
-                    <tr>
-                        <th class="ap-table__th">BENEFICIARIO</th>
-                        <th class="ap-table__th">CASO</th>
-                        <th class="ap-table__th">MONTO</th>
-                        <th class="ap-table__th">METODO</th>
-                        <th class="ap-table__th">DATOS</th>
-                        <th class="ap-table__th">ESTADO</th>
-                        <th class="ap-table__th">FECHA</th>
-                        <th class="ap-table__th ap-table__th--actions">ACCIONES</th>
+                    <tr style="background-color: #f9fafb !important;">
+                        <th class="ap-table__th" style="background-color: #f9fafb !important; color: #6b7280 !important;">BENEFICIARIO</th>
+                        <th class="ap-table__th" style="background-color: #f9fafb !important; color: #6b7280 !important;">CASO</th>
+                        <th class="ap-table__th" style="background-color: #f9fafb !important; color: #6b7280 !important;">MONTO</th>
+                        <th class="ap-table__th" style="background-color: #f9fafb !important; color: #6b7280 !important;">METODO</th>
+                        <th class="ap-table__th" style="background-color: #f9fafb !important; color: #6b7280 !important;">DATOS</th>
+                        <th class="ap-table__th" style="background-color: #f9fafb !important; color: #6b7280 !important;">ESTADO</th>
+                        <th class="ap-table__th" style="background-color: #f9fafb !important; color: #6b7280 !important;">FECHA</th>
+                        <th class="ap-table__th ap-table__th--actions" style="background-color: #f9fafb !important; color: #6b7280 !important;">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,19 +97,19 @@
                     {
                         @foreach (var retiro in VisibleWithdrawals)
                         {
-                            <tr class="ap-table__row">
-                                <td class="ap-table__td">
-                                    <strong>@GetBeneficiaryName(retiro)</strong>
+                            <tr class="ap-table__row" style="background-color: #ffffff !important;">
+                                <td class="ap-table__td" style="color: #111111 !important;">
+                                    <strong style="color: #111111 !important;">@GetBeneficiaryName(retiro)</strong>
                                     <div class="bulma-is-size-7 bulma-has-text-grey">@retiro.IdBeneficiadoNavigation?.Email</div>
                                 </td>
-                                <td class="ap-table__td">@retiro.IdCasoNavigation?.Titulo</td>
-                                <td class="ap-table__td">@retiro.Monto.ToString("C")</td>
-                                <td class="ap-table__td">@retiro.MetodoPago</td>
-                                <td class="ap-table__td">@(string.IsNullOrWhiteSpace(retiro.DatosPago) ? "Sin detalle" : retiro.DatosPago)</td>
+                                <td class="ap-table__td" style="color: #111111 !important;">@retiro.IdCasoNavigation?.Titulo</td>
+                                <td class="ap-table__td" style="color: #111111 !important;">@retiro.Monto.ToString("C")</td>
+                                <td class="ap-table__td" style="color: #111111 !important;">@retiro.MetodoPago</td>
+                                <td class="ap-table__td" style="color: #111111 !important;">@(string.IsNullOrWhiteSpace(retiro.DatosPago) ? "Sin detalle" : retiro.DatosPago)</td>
                                 <td class="ap-table__td">
                                     <span class="wh-status @GetStatusClass(retiro.Estado)">@retiro.Estado</span>
                                 </td>
-                                <td class="ap-table__td">@retiro.FechaSolicitud.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                <td class="ap-table__td" style="color: #111111 !important;">@retiro.FechaSolicitud.ToString("dd/MM/yyyy hh:mm tt")</td>
                                 <td class="ap-table__td ap-table__td--actions">
                                     @if (string.Equals(retiro.Estado, "Pendiente", StringComparison.OrdinalIgnoreCase))
                                     {
@@ -136,8 +136,8 @@
                     }
                     else
                     {
-                        <tr>
-                            <td colspan="8" class="ap-table__empty">
+                        <tr style="background-color: #ffffff !important;">
+                            <td colspan="8" class="ap-table__empty" style="color: #6b7280 !important;">
                                 No hay solicitudes para mostrar en esta vista.
                             </td>
                         </tr>
