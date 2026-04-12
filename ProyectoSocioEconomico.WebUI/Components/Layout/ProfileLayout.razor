@@ -35,7 +35,11 @@
                         <a class="bulma-navbar-item" href="/account/settings">
                             <div class="bulma-is-flex bulma-is-align-items-center">
                                 <figure class="bulma-image profile-pic-container bulma-mr-3">
-                                    <img class="profile-pic" src="@GetProfileImage(context.User)" alt="Foto de perfil" />
+                                    <img class="profile-pic"
+                                         src="@GetProfileImage(context.User)"
+                                         alt="Foto de perfil"
+                                         width="56"
+                                         height="56" />
                                 </figure>
                                 <div class="bulma-is-flex bulma-is-flex-direction-column">
                                     <span class="bulma-has-text-weight-bold" style="line-height: 1.2;">@context.User.Identity?.Name</span>
